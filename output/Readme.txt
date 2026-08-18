@@ -1,0 +1,1 @@
+En esta carpeta se van a guardar los resultados de los códigos que ejecutaremos en clase.
