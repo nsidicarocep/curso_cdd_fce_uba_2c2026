@@ -13,17 +13,6 @@ Este es un material nuevo y de prueba, por lo que si encuentran errores o proble
 | Tema | Qué se practica | Link |
 |---|---|---|
 | Pensamiento computacional | Ordenar algoritmos, trazar el estado de las variables y encontrar errores de lógica en pseudocódigo | [Cuaderno de algoritmos](./pensamiento_computacional/) |
-<<<<<<< Updated upstream
-
-<!--
-A medida que avance la cursada, agregá una fila por página nueva.
-Formato: | Tema | Qué se practica | [Nombre](./carpeta/) |
-Ideas para las próximas: manipulación de datos (verbos de dplyr sobre una
-tabla chica), lectura de gráficos, interpretación de coeficientes de MCO,
-supuestos del modelo lineal, inferencia y valores p.
--->
-=======
->>>>>>> Stashed changes
 
 ## Cómo se usan
 
