@@ -33,6 +33,7 @@ Las clases se organizan en dos instancias semanales:
 | Recursos adicionales | [Link a los recursos](https://docs.google.com/spreadsheets/d/1vlUwVtV9uuOB-9Sxx9zMwfloQc3jgI1N1ZVSjjOtKXs/edit?gid=1735927625#gid=1735927625) |
 | Ejemplo de códigos y carpetas | [Útil para TP](https://github.com/nsidicarocep/ejemplo_datos_empleo) |
 | Guía para el Readme | [Útil para TP](https://github.com/nsidicarocep/curso_cdd_fce_uba_2c2026/blob/main/trabajo_practico/guia_readme.md) |
+| Guía para instalar R | [Link](https://github.com/nsidicarocep/curso_cdd_fce_uba_2c2026/blob/main/materiales_utiles/GUIA_INSTALACION_R.md) |
 
 ### Materiales por clase
 
@@ -156,3 +157,4 @@ El curso no prohíbe el uso de herramientas de IA (ChatGPT, Claude, Copilot, etc
 ## 📬 Contacto
 
 Nicolás Sidicaro — [EMAIL](mailto:nsidicaro.fce@gmail.com)
+Maida Beltrán - [EMAIL](maidabeltran0@gmail.com)
