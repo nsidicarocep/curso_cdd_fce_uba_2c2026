@@ -34,6 +34,7 @@ Las clases se organizan en dos instancias semanales:
 | Ejemplo de códigos y carpetas | [Útil para TP](https://github.com/nsidicarocep/ejemplo_datos_empleo) |
 | Guía para el Readme | [Útil para TP](https://github.com/nsidicarocep/curso_cdd_fce_uba_2c2026/blob/main/trabajo_practico/guia_readme.md) |
 | Guía para instalar R | [Link](https://github.com/nsidicarocep/curso_cdd_fce_uba_2c2026/blob/main/materiales_utiles/GUIA_INSTALACION_R.md) |
+| Material interactivo | [Link](https://nsidicarocep.github.io/curso_cdd_fce_uba_2c2026/interactivo/) |
 
 ### Materiales por clase
 
