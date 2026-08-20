@@ -2,7 +2,7 @@
 
 **Facultad de Ciencias Económicas — Universidad de Buenos Aires**
 
-Docente: Nicolás Sidicaro
+Docente: Nicolás Sidicaro - 
 Ayudate: Maida Beltrán
 2do cuatrimestre 2026
 
