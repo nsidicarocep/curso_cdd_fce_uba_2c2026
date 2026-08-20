@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cuaderno de algoritmos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --papel:#ECEDF1;
+  --papel-2:#F7F7FA;
+  --tinta:#181C34;
+  --tinta-suave:#5B6079;
+  --lapiz:#C9CBD6;
+  --riso:#2F44D8;
+  --ocre:#D99A16;
+  --verde:#137A5B;
+  --rojo:#C0392F;
+  --r:3px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--papel);color:var(--tinta);
+  font-family:"IBM Plex Sans",system-ui,sans-serif;
+  font-size:16px;line-height:1.55;
+  background-image:linear-gradient(var(--lapiz) 1px,transparent 1px);
+  background-size:100% 32px;background-position:0 -1px;
+}
+.wrap{max-width:820px;margin:0 auto;padding:0 20px 96px}
+
+/* ---------- encabezado ---------- */
+header{padding:56px 0 32px;border-bottom:2px solid var(--tinta)}
+.eyebrow{
+  font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--riso);margin:0 0 10px
+}
+h1{
+  font-family:"Bricolage Grotesque",sans-serif;font-weight:800;
+  font-size:clamp(38px,8vw,64px);line-height:.95;letter-spacing:-.03em;margin:0 0 14px
+}
+header p{margin:0;max-width:52ch;color:var(--tinta-suave)}
+.marcador{
+  display:flex;gap:6px;align-items:center;margin-top:28px;
+  font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--tinta-suave)
+}
+.pip{width:12px;height:12px;border:1.5px solid var(--tinta);border-radius:50%}
+.pip.ok{background:var(--verde);border-color:var(--verde)}
+
+.filtros{display:flex;gap:8px;flex-wrap:wrap;margin-top:22px}
+.filtro{
+  font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.08em;
+  text-transform:uppercase;background:transparent;color:var(--tinta-suave);
+  border:1.5px solid var(--lapiz);border-radius:var(--r);padding:6px 12px;cursor:pointer
+}
+.filtro:hover{border-color:var(--tinta);color:var(--tinta)}
+.filtro.activo{background:var(--tinta);border-color:var(--tinta);color:var(--papel)}
+
+/* ---------- ejercicio ---------- */
+.ej{border-bottom:1px solid var(--lapiz);padding:44px 0}
+.ej-cab{display:flex;gap:16px;align-items:baseline;margin-bottom:6px}
+.ej-n{
+  font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;
+  color:var(--riso);border:1.5px solid var(--riso);border-radius:var(--r);
+  padding:2px 7px;flex:none;letter-spacing:.06em
+}
+.ej-tipo{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--tinta-suave)}
+h2{font-family:"Bricolage Grotesque",sans-serif;font-weight:500;font-size:26px;letter-spacing:-.015em;margin:0 0 8px}
+.consigna{margin:0 0 22px;max-width:60ch;color:var(--tinta-suave)}
+.consigna code{font-family:"IBM Plex Mono",monospace;font-size:.9em;background:var(--papel-2);padding:1px 4px;border:1px solid var(--lapiz)}
+
+/* ---------- bloques de código ---------- */
+.pseudo{
+  font-family:"IBM Plex Mono",monospace;font-size:14px;line-height:1.7;
+  background:var(--papel-2);border:1.5px solid var(--tinta);border-radius:var(--r);
+  padding:14px 0;margin:0 0 18px;overflow-x:auto
+}
+.linea{display:flex;gap:14px;padding:1px 16px;white-space:pre}
+.num{color:var(--lapiz);flex:none;width:1.6em;text-align:right;user-select:none}
+
+/* ---------- parsons ---------- */
+.piezas{list-style:none;margin:0 0 18px;padding:0;display:flex;flex-direction:column;gap:6px}
+.pieza{
+  display:flex;align-items:center;gap:10px;background:var(--papel-2);
+  border:1.5px solid var(--tinta);border-radius:var(--r);padding:8px 10px 8px 12px;
+  font-family:"IBM Plex Mono",monospace;font-size:14px;cursor:grab
+}
+.pieza:active{cursor:grabbing}
+.pieza.arrastrando{opacity:.35}
+.pieza.sobre{box-shadow:0 -3px 0 var(--riso)}
+.pieza-txt{flex:1;white-space:pre-wrap;min-width:0}
+.mover{display:flex;flex-direction:column;gap:2px;flex:none}
+.mover button{
+  border:1px solid var(--lapiz);background:transparent;color:var(--tinta-suave);
+  font-size:11px;line-height:1;padding:3px 6px;border-radius:2px;cursor:pointer;font-family:inherit
+}
+.mover button:hover{border-color:var(--tinta);color:var(--tinta)}
+.sangria{
+  font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--riso);
+  border:1px solid var(--lapiz);background:transparent;border-radius:2px;
+  padding:3px 6px;cursor:pointer;flex:none
+}
+.ok .pieza{border-color:var(--verde)}
+
+/* ---------- traza ---------- */
+.tabla-wrap{overflow-x:auto;margin:0 0 18px}
+table{border-collapse:collapse;width:100%;font-family:"IBM Plex Mono",monospace;font-size:14px;background:var(--papel-2)}
+th,td{border:1px solid var(--lapiz);padding:0;text-align:center}
+th{
+  background:var(--tinta);color:var(--papel);font-weight:600;
+  font-size:12px;letter-spacing:.06em;padding:7px 10px
+}
+td.paso{background:var(--papel);color:var(--tinta-suave);padding:7px 10px;width:56px}
+td input{
+  width:100%;min-width:64px;border:0;background:transparent;padding:8px 6px;
+  font:inherit;text-align:center;color:var(--tinta)
+}
+td input:focus{outline:2px solid var(--riso);outline-offset:-2px}
+td.bien{background:rgba(19,122,91,.12)}
+td.mal{background:rgba(192,57,47,.12)}
+
+/* ---------- bug ---------- */
+.pseudo.cazable .linea{cursor:pointer;border-radius:2px}
+.pseudo.cazable .linea:hover{background:rgba(47,68,216,.09)}
+.pseudo .linea.elegida{background:rgba(47,68,216,.16);box-shadow:inset 3px 0 0 var(--riso)}
+.pseudo .linea.acierto{background:rgba(19,122,91,.16);box-shadow:inset 3px 0 0 var(--verde)}
+.pseudo .linea.error{background:rgba(192,57,47,.14);box-shadow:inset 3px 0 0 var(--rojo)}
+
+/* ---------- controles ---------- */
+.barra{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+button.accion{
+  font-family:"IBM Plex Sans",sans-serif;font-weight:600;font-size:14px;
+  background:var(--tinta);color:var(--papel);border:1.5px solid var(--tinta);
+  padding:9px 18px;border-radius:var(--r);cursor:pointer
+}
+button.accion:hover{background:var(--riso);border-color:var(--riso)}
+button.fantasma{background:transparent;color:var(--tinta-suave);border-color:var(--lapiz)}
+button.fantasma:hover{background:transparent;color:var(--tinta);border-color:var(--tinta)}
+:focus-visible{outline:2px solid var(--riso);outline-offset:2px}
+
+.feedback{margin:14px 0 0;font-size:14px;max-width:58ch;min-height:1.4em}
+.feedback.bien{color:var(--verde);font-weight:600}
+.feedback.mal{color:var(--rojo)}
+.pista{
+  margin:12px 0 0;padding:12px 14px;background:var(--papel-2);
+  border-left:3px solid var(--ocre);font-size:14px;max-width:58ch
+}
+.pista[hidden]{display:none}
+
+footer{padding:40px 0 0;font-size:13px;color:var(--tinta-suave);max-width:58ch}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media (max-width:560px){
+  .mover{display:none}
+  .pieza{cursor:default}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">Pensamiento computacional · sin lenguaje</p>
+  <h1>Cuaderno de algoritmos</h1>
+  <p>Nueve de cada diez errores de programación no son de sintaxis: son de razonamiento sobre el estado. Acá se practica eso, en pseudocódigo, antes de escribir una sola línea de R o de Python.</p>
+  <div class="marcador" id="marcador"></div>
+  <nav class="filtros" id="filtros" aria-label="Filtrar por tipo de ejercicio">
+    <button class="filtro activo" data-t="todos">Todos</button>
+    <button class="filtro" data-t="orden">Ordenar</button>
+    <button class="filtro" data-t="traza">Trazar</button>
+    <button class="filtro" data-t="bug">Depurar</button>
+  </nav>
+</header>
+
+<main id="tablero"></main>
+
+<footer>
+  <p>El progreso se guarda en este navegador. Para reiniciarlo, <button class="accion fantasma" id="reset" style="padding:4px 10px;font-size:13px">borrar respuestas</button></p>
+</footer>
+
+</div>
+
+<script>
+/* ============================================================
+   BANCO DE EJERCICIOS
+   Para agregar uno nuevo, sumá un objeto a este array.
+   Tipos: "orden" (Parsons) | "traza" (tabla de estado) | "bug"
+   ============================================================ */
+const EJERCICIOS = [
+
+  /* ---------- 01 ---------- */
+  {
+    tipo: "orden",
+    titulo: "Promedio de una lista",
+    consigna: "Ordená las instrucciones para que el algoritmo calcule el promedio de los valores de <code>datos</code>. Usá el botón → para indentar lo que va adentro del ciclo.",
+    // El orden correcto es el de este array. `s` = sangría esperada (0, 1, 2)
+    lineas: [
+      { t: "suma ← 0",                       s: 0 },
+      { t: "cuenta ← 0",                     s: 0 },
+      { t: "para cada valor en datos hacer", s: 0 },
+      { t: "suma ← suma + valor",            s: 1 },
+      { t: "cuenta ← cuenta + 1",            s: 1 },
+      { t: "fin para",                       s: 0 },
+      { t: "promedio ← suma / cuenta",       s: 0 },
+      { t: "devolver promedio",              s: 0 }
+    ],
+    pista: "Los acumuladores se inicializan antes de entrar al ciclo, nunca adentro: si no, se reinician en cada vuelta. Y la división va después de recorrer todo."
+  },
+
+  /* ---------- 02 ---------- */
+  {
+    tipo: "traza",
+    titulo: "Factorial paso a paso",
+    consigna: "Completá el estado de las variables al terminar cada iteración del ciclo.",
+    codigo: [
+      "n ← 4",
+      "resultado ← 1",
+      "i ← 1",
+      "mientras i <= n hacer",
+      "    resultado ← resultado * i",
+      "    i ← i + 1",
+      "fin mientras"
+    ],
+    columnas: ["i", "resultado"],
+    filas: ["Iteración 1", "Iteración 2", "Iteración 3", "Iteración 4"],
+    respuestas: [
+      ["2", "1"],
+      ["3", "2"],
+      ["4", "6"],
+      ["5", "24"]
+    ],
+    pista: "Primero se multiplica y después se incrementa <code>i</code>. Al terminar la última iteración, <code>i</code> ya vale más que <code>n</code>: por eso el ciclo corta."
+  },
+
+  /* ---------- 03 ---------- */
+  {
+    tipo: "bug",
+    titulo: "El máximo que no aparece",
+    consigna: "Este algoritmo debería devolver el valor máximo de la lista, pero falla cuando todos los datos son negativos. Tocá la línea donde está el problema.",
+    codigo: [
+      "maximo ← 0",
+      "para cada valor en datos hacer",
+      "    si valor > maximo entonces",
+      "        maximo ← valor",
+      "    fin si",
+      "fin para",
+      "devolver maximo"
+    ],
+    linea_bug: 1,
+    explicacion: "Inicializar en 0 asume que hay algún valor positivo. Si todos son negativos, devuelve 0, un número que ni siquiera está en la lista. Lo correcto es arrancar con el primer elemento de <code>datos</code>.",
+    fallo: "Esa línea hace lo que corresponde. El problema aparece antes de que el ciclo empiece a comparar.",
+    pista: "Preguntate con qué valor arranca la comparación y si ese valor pertenece a los datos."
+  },
+
+  /* ---------- 04 ---------- */
+  {
+    tipo: "orden",
+    titulo: "Contar por encima de un umbral",
+    consigna: "Ordená el algoritmo que cuenta cuántos valores de <code>datos</code> superan a <code>umbral</code>. Prestá atención a los dos niveles de sangría.",
+    lineas: [
+      { t: "cuenta ← 0",                     s: 0 },
+      { t: "para cada valor en datos hacer", s: 0 },
+      { t: "si valor > umbral entonces",     s: 1 },
+      { t: "cuenta ← cuenta + 1",            s: 2 },
+      { t: "fin si",                         s: 1 },
+      { t: "fin para",                       s: 0 },
+      { t: "devolver cuenta",                s: 0 }
+    ],
+    pista: "El condicional vive adentro del ciclo, y el incremento vive adentro del condicional: son dos cajas, una dentro de la otra."
+  },
+
+  /* ---------- 05 ---------- */
+  {
+    tipo: "traza",
+    titulo: "Sumar sólo los pares",
+    consigna: "El ciclo recorre del 1 al 5 pero no acumula en todas las vueltas. Completá el estado al terminar cada iteración.",
+    codigo: [
+      "suma ← 0",
+      "i ← 1",
+      "mientras i <= 5 hacer",
+      "    si i módulo 2 = 0 entonces",
+      "        suma ← suma + i",
+      "    fin si",
+      "    i ← i + 1",
+      "fin mientras"
+    ],
+    columnas: ["i", "suma"],
+    filas: ["Iteración 1", "Iteración 2", "Iteración 3", "Iteración 4", "Iteración 5"],
+    respuestas: [
+      ["2", "0"],
+      ["3", "2"],
+      ["4", "2"],
+      ["5", "6"],
+      ["6", "6"]
+    ],
+    pista: "<code>i</code> avanza siempre, pase lo que pase con el condicional. <code>suma</code> sólo cambia en las vueltas pares."
+  },
+
+  /* ---------- 06 ---------- */
+  {
+    tipo: "bug",
+    titulo: "El ciclo que no termina nunca",
+    consigna: "Este algoritmo se cuelga: nunca llega a devolver nada. Tocá la línea responsable.",
+    codigo: [
+      "i ← 1",
+      "suma ← 0",
+      "mientras i <= 10 hacer",
+      "    suma ← suma + i",
+      "fin mientras",
+      "i ← i + 1",
+      "devolver suma"
+    ],
+    linea_bug: 6,
+    explicacion: "El incremento quedó fuera del ciclo. Como <code>i</code> nunca cambia adentro, la condición <code>i &lt;= 10</code> es siempre verdadera y el ciclo no corta jamás.",
+    fallo: "Esa línea está bien. Buscá qué es lo que debería cambiar en cada vuelta para que la condición del ciclo alguna vez sea falsa.",
+    pista: "Un ciclo <code>mientras</code> sólo termina si algo de su condición se modifica adentro del cuerpo."
+  },
+
+  /* ---------- 07 ---------- */
+  {
+    tipo: "orden",
+    titulo: "Máximo, bien inicializado",
+    consigna: "Armá la versión correcta del algoritmo del ejercicio 03: la que funciona también con datos negativos.",
+    lineas: [
+      { t: "maximo ← datos[1]",                  s: 0 },
+      { t: "i ← 2",                              s: 0 },
+      { t: "mientras i <= largo(datos) hacer",   s: 0 },
+      { t: "si datos[i] > maximo entonces",      s: 1 },
+      { t: "maximo ← datos[i]",                  s: 2 },
+      { t: "fin si",                             s: 1 },
+      { t: "i ← i + 1",                          s: 1 },
+      { t: "fin mientras",                       s: 0 },
+      { t: "devolver maximo"  ,                  s: 0 }
+    ],
+    pista: "Si el candidato inicial es el primer elemento, el recorrido puede arrancar desde el segundo. El incremento de <code>i</code> va afuera del condicional pero adentro del ciclo."
+  },
+
+  /* ---------- 08 ---------- */
+  {
+    tipo: "traza",
+    titulo: "División entera por restas",
+    consigna: "Este algoritmo divide sin usar el operador de división. Completá cada vuelta hasta que el ciclo corte.",
+    codigo: [
+      "dividendo ← 17",
+      "divisor ← 5",
+      "cociente ← 0",
+      "mientras dividendo >= divisor hacer",
+      "    dividendo ← dividendo - divisor",
+      "    cociente ← cociente + 1",
+      "fin mientras"
+    ],
+    columnas: ["dividendo", "cociente"],
+    filas: ["Iteración 1", "Iteración 2", "Iteración 3"],
+    respuestas: [
+      ["12", "1"],
+      ["7", "2"],
+      ["2", "3"]
+    ],
+    pista: "Cuando el ciclo termina, lo que queda en <code>dividendo</code> es el resto de la división."
+  },
+
+  /* ---------- 09 ---------- */
+  {
+    tipo: "bug",
+    titulo: "La suma que siempre da poco",
+    consigna: "Este algoritmo debería sumar todos los valores, pero devuelve siempre el último. Tocá la línea culpable.",
+    codigo: [
+      "para cada valor en datos hacer",
+      "    suma ← 0",
+      "    suma ← suma + valor",
+      "fin para",
+      "devolver suma"
+    ],
+    linea_bug: 2,
+    explicacion: "La inicialización quedó adentro del ciclo, así que el acumulador se borra en cada vuelta. Tiene que ir una sola vez, antes de empezar a recorrer.",
+    fallo: "Esa línea es correcta. Fijate cuántas veces se ejecuta cada instrucción: hay una que debería correr una sola vez y está corriendo en cada vuelta.",
+    pista: "Contá mentalmente cuántas veces se ejecuta cada línea si <code>datos</code> tiene cinco elementos."
+  },
+
+  /* ---------- 10 ---------- */
+  {
+    tipo: "orden",
+    titulo: "Intercambio condicional",
+    consigna: "Ordená el bloque que deja el menor de los dos valores en <code>a</code> y el mayor en <code>b</code>. Es el corazón de cualquier algoritmo de ordenamiento.",
+    lineas: [
+      { t: "si a > b entonces", s: 0 },
+      { t: "auxiliar ← a",      s: 1 },
+      { t: "a ← b",             s: 1 },
+      { t: "b ← auxiliar",      s: 1 },
+      { t: "fin si",            s: 0 }
+    ],
+    pista: "Si escribís <code>a ← b</code> primero, el valor original de <code>a</code> se pierde para siempre. Por eso hace falta guardarlo antes en algún lado."
+  },
+
+  /* ---------- 11 ---------- */
+  {
+    tipo: "traza",
+    titulo: "Dos variables que se pisan",
+    consigna: "Cada vuelta reemplaza el par de valores por el siguiente. Completá el estado al terminar cada iteración.",
+    codigo: [
+      "a ← 0",
+      "b ← 1",
+      "i ← 1",
+      "mientras i <= 4 hacer",
+      "    temp ← a + b",
+      "    a ← b",
+      "    b ← temp",
+      "    i ← i + 1",
+      "fin mientras"
+    ],
+    columnas: ["a", "b"],
+    filas: ["Iteración 1", "Iteración 2", "Iteración 3", "Iteración 4"],
+    respuestas: [
+      ["1", "1"],
+      ["1", "2"],
+      ["2", "3"],
+      ["3", "5"]
+    ],
+    pista: "<code>temp</code> se calcula con los valores viejos de <code>a</code> y <code>b</code>, antes de que ninguno de los dos se modifique."
+  },
+
+  /* ---------- 12 ---------- */
+  {
+    tipo: "bug",
+    titulo: "Falta un dato",
+    consigna: "Este algoritmo suma los elementos de <code>datos</code>, pero el total siempre queda corto. Tocá la línea del problema.",
+    codigo: [
+      "i ← 1",
+      "suma ← 0",
+      "mientras i < largo(datos) hacer",
+      "    suma ← suma + datos[i]",
+      "    i ← i + 1",
+      "fin mientras",
+      "devolver suma"
+    ],
+    linea_bug: 3,
+    explicacion: "La condición usa <code>&lt;</code> en lugar de <code>&lt;=</code>: el ciclo corta justo antes de procesar el último elemento. Es el error de límite más frecuente que vas a cometer.",
+    fallo: "Esa línea está bien. El error no es de qué se hace adentro del ciclo, sino de hasta dónde llega.",
+    pista: "Probá con una lista de tres elementos y anotá qué posiciones visita el ciclo."
+  },
+
+  /* ---------- 13 ---------- */
+  {
+    tipo: "orden",
+    titulo: "Búsqueda con corte anticipado",
+    consigna: "Ordená el algoritmo que devuelve la posición de <code>buscado</code> dentro de <code>datos</code>, o 0 si no está. El ciclo tiene que frenar apenas lo encuentra.",
+    lineas: [
+      { t: "posicion ← 0",                                     s: 0 },
+      { t: "i ← 1",                                            s: 0 },
+      { t: "mientras i <= largo(datos) y posicion = 0 hacer",  s: 0 },
+      { t: "si datos[i] = buscado entonces",                   s: 1 },
+      { t: "posicion ← i",                                     s: 2 },
+      { t: "fin si",                                           s: 1 },
+      { t: "i ← i + 1",                                        s: 1 },
+      { t: "fin mientras",                                     s: 0 },
+      { t: "devolver posicion",                                s: 0 }
+    ],
+    pista: "<code>posicion</code> cumple dos roles a la vez: guarda el resultado y funciona como bandera de corte. Por eso arranca en un valor imposible."
+  },
+
+  /* ---------- 14 ---------- */
+  {
+    tipo: "traza",
+    titulo: "Mínimo recorriendo una lista",
+    consigna: "Con <code>datos = [8, 4, 6, 2, 7]</code>, completá el estado al terminar cada iteración.",
+    codigo: [
+      "minimo ← datos[1]",
+      "i ← 2",
+      "mientras i <= 5 hacer",
+      "    si datos[i] < minimo entonces",
+      "        minimo ← datos[i]",
+      "    fin si",
+      "    i ← i + 1",
+      "fin mientras"
+    ],
+    columnas: ["i", "minimo"],
+    filas: ["Iteración 1", "Iteración 2", "Iteración 3", "Iteración 4"],
+    respuestas: [
+      ["3", "4"],
+      ["4", "4"],
+      ["5", "2"],
+      ["6", "2"]
+    ],
+    pista: "Sólo hay cuatro iteraciones porque el recorrido arranca en la posición 2. El mínimo cambia únicamente cuando encuentra algo más chico que lo que ya tenía."
+  },
+
+  /* ---------- 15 ---------- */
+  {
+    tipo: "bug",
+    titulo: "El filtro que no filtra",
+    consigna: "Este algoritmo debería contar los valores que están entre 100 y 500, pero devuelve siempre el total de la lista. Tocá la línea del problema.",
+    codigo: [
+      "cuenta ← 0",
+      "para cada valor en datos hacer",
+      "    si valor >= 100 o valor <= 500 entonces",
+      "        cuenta ← cuenta + 1",
+      "    fin si",
+      "fin para",
+      "devolver cuenta"
+    ],
+    linea_bug: 3,
+    explicacion: "Con <code>o</code>, cualquier número cumple al menos una de las dos condiciones: 20 no llega a 100 pero sí es menor que 500. Para exigir las dos a la vez va <code>y</code>.",
+    fallo: "Esa línea está bien. El problema está en cómo se combinan las dos condiciones del filtro.",
+    pista: "Probá el valor 20 y el valor 9000 contra la condición tal como está escrita."
+  },
+
+  /* ---------- 16 ---------- */
+  {
+    tipo: "orden",
+    titulo: "Totales por fila",
+    consigna: "Ordená el algoritmo que suma cada fila de una tabla de <code>n</code> filas por <code>m</code> columnas y muestra el total. Hay un ciclo adentro de otro.",
+    lineas: [
+      { t: "para fila desde 1 hasta n hacer",                 s: 0 },
+      { t: "total_fila ← 0",                                  s: 1 },
+      { t: "para columna desde 1 hasta m hacer",              s: 1 },
+      { t: "total_fila ← total_fila + tabla[fila][columna]",  s: 2 },
+      { t: "fin para",                                        s: 1 },
+      { t: "mostrar total_fila",                              s: 1 },
+      { t: "fin para",                                        s: 0 }
+    ],
+    pista: "El acumulador se reinicia una vez por fila, no una vez por tabla: acá sí va adentro del ciclo externo. Y el resultado se muestra recién cuando terminó de recorrer las columnas."
+  },
+
+  /* ---------- 17 ---------- */
+  {
+    tipo: "traza",
+    titulo: "Dos acumuladores en paralelo",
+    consigna: "Con <code>salarios = [10, 40, 20, 30]</code>, completá el estado al terminar cada iteración.",
+    codigo: [
+      "suma ← 0",
+      "cuantas ← 0",
+      "para i desde 1 hasta 4 hacer",
+      "    suma ← suma + salarios[i]",
+      "    si salarios[i] > 25 entonces",
+      "        cuantas ← cuantas + 1",
+      "    fin si",
+      "fin para"
+    ],
+    columnas: ["suma", "cuantas"],
+    filas: ["i = 1", "i = 2", "i = 3", "i = 4"],
+    respuestas: [
+      ["10", "0"],
+      ["50", "1"],
+      ["70", "1"],
+      ["100", "2"]
+    ],
+    pista: "Un acumulador se actualiza siempre y el otro sólo cuando se cumple la condición. Es exactamente lo que hace un <code>group_by</code> por dentro."
+  },
+
+  /* ---------- 18 ---------- */
+  {
+    tipo: "bug",
+    titulo: "Una respuesta apurada",
+    consigna: "Este algoritmo debería avisar si <code>buscado</code> está en la lista, pero da negativo aunque el valor esté en la última posición. Tocá la línea responsable.",
+    codigo: [
+      "para cada valor en datos hacer",
+      "    si valor = buscado entonces",
+      "        devolver \"encontrado\"",
+      "    si no",
+      "        devolver \"no encontrado\"",
+      "    fin si",
+      "fin para"
+    ],
+    linea_bug: 5,
+    explicacion: "El <code>si no</code> corta el recorrido en el primer elemento que no coincide. Para concluir que algo no está hay que haber revisado toda la lista: esa línea va después del ciclo, no adentro.",
+    fallo: "Esa línea está bien. Pensá en qué momento el algoritmo tiene derecho a afirmar cada una de las dos respuestas.",
+    pista: "Para afirmar que algo está alcanza con un caso. Para afirmar que no está, hacen falta todos."
+  }
+
+];
+
+/* ============================================================
+   MOTOR
+   ============================================================ */
+const CLAVE = "cuaderno-algoritmos-v1";
+const estado = JSON.parse(localStorage.getItem(CLAVE) || "{}");
+const tablero = document.getElementById("tablero");
+
+function guardar(i){ estado[i] = true; localStorage.setItem(CLAVE, JSON.stringify(estado)); pintarMarcador(); }
+
+function pintarMarcador(){
+  const m = document.getElementById("marcador");
+  const hechos = EJERCICIOS.filter((_, i) => estado[i]).length;
+  m.innerHTML = EJERCICIOS.map((_, i) => `<span class="pip ${estado[i] ? "ok" : ""}"></span>`).join("") +
+    `<span style="margin-left:8px">${hechos} de ${EJERCICIOS.length} resueltos</span>`;
+}
+
+function armazon(ej, i){
+  const art = document.createElement("article");
+  art.className = "ej";
+  art.innerHTML = `
+    <div class="ej-cab">
+      <span class="ej-n">${String(i + 1).padStart(2, "0")}</span>
+      <span class="ej-tipo">${{orden:"Ordenar", traza:"Trazar", bug:"Depurar"}[ej.tipo]}</span>
+    </div>
+    <h2>${ej.titulo}</h2>
+    <p class="consigna">${ej.consigna}</p>
+    <div class="cuerpo"></div>
+    <div class="barra">
+      <button class="accion verificar">Verificar</button>
+      <button class="accion fantasma pedir-pista">Ver pista</button>
+    </div>
+    <p class="pista" hidden>${ej.pista || ""}</p>
+    <p class="feedback" role="status"></p>`;
+  art.querySelector(".pedir-pista").onclick = e => {
+    art.querySelector(".pista").hidden = false;
+    e.target.remove();
+  };
+  return art;
+}
+
+function bloqueCodigo(lineas, cazable){
+  return `<div class="pseudo ${cazable ? "cazable" : ""}">` +
+    lineas.map((l, k) => `<div class="linea" data-l="${k + 1}"><span class="num">${k + 1}</span><span>${l}</span></div>`).join("") +
+    `</div>`;
+}
+
+/* ---------- tipo: orden (Parsons) ---------- */
+function montarOrden(ej, art, idx){
+  const cuerpo = art.querySelector(".cuerpo");
+  const ul = document.createElement("ul");
+  ul.className = "piezas";
+  const mezcladas = ej.lineas.map((l, k) => ({ ...l, id: k })).sort(() => Math.random() - .5);
+
+  mezcladas.forEach(l => {
+    const li = document.createElement("li");
+    li.className = "pieza";
+    li.draggable = true;
+    li.dataset.id = l.id;
+    li.dataset.sangria = 0;
+    li.innerHTML = `
+      <span class="mover">
+        <button type="button" aria-label="Subir">▲</button>
+        <button type="button" aria-label="Bajar">▼</button>
+      </span>
+      <button type="button" class="sangria" aria-label="Cambiar sangría">→</button>
+      <span class="pieza-txt">${l.t}</span>`;
+    const [arriba, abajo] = li.querySelectorAll(".mover button");
+    arriba.onclick = () => { const p = li.previousElementSibling; if (p) ul.insertBefore(li, p); };
+    abajo.onclick  = () => { const n = li.nextElementSibling;    if (n) ul.insertBefore(n, li); };
+    li.querySelector(".sangria").onclick = () => {
+      const s = (Number(li.dataset.sangria) + 1) % 3;
+      li.dataset.sangria = s;
+      li.querySelector(".pieza-txt").style.paddingLeft = (s * 22) + "px";
+    };
+    ul.appendChild(li);
+  });
+
+  let tomada = null;
+  ul.addEventListener("dragstart", e => { tomada = e.target.closest(".pieza"); tomada.classList.add("arrastrando"); });
+  ul.addEventListener("dragend",   () => { tomada?.classList.remove("arrastrando"); ul.querySelectorAll(".sobre").forEach(n => n.classList.remove("sobre")); tomada = null; });
+  ul.addEventListener("dragover",  e => {
+    e.preventDefault();
+    const sobre = e.target.closest(".pieza");
+    if (!sobre || sobre === tomada) return;
+    ul.querySelectorAll(".sobre").forEach(n => n.classList.remove("sobre"));
+    sobre.classList.add("sobre");
+    const r = sobre.getBoundingClientRect();
+    ul.insertBefore(tomada, (e.clientY - r.top) / r.height < .5 ? sobre : sobre.nextElementSibling);
+  });
+
+  cuerpo.appendChild(ul);
+
+  art.querySelector(".verificar").onclick = () => {
+    const piezas = [...ul.children];
+    const ordenMal = piezas.findIndex((li, k) => Number(li.dataset.id) !== k);
+    const sangriaMal = piezas.findIndex(li => Number(li.dataset.sangria) !== ej.lineas[Number(li.dataset.id)].s);
+    const f = art.querySelector(".feedback");
+    if (ordenMal === -1 && sangriaMal === -1){
+      f.className = "feedback bien"; f.textContent = "Correcto. El algoritmo está bien armado.";
+      ul.classList.add("ok"); guardar(idx);
+    } else if (ordenMal !== -1){
+      f.className = "feedback mal";
+      f.textContent = `Hasta la línea ${ordenMal} vas bien. Revisá qué instrucción tiene que ir en el lugar ${ordenMal + 1}.`;
+    } else {
+      f.className = "feedback mal";
+      f.textContent = "El orden está bien, pero la sangría no: fijate qué instrucciones quedan adentro del ciclo.";
+    }
+  };
+}
+
+/* ---------- tipo: traza ---------- */
+function montarTraza(ej, art, idx){
+  const cuerpo = art.querySelector(".cuerpo");
+  cuerpo.innerHTML = bloqueCodigo(ej.codigo, false) + `
+    <div class="tabla-wrap"><table>
+      <thead><tr><th></th>${ej.columnas.map(c => `<th>${c}</th>`).join("")}</tr></thead>
+      <tbody>${ej.filas.map((f, r) => `<tr><td class="paso">${f}</td>${
+        ej.columnas.map((_, c) => `<td><input inputmode="numeric" autocomplete="off" data-r="${r}" data-c="${c}"></td>`).join("")
+      }</tr>`).join("")}</tbody>
+    </table></div>`;
+
+  art.querySelector(".verificar").onclick = () => {
+    let bien = 0, total = 0;
+    cuerpo.querySelectorAll("input").forEach(inp => {
+      const esperado = ej.respuestas[inp.dataset.r][inp.dataset.c].trim();
+      const dado = inp.value.trim();
+      inp.parentElement.className = "";
+      total++;
+      if (dado === esperado){ inp.parentElement.className = "bien"; bien++; }
+      else if (dado !== "")  { inp.parentElement.className = "mal"; }
+    });
+    const f = art.querySelector(".feedback");
+    if (bien === total){
+      f.className = "feedback bien"; f.textContent = "Traza completa y correcta."; guardar(idx);
+    } else {
+      f.className = "feedback mal";
+      f.textContent = `${bien} de ${total} celdas correctas. Las marcadas en rojo no coinciden; volvé a recorrer el ciclo una vuelta por vez.`;
+    }
+  };
+}
+
+/* ---------- tipo: bug ---------- */
+function montarBug(ej, art, idx){
+  const cuerpo = art.querySelector(".cuerpo");
+  cuerpo.innerHTML = bloqueCodigo(ej.codigo, true);
+  let elegida = null;
+  cuerpo.querySelectorAll(".linea").forEach(l => {
+    l.tabIndex = 0;
+    const marcar = () => {
+      cuerpo.querySelectorAll(".linea").forEach(x => x.classList.remove("elegida"));
+      l.classList.add("elegida");
+      elegida = Number(l.dataset.l);
+    };
+    l.onclick = marcar;
+    l.onkeydown = e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); marcar(); } };
+  });
+
+  art.querySelector(".verificar").onclick = () => {
+    const f = art.querySelector(".feedback");
+    if (!elegida){ f.className = "feedback mal"; f.textContent = "Elegí una línea antes de verificar."; return; }
+    const sel = cuerpo.querySelector(`.linea[data-l="${elegida}"]`);
+    sel.classList.remove("elegida");
+    if (elegida === ej.linea_bug){
+      sel.classList.add("acierto");
+      f.className = "feedback bien"; f.innerHTML = "Correcto. " + ej.explicacion; guardar(idx);
+    } else {
+      sel.classList.add("error");
+      f.className = "feedback mal";
+      f.textContent = ej.fallo || "Esa línea hace lo que corresponde. Probá con otra.";
+    }
+  };
+}
+
+/* ---------- arranque ---------- */
+EJERCICIOS.forEach((ej, i) => {
+  const art = armazon(ej, i);
+  art.dataset.tipo = ej.tipo;
+  tablero.appendChild(art);
+  ({ orden: montarOrden, traza: montarTraza, bug: montarBug })[ej.tipo](ej, art, i);
+});
+pintarMarcador();
+
+document.getElementById("filtros").addEventListener("click", e => {
+  const b = e.target.closest(".filtro");
+  if (!b) return;
+  document.querySelectorAll(".filtro").forEach(x => x.classList.toggle("activo", x === b));
+  document.querySelectorAll(".ej").forEach(a => {
+    a.style.display = (b.dataset.t === "todos" || a.dataset.tipo === b.dataset.t) ? "" : "none";
+  });
+});
+
+document.getElementById("reset").onclick = () => {
+  localStorage.removeItem(CLAVE);
+  location.reload();
+};
+</script>
+</body>
+</html>
