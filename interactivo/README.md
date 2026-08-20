@@ -12,7 +12,7 @@ Cada ejercicio corrige al instante y explica por qué. La corrección no es un s
 
 | Tema | Qué se practica | Link |
 |---|---|---|
-| Pensamiento computacional | Ordenar algoritmos, trazar el estado de las variables y encontrar errores de lógica en pseudocódigo | [Cuaderno de algoritmos](./pensamiento-computacional/) |
+| Pensamiento computacional | Ordenar algoritmos, trazar el estado de las variables y encontrar errores de lógica en pseudocódigo | [Cuaderno de algoritmos](./pensamiento_computacional/) |
 
 <!--
 A medida que avance la cursada, agregá una fila por página nueva.
