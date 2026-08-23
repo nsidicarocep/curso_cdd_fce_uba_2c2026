@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Práctica pre-código</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --papel:#ECEDF1;--papel-2:#F7F7FA;--tinta:#181C34;--tinta-suave:#5B6079;
+  --lapiz:#C9CBD6;--riso:#2F44D8;--ocre:#D99A16;--verde:#137A5B;--rojo:#C0392F;--r:3px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--papel);color:var(--tinta);
+  font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:16px;line-height:1.55;
+  background-image:linear-gradient(var(--lapiz) 1px,transparent 1px);
+  background-size:100% 32px;background-position:0 -1px;
+}
+.wrap{max-width:820px;margin:0 auto;padding:0 20px 96px}
+header{padding:56px 0 32px;border-bottom:2px solid var(--tinta)}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--riso);margin:0 0 10px}
+h1{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:clamp(38px,8vw,64px);line-height:.95;letter-spacing:-.03em;margin:0 0 14px}
+header p{margin:0;max-width:52ch;color:var(--tinta-suave)}
+.marcador{display:flex;gap:6px;align-items:center;margin-top:28px;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--tinta-suave)}
+.pip{width:12px;height:12px;border:1.5px solid var(--tinta);border-radius:50%}
+.pip.ok{background:var(--verde);border-color:var(--verde)}
+.filtros{display:flex;gap:8px;flex-wrap:wrap;margin-top:22px}
+.filtro{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;background:transparent;color:var(--tinta-suave);border:1.5px solid var(--lapiz);border-radius:var(--r);padding:6px 12px;cursor:pointer}
+.filtro:hover{border-color:var(--tinta);color:var(--tinta)}
+.filtro.activo{background:var(--tinta);border-color:var(--tinta);color:var(--papel)}
+.ej{border-bottom:1px solid var(--lapiz);padding:44px 0}
+.ej-cab{display:flex;gap:16px;align-items:baseline;margin-bottom:6px}
+.ej-n{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;color:var(--riso);border:1.5px solid var(--riso);border-radius:var(--r);padding:2px 7px;flex:none;letter-spacing:.06em}
+.ej-tipo{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--tinta-suave)}
+h2{font-family:"Bricolage Grotesque",sans-serif;font-weight:500;font-size:26px;letter-spacing:-.015em;margin:0 0 8px}
+.consigna{margin:0 0 22px;max-width:60ch;color:var(--tinta-suave)}
+.consigna code{font-family:"IBM Plex Mono",monospace;font-size:.9em;background:var(--papel-2);padding:1px 4px;border:1px solid var(--lapiz)}
+/* código */
+.pseudo{font-family:"IBM Plex Mono",monospace;font-size:14px;line-height:1.7;background:var(--papel-2);border:1.5px solid var(--tinta);border-radius:var(--r);padding:14px 0;margin:0 0 18px;overflow-x:auto}
+.linea{display:flex;gap:14px;padding:1px 16px;white-space:pre}
+.num{color:var(--lapiz);flex:none;width:1.6em;text-align:right;user-select:none}
+/* parsons */
+.piezas{list-style:none;margin:0 0 18px;padding:0;display:flex;flex-direction:column;gap:6px}
+.pieza{display:flex;align-items:center;gap:10px;background:var(--papel-2);border:1.5px solid var(--tinta);border-radius:var(--r);padding:8px 10px 8px 12px;font-family:"IBM Plex Mono",monospace;font-size:14px;cursor:grab}
+.pieza:active{cursor:grabbing}
+.pieza.arrastrando{opacity:.35}
+.pieza.sobre{box-shadow:0 -3px 0 var(--riso)}
+.pieza-txt{flex:1;white-space:pre-wrap;min-width:0}
+.mover{display:flex;flex-direction:column;gap:2px;flex:none}
+.mover button{border:1px solid var(--lapiz);background:transparent;color:var(--tinta-suave);font-size:11px;line-height:1;padding:3px 6px;border-radius:2px;cursor:pointer;font-family:inherit}
+.mover button:hover{border-color:var(--tinta);color:var(--tinta)}
+.sangria{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--riso);border:1px solid var(--lapiz);background:transparent;border-radius:2px;padding:3px 6px;cursor:pointer;flex:none}
+.ok .pieza{border-color:var(--verde)}
+/* traza / tabla */
+.tabla-wrap{overflow-x:auto;margin:0 0 18px}
+table{border-collapse:collapse;width:100%;font-family:"IBM Plex Mono",monospace;font-size:14px;background:var(--papel-2)}
+th,td{border:1px solid var(--lapiz);padding:0;text-align:center}
+th{background:var(--tinta);color:var(--papel);font-weight:600;font-size:12px;letter-spacing:.06em;padding:7px 10px}
+td.paso{background:var(--papel);color:var(--tinta-suave);padding:7px 10px;width:80px}
+td input{width:100%;min-width:64px;border:0;background:transparent;padding:8px 6px;font:inherit;text-align:center;color:var(--tinta)}
+td input:focus{outline:2px solid var(--riso);outline-offset:-2px}
+td.bien{background:rgba(19,122,91,.12)}
+td.mal{background:rgba(192,57,47,.12)}
+table.ctx{margin:0 0 14px}
+table.ctx td{padding:6px 10px}
+/* bug */
+.pseudo.cazable .linea{cursor:pointer;border-radius:2px}
+.pseudo.cazable .linea:hover{background:rgba(47,68,216,.09)}
+.pseudo .linea.elegida{background:rgba(47,68,216,.16);box-shadow:inset 3px 0 0 var(--riso)}
+.pseudo .linea.acierto{background:rgba(19,122,91,.16);box-shadow:inset 3px 0 0 var(--verde)}
+.pseudo .linea.error{background:rgba(192,57,47,.14);box-shadow:inset 3px 0 0 var(--rojo)}
+/* completar */
+.hueco{
+  font-family:"IBM Plex Mono",monospace;font-size:13px;
+  background:var(--papel);border:1.5px solid var(--riso);border-radius:var(--r);
+  padding:2px 4px;color:var(--tinta);cursor:pointer;
+  -webkit-appearance:none;appearance:none;
+}
+.hueco.bien{border-color:var(--verde);background:rgba(19,122,91,.12)}
+.hueco.mal{border-color:var(--rojo);background:rgba(192,57,47,.12)}
+/* controles */
+.barra{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+button.accion{font-family:"IBM Plex Sans",sans-serif;font-weight:600;font-size:14px;background:var(--tinta);color:var(--papel);border:1.5px solid var(--tinta);padding:9px 18px;border-radius:var(--r);cursor:pointer}
+button.accion:hover{background:var(--riso);border-color:var(--riso)}
+button.fantasma{background:transparent;color:var(--tinta-suave);border-color:var(--lapiz)}
+button.fantasma:hover{background:transparent;color:var(--tinta);border-color:var(--tinta)}
+:focus-visible{outline:2px solid var(--riso);outline-offset:2px}
+.feedback{margin:14px 0 0;font-size:14px;max-width:58ch;min-height:1.4em}
+.feedback.bien{color:var(--verde);font-weight:600}
+.feedback.mal{color:var(--rojo)}
+.pista{margin:12px 0 0;padding:12px 14px;background:var(--papel-2);border-left:3px solid var(--ocre);font-size:14px;max-width:58ch}
+.pista[hidden]{display:none}
+footer{padding:40px 0 0;font-size:13px;color:var(--tinta-suave);max-width:58ch}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media(max-width:560px){.mover{display:none}.pieza{cursor:default}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <p class="eyebrow">Tidyverse &middot; pr&aacute;ctica</p>
+  <h1>Pr&aacute;ctica pre-c&oacute;digo</h1>
+  <p>Ejercicios para afianzar la l&oacute;gica de dplyr antes de abrir RStudio. Orden&aacute; pipelines, traz&aacute; resultados, encontr&aacute; errores y complet&aacute; los huecos en el c&oacute;digo.</p>
+  <div class="marcador" id="marcador"></div>
+  <nav class="filtros" id="filtros" aria-label="Filtrar por tipo de ejercicio">
+    <button class="filtro activo" data-t="todos">Todos</button>
+    <button class="filtro" data-t="orden">Ordenar</button>
+    <button class="filtro" data-t="completar">Completar</button>
+    <button class="filtro" data-t="traza">Trazar</button>
+    <button class="filtro" data-t="bug">Depurar</button>
+  </nav>
+</header>
+<main id="tablero"></main>
+<footer>
+  <p>El progreso se guarda en este navegador. Para reiniciarlo, <button class="accion fantasma" id="reset" style="padding:4px 10px;font-size:13px">borrar respuestas</button></p>
+</footer>
+</div>
+
+<script>
+const EJERCICIOS = [
+
+/* ===== 01 ===== */
+{
+  tipo:"orden",
+  titulo:"Pipeline básico: filtrar y seleccionar",
+  consigna:"Ordená las líneas para armar un pipeline que filtre los datos de Argentina y seleccione solo las columnas <code>anio</code> y <code>pbi_pc</code>, ordenados de mayor a menor PBI.",
+  lineas:[
+    {t:"latam |>", s:0},
+    {t:'  filter(pais == "ARG") |>', s:0},
+    {t:"  select(anio, pbi_pc) |>", s:0},
+    {t:"  arrange(desc(pbi_pc))", s:0}
+  ],
+  pista:"El pipeline siempre arranca con los datos. Después filtrás filas, seleccionás columnas y finalmente ordenás."
+},
+
+/* ===== 02 ===== */
+{
+  tipo:"completar",
+  titulo:"Elegir el verbo correcto",
+  consigna:"Completá los huecos con el verbo de dplyr que corresponda en cada caso.",
+  plantilla:[
+    "latam |>",
+    "  {0}(pais == \"ARG\") |>",
+    "  {1}(anio, pbi_pc) |>",
+    "  {2}(desc(pbi_pc))"
+  ],
+  huecos:[
+    {opciones:["filter","select","mutate","arrange"], correcta:0},
+    {opciones:["select","filter","summarise","mutate"], correcta:0},
+    {opciones:["arrange","filter","select","group_by"], correcta:0}
+  ],
+  pista:"Primero se filtran filas (condición lógica), después se eligen columnas (por nombre), y finalmente se ordena."
+},
+
+/* ===== 03 ===== */
+{
+  tipo:"traza",
+  titulo:"Trazar un filter",
+  consigna:"Dada esta tabla, completá los valores de <code>salario</code> que quedan después de <code>filter(salario > 50000)</code>. Escribí los salarios en el orden en que aparecen." +
+    '<div class="tabla-wrap" style="margin-top:14px"><table class="ctx"><thead><tr><th>nombre</th><th>salario</th></tr></thead><tbody>' +
+    '<tr><td>Ana</td><td>45000</td></tr><tr><td>Bruno</td><td>62000</td></tr>' +
+    '<tr><td>Carla</td><td>51000</td></tr><tr><td>Diana</td><td>48000</td></tr></tbody></table></div>',
+  codigo:["datos |> filter(salario > 50000)"],
+  columnas:["salario"],
+  filas:["Fila 1","Fila 2"],
+  respuestas:[["62000"],["51000"]],
+  pista:"Solo Bruno (62000) y Carla (51000) tienen salario estrictamente mayor que 50000."
+},
+
+/* ===== 04 ===== */
+{
+  tipo:"traza",
+  titulo:"Trazar un mutate",
+  consigna:"Completá los valores de la nueva columna <code>salario_anual</code> creada por <code>mutate</code>." +
+    '<div class="tabla-wrap" style="margin-top:14px"><table class="ctx"><thead><tr><th>nombre</th><th>salario</th></tr></thead><tbody>' +
+    '<tr><td>Ana</td><td>3500</td></tr><tr><td>Bruno</td><td>5200</td></tr><tr><td>Carla</td><td>4100</td></tr></tbody></table></div>',
+  codigo:[
+    "datos |>",
+    "  mutate(salario_anual = salario * 12)"
+  ],
+  columnas:["salario_anual"],
+  filas:["Ana","Bruno","Carla"],
+  respuestas:[["42000"],["62400"],["49200"]],
+  pista:"Multiplicá cada salario mensual por 12: 3500×12, 5200×12, 4100×12."
+},
+
+/* ===== 05 ===== */
+{
+  tipo:"orden",
+  titulo:"Pipeline con mutate",
+  consigna:"Ordená el pipeline que calcula el PBI total (pbi_pc × población) solo para el año 2022 y muestra los resultados de mayor a menor.",
+  lineas:[
+    {t:"latam |>", s:0},
+    {t:"  filter(anio == 2022) |>", s:0},
+    {t:"  mutate(pbi_total = pbi_pc * poblacion_mill) |>", s:0},
+    {t:"  select(pais, pbi_total) |>", s:0},
+    {t:"  arrange(desc(pbi_total))", s:0}
+  ],
+  pista:"Primero filtrás el año, después creás la columna nueva, después seleccionás lo que querés mostrar, y finalmente ordenás."
+},
+
+/* ===== 06 ===== */
+{
+  tipo:"bug",
+  titulo:"El igual que no compara",
+  consigna:"Este pipeline debería filtrar los datos de Argentina, pero devuelve un error. Tocá la línea donde está el problema.",
+  codigo:[
+    "latam |>",
+    '  filter(pais = "ARG") |>',
+    "  select(pais, anio, pbi_pc)"
+  ],
+  linea_bug:2,
+  explicacion:'En R, <code>=</code> es asignación, no comparación. Para comparar igualdad se usa <code>==</code>. La línea correcta sería: <code>filter(pais == "ARG")</code>.',
+  fallo:"Esa línea está bien. El problema está en cómo se escribe la comparación.",
+  pista:"¿Cuál es la diferencia entre = y == en R?"
+},
+
+/* ===== 07 ===== */
+{
+  tipo:"completar",
+  titulo:"Completar la condición del filter",
+  consigna:"Completá los operadores lógicos para filtrar países con inflación mayor a 10 y PBI per cápita menor a 15000.",
+  plantilla:[
+    "latam |>",
+    "  filter(inflacion {0} 10, pbi_pc {1} 15000)"
+  ],
+  huecos:[
+    {opciones:[">","<",">=","=="], correcta:0},
+    {opciones:["<",">","<=","!="], correcta:0}
+  ],
+  pista:"\"Mayor a 10\" es >, y \"menor a 15000\" es <."
+},
+
+/* ===== 08 ===== */
+{
+  tipo:"traza",
+  titulo:"Trazar group_by + summarise",
+  consigna:"Completá el resultado de agrupar estas ventas por <code>producto</code> y calcular la cantidad total y el precio promedio." +
+    '<div class="tabla-wrap" style="margin-top:14px"><table class="ctx"><thead><tr><th>producto</th><th>cantidad</th><th>precio</th></tr></thead><tbody>' +
+    '<tr><td>Manzana</td><td>10</td><td>200</td></tr>' +
+    '<tr><td>Banana</td><td>6</td><td>150</td></tr>' +
+    '<tr><td>Manzana</td><td>8</td><td>220</td></tr>' +
+    '<tr><td>Banana</td><td>4</td><td>160</td></tr></tbody></table></div>',
+  codigo:[
+    "ventas |>",
+    "  group_by(producto) |>",
+    "  summarise(",
+    "    total_cant = sum(cantidad),",
+    "    precio_prom = mean(precio)",
+    "  )"
+  ],
+  columnas:["total_cant","precio_prom"],
+  filas:["Banana","Manzana"],
+  respuestas:[["10","155"],["18","210"]],
+  pista:"Banana: sum(6,4)=10, mean(150,160)=155. Manzana: sum(10,8)=18, mean(200,220)=210."
+},
+
+/* ===== 09 ===== */
+{
+  tipo:"orden",
+  titulo:"Pipeline con group_by",
+  consigna:"Ordená el pipeline que calcula la inflación promedio por región para el año 2022 y muestra los resultados de mayor a menor.",
+  lineas:[
+    {t:"latam |>", s:0},
+    {t:"  filter(anio == 2022) |>", s:0},
+    {t:"  group_by(region) |>", s:0},
+    {t:"  summarise(infl_prom = mean(inflacion)) |>", s:0},
+    {t:"  arrange(desc(infl_prom))", s:0}
+  ],
+  pista:"Primero filtrás, después agrupás, después resumís, y finalmente ordenás. El group_by siempre va justo antes del summarise."
+},
+
+/* ===== 10 ===== */
+{
+  tipo:"bug",
+  titulo:"La columna que no existe",
+  consigna:"Este pipeline debería mostrar el salario promedio por área, pero da error. Tocá la línea responsable.",
+  codigo:[
+    "empleados |>",
+    "  group_by(area) |>",
+    "  summarise(prom = mean(salario)) |>",
+    "  select(area, prom, salario)"
+  ],
+  linea_bug:4,
+  explicacion:'Después de <code>summarise()</code>, la tabla solo tiene las columnas de agrupamiento (<code>area</code>) y las que se calcularon (<code>prom</code>). La columna <code>salario</code> original ya no existe: fue colapsada por el resumen.',
+  fallo:"Esa línea está bien. Pensá en qué columnas tiene la tabla después de cada paso.",
+  pista:"¿Qué columnas tiene una tabla después de un summarise? Solo las de group_by y las que se calcularon."
+},
+
+/* ===== 11 ===== */
+{
+  tipo:"completar",
+  titulo:"Completar un case_when",
+  consigna:"Completá las condiciones del <code>case_when</code> para clasificar países por nivel de PBI per cápita: alto (&ge; 15000), medio (&ge; 8000) o bajo.",
+  plantilla:[
+    "latam |>",
+    "  mutate(",
+    "    nivel = case_when(",
+    "      pbi_pc >= {0} ~ \"alto\",",
+    "      pbi_pc >= {1} ~ \"medio\",",
+    "      TRUE ~ \"bajo\"",
+    "    )",
+    "  )"
+  ],
+  huecos:[
+    {opciones:["15000","8000","5000","20000"], correcta:0},
+    {opciones:["8000","15000","5000","3000"], correcta:0}
+  ],
+  pista:"Las condiciones van de más restrictiva a menos restrictiva: primero >= 15000 (alto), después >= 8000 (medio), y el resto es bajo."
+},
+
+/* ===== 12 ===== */
+{
+  tipo:"traza",
+  titulo:"Trazar case_when fila por fila",
+  consigna:"Completá la columna <code>rango</code> usando los códigos: <strong>3</strong> = caro (&ge; 1000), <strong>2</strong> = medio (&ge; 500), <strong>1</strong> = barato." +
+    '<div class="tabla-wrap" style="margin-top:14px"><table class="ctx"><thead><tr><th>producto</th><th>precio</th></tr></thead><tbody>' +
+    '<tr><td>Notebook</td><td>1500</td></tr><tr><td>Mouse</td><td>350</td></tr>' +
+    '<tr><td>Monitor</td><td>800</td></tr><tr><td>Cable</td><td>120</td></tr></tbody></table></div>',
+  codigo:[
+    "datos |> mutate(",
+    "  rango = case_when(",
+    "    precio >= 1000 ~ 3,",
+    "    precio >= 500  ~ 2,",
+    "    TRUE           ~ 1",
+    "  )",
+    ")"
+  ],
+  columnas:["rango"],
+  filas:["Notebook","Mouse","Monitor","Cable"],
+  respuestas:[["3"],["1"],["2"],["1"]],
+  pista:"Notebook (1500 >= 1000 → 3). Mouse (350: no llega a 1000 ni a 500 → 1). Monitor (800 >= 500 → 2). Cable (120 → 1)."
+},
+
+/* ===== 13 ===== */
+{
+  tipo:"bug",
+  titulo:"El case_when incompleto",
+  consigna:"Este pipeline debería clasificar la inflación en \"alta\", \"media\" o \"baja\", pero algunos valores quedan como <code>NA</code>. Tocá la línea del problema.",
+  codigo:[
+    "latam |>",
+    "  mutate(",
+    "    nivel_infl = case_when(",
+    '      inflacion > 20 ~ "alta",',
+    '      inflacion > 5  ~ "media"',
+    "    )",
+    "  )"
+  ],
+  linea_bug:5,
+  explicacion:'Falta el caso por defecto. Los valores con inflación &le; 5 no cumplen ninguna condición y quedan como <code>NA</code>. Hay que agregar una línea <code>TRUE ~ "baja"</code> para cubrir todos los casos.',
+  fallo:"Esa línea está correcta. Pensá en qué pasa con los valores que no cumplen ninguna condición.",
+  pista:"¿Qué devuelve case_when cuando ninguna condición se cumple?"
+},
+
+/* ===== 14 ===== */
+{
+  tipo:"orden",
+  titulo:"Pipeline con join",
+  consigna:"Ordená el pipeline que une la tabla de alumnos con sus notas, filtra los aprobados (nota &ge; 4) y muestra nombre y nota ordenados de mayor a menor.",
+  lineas:[
+    {t:"alumnos |>", s:0},
+    {t:'  left_join(notas, by = c("id" = "alumno_id")) |>', s:0},
+    {t:"  filter(nota >= 4) |>", s:0},
+    {t:"  select(nombre, nota) |>", s:0},
+    {t:"  arrange(desc(nota))", s:0}
+  ],
+  pista:"Primero unís las tablas (join), después filtrás, seleccionás y ordenás. El join va al principio porque necesitás la columna nota para filtrar."
+},
+
+/* ===== 15 ===== */
+{
+  tipo:"completar",
+  titulo:"Elegir el tipo de join",
+  consigna:"Completá el tipo de join correcto en cada caso.",
+  plantilla:[
+    "# Ver todos los alumnos con su nota",
+    "# (incluyendo los que no rindieron)",
+    "alumnos |> {0}(notas, by = \"id\")",
+    "",
+    "# Ver solo los alumnos que rindieron",
+    "alumnos |> {1}(notas, by = \"id\")"
+  ],
+  huecos:[
+    {opciones:["left_join","inner_join","anti_join","full_join"], correcta:0},
+    {opciones:["inner_join","left_join","anti_join","right_join"], correcta:0}
+  ],
+  pista:"left_join conserva todos los alumnos (con NA si no hay nota). inner_join conserva solo los que tienen coincidencia en ambas tablas."
+},
+
+/* ===== 16 ===== */
+{
+  tipo:"traza",
+  titulo:"Trazar un left_join",
+  consigna:"Completá la columna <code>precio</code> en el resultado del join. Si un producto no tiene precio, escribí <strong>NA</strong>." +
+    '<div style="display:flex;gap:18px;flex-wrap:wrap;margin-top:14px">' +
+    '<div class="tabla-wrap"><table class="ctx" style="width:auto"><thead><tr><th colspan="2">pedidos</th></tr><tr><th>pedido</th><th>prod_id</th></tr></thead><tbody>' +
+    '<tr><td>P1</td><td>A</td></tr><tr><td>P2</td><td>B</td></tr><tr><td>P3</td><td>C</td></tr><tr><td>P4</td><td>A</td></tr></tbody></table></div>' +
+    '<div class="tabla-wrap"><table class="ctx" style="width:auto"><thead><tr><th colspan="2">precios</th></tr><tr><th>prod_id</th><th>precio</th></tr></thead><tbody>' +
+    '<tr><td>A</td><td>500</td></tr><tr><td>C</td><td>300</td></tr></tbody></table></div></div>',
+  codigo:[
+    "pedidos |>",
+    "  left_join(precios, by = \"prod_id\")"
+  ],
+  columnas:["precio"],
+  filas:["P1 (prod A)","P2 (prod B)","P3 (prod C)","P4 (prod A)"],
+  respuestas:[["500"],["NA"],["300"],["500"]],
+  pista:"Producto A tiene precio 500, C tiene 300. Producto B no está en la tabla de precios → NA. P4 también pide A → 500."
+},
+
+/* ===== 17 ===== */
+{
+  tipo:"bug",
+  titulo:"La clave equivocada",
+  consigna:"Este join debería agregar el nombre del departamento a cada empleado, pero todas las columnas del departamento aparecen como <code>NA</code>. Tocá la línea responsable.",
+  codigo:[
+    "empleados |>",
+    '  left_join(departamentos, by = "nombre")',
+  ],
+  linea_bug:2,
+  explicacion:'La clave de unión debería ser el id del departamento, no <code>"nombre"</code>. <code>empleados</code> tiene una columna <code>depto_id</code> y <code>departamentos</code> tiene <code>id</code>. La línea correcta sería: <code>left_join(departamentos, by = c("depto_id" = "id"))</code>.',
+  fallo:"Esa línea está bien. El problema está en cómo se conectan las dos tablas.",
+  pista:'Las tablas se unen por una clave compartida. ¿"nombre" es la clave correcta para conectar empleados con departamentos?'
+},
+
+/* ===== 18 ===== */
+{
+  tipo:"orden",
+  titulo:"Pipeline completo de análisis",
+  consigna:"Ordená el pipeline completo: unite dos tablas, creá una columna nueva, agrupá, resumí y ordená.",
+  lineas:[
+    {t:"ventas |>", s:0},
+    {t:'  left_join(productos, by = "prod_id") |>', s:0},
+    {t:"  mutate(monto = cantidad * precio) |>", s:0},
+    {t:"  group_by(categoria) |>", s:0},
+    {t:"  summarise(total = sum(monto)) |>", s:0},
+    {t:"  arrange(desc(total))", s:0}
+  ],
+  pista:"El orden lógico es: unir datos → crear columna → agrupar → resumir → ordenar. Cada paso depende del anterior."
+}
+
+];
+
+/* ============================================================
+   MOTOR
+   ============================================================ */
+const CLAVE = "tidyverse-practica-v1";
+var _ls = true;
+try { localStorage.getItem("_test"); } catch(e){ _ls = false; }
+const estado = _ls ? JSON.parse(localStorage.getItem(CLAVE) || "{}") : {};
+const tablero = document.getElementById("tablero");
+
+function guardar(i){ estado[i]=true; if(_ls) localStorage.setItem(CLAVE, JSON.stringify(estado)); pintarMarcador(); }
+
+function pintarMarcador(){
+  var m = document.getElementById("marcador");
+  var hechos = EJERCICIOS.filter(function(_,i){return estado[i];}).length;
+  m.innerHTML = EJERCICIOS.map(function(_,i){return '<span class="pip '+(estado[i]?"ok":"")+'"></span>';}).join("") +
+    '<span style="margin-left:8px">'+hechos+" de "+EJERCICIOS.length+" resueltos</span>";
+}
+
+function armazon(ej, i){
+  var art = document.createElement("article");
+  art.className = "ej";
+  var etiqueta = {orden:"Ordenar",traza:"Trazar",bug:"Depurar",completar:"Completar"}[ej.tipo]||ej.tipo;
+  art.innerHTML =
+    '<div class="ej-cab"><span class="ej-n">'+String(i+1).padStart(2,"0")+'</span><span class="ej-tipo">'+etiqueta+"</span></div>" +
+    "<h2>"+ej.titulo+"</h2>" +
+    '<p class="consigna">'+ej.consigna+"</p>" +
+    '<div class="cuerpo"></div>' +
+    '<div class="barra"><button class="accion verificar">Verificar</button><button class="accion fantasma pedir-pista">Ver pista</button></div>' +
+    '<p class="pista" hidden>'+(ej.pista||"")+"</p>" +
+    '<p class="feedback" role="status"></p>';
+  art.querySelector(".pedir-pista").onclick = function(e){ art.querySelector(".pista").hidden=false; e.target.remove(); };
+  return art;
+}
+
+function bloqueCodigo(lineas, cazable){
+  return '<div class="pseudo '+(cazable?"cazable":"")+'">' +
+    lineas.map(function(l,k){return '<div class="linea" data-l="'+(k+1)+'"><span class="num">'+(k+1)+'</span><span>'+l+"</span></div>";}).join("") +
+    "</div>";
+}
+
+/* ---------- tipo: orden (Parsons) ---------- */
+function montarOrden(ej, art, idx){
+  var cuerpo = art.querySelector(".cuerpo");
+  var ul = document.createElement("ul");
+  ul.className = "piezas";
+  var mezcladas = ej.lineas.map(function(l,k){return {t:l.t,s:l.s,id:k};}).sort(function(){return Math.random()-.5;});
+
+  mezcladas.forEach(function(l){
+    var li = document.createElement("li");
+    li.className = "pieza"; li.draggable = true;
+    li.dataset.id = l.id; li.dataset.sangria = 0;
+    li.innerHTML =
+      '<span class="mover"><button type="button" aria-label="Subir">▲</button><button type="button" aria-label="Bajar">▼</button></span>' +
+      '<button type="button" class="sangria" aria-label="Cambiar sangría">→</button>' +
+      '<span class="pieza-txt">'+l.t+"</span>";
+    var btns = li.querySelectorAll(".mover button");
+    btns[0].onclick = function(){ var p=li.previousElementSibling; if(p) ul.insertBefore(li,p); };
+    btns[1].onclick = function(){ var n=li.nextElementSibling; if(n) ul.insertBefore(n,li); };
+    li.querySelector(".sangria").onclick = function(){
+      var s = (Number(li.dataset.sangria)+1)%3;
+      li.dataset.sangria = s;
+      li.querySelector(".pieza-txt").style.paddingLeft = (s*22)+"px";
+    };
+    ul.appendChild(li);
+  });
+
+  var tomada = null;
+  ul.addEventListener("dragstart",function(e){tomada=e.target.closest(".pieza");tomada.classList.add("arrastrando");});
+  ul.addEventListener("dragend",function(){if(tomada)tomada.classList.remove("arrastrando");ul.querySelectorAll(".sobre").forEach(function(n){n.classList.remove("sobre");});tomada=null;});
+  ul.addEventListener("dragover",function(e){
+    e.preventDefault();
+    var sobre=e.target.closest(".pieza"); if(!sobre||sobre===tomada) return;
+    ul.querySelectorAll(".sobre").forEach(function(n){n.classList.remove("sobre");});
+    sobre.classList.add("sobre");
+    var r=sobre.getBoundingClientRect();
+    ul.insertBefore(tomada,(e.clientY-r.top)/r.height<.5?sobre:sobre.nextElementSibling);
+  });
+  cuerpo.appendChild(ul);
+
+  art.querySelector(".verificar").onclick = function(){
+    var piezas = Array.from(ul.children);
+    var ordenMal = piezas.findIndex(function(li,k){return Number(li.dataset.id)!==k;});
+    var sangriaMal = piezas.findIndex(function(li){return Number(li.dataset.sangria)!==ej.lineas[Number(li.dataset.id)].s;});
+    var f = art.querySelector(".feedback");
+    if(ordenMal===-1 && sangriaMal===-1){
+      f.className="feedback bien"; f.textContent="Correcto. El pipeline está bien armado.";
+      ul.classList.add("ok"); guardar(idx);
+    } else if(ordenMal!==-1){
+      f.className="feedback mal";
+      f.textContent="Hasta la línea "+ordenMal+" vas bien. Revisá qué paso tiene que ir en el lugar "+(ordenMal+1)+".";
+    } else {
+      f.className="feedback mal";
+      f.textContent="El orden está bien, pero la sangría no.";
+    }
+  };
+}
+
+/* ---------- tipo: traza ---------- */
+function montarTraza(ej, art, idx){
+  var cuerpo = art.querySelector(".cuerpo");
+  var html = "";
+  if(ej.codigo) html += bloqueCodigo(ej.codigo, false);
+  html += '<div class="tabla-wrap"><table><thead><tr><th></th>' +
+    ej.columnas.map(function(c){return "<th>"+c+"</th>";}).join("") +
+    "</tr></thead><tbody>" +
+    ej.filas.map(function(fila,r){
+      return '<tr><td class="paso">'+fila+"</td>" +
+        ej.columnas.map(function(_,c){return '<td><input autocomplete="off" data-r="'+r+'" data-c="'+c+'"></td>';}).join("") +
+        "</tr>";
+    }).join("") + "</tbody></table></div>";
+  cuerpo.innerHTML = html;
+
+  art.querySelector(".verificar").onclick = function(){
+    var bien=0, total=0;
+    cuerpo.querySelectorAll("input").forEach(function(inp){
+      var esperado = ej.respuestas[inp.dataset.r][inp.dataset.c].trim().toUpperCase();
+      var dado = inp.value.trim().toUpperCase();
+      inp.parentElement.className = "";
+      total++;
+      if(esperado==="NA"){
+        if(dado==="NA"||dado==="N/A"){inp.parentElement.className="bien";bien++;}
+        else if(dado!==""){inp.parentElement.className="mal";}
+      } else {
+        if(dado===esperado){inp.parentElement.className="bien";bien++;}
+        else if(dado!==""){inp.parentElement.className="mal";}
+      }
+    });
+    var f = art.querySelector(".feedback");
+    if(bien===total){
+      f.className="feedback bien"; f.textContent="Todos los valores son correctos."; guardar(idx);
+    } else {
+      f.className="feedback mal";
+      f.textContent=bien+" de "+total+" celdas correctas. Las marcadas en rojo no coinciden.";
+    }
+  };
+}
+
+/* ---------- tipo: bug ---------- */
+function montarBug(ej, art, idx){
+  var cuerpo = art.querySelector(".cuerpo");
+  cuerpo.innerHTML = bloqueCodigo(ej.codigo, true);
+  var elegida = null;
+  cuerpo.querySelectorAll(".linea").forEach(function(l){
+    l.tabIndex = 0;
+    function marcar(){
+      cuerpo.querySelectorAll(".linea").forEach(function(x){x.classList.remove("elegida");});
+      l.classList.add("elegida");
+      elegida = Number(l.dataset.l);
+    }
+    l.onclick = marcar;
+    l.onkeydown = function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();marcar();}};
+  });
+
+  art.querySelector(".verificar").onclick = function(){
+    var f = art.querySelector(".feedback");
+    if(!elegida){f.className="feedback mal";f.textContent="Elegí una línea antes de verificar.";return;}
+    var sel = cuerpo.querySelector('.linea[data-l="'+elegida+'"]');
+    sel.classList.remove("elegida");
+    if(elegida===ej.linea_bug){
+      sel.classList.add("acierto");
+      f.className="feedback bien"; f.innerHTML="Correcto. "+ej.explicacion; guardar(idx);
+    } else {
+      sel.classList.add("error");
+      f.className="feedback mal"; f.textContent=ej.fallo||"Esa línea está bien. Probá con otra.";
+    }
+  };
+}
+
+/* ---------- tipo: completar ---------- */
+function montarCompletar(ej, art, idx){
+  var cuerpo = art.querySelector(".cuerpo");
+  var html = '<div class="pseudo">';
+  var huecoIdx = 0;
+  ej.plantilla.forEach(function(linea, k){
+    var contenido = linea;
+    var regex = /\{(\d+)\}/g;
+    contenido = contenido.replace(regex, function(_, n){
+      var h = ej.huecos[Number(n)];
+      var sel = '<select class="hueco" data-h="'+n+'">';
+      sel += '<option value="">???</option>';
+      h.opciones.forEach(function(op){sel += '<option value="'+op+'">'+op+"</option>";});
+      sel += "</select>";
+      return sel;
+    });
+    html += '<div class="linea"><span class="num">'+(k+1)+'</span><span>'+contenido+"</span></div>";
+  });
+  html += "</div>";
+  cuerpo.innerHTML = html;
+
+  art.querySelector(".verificar").onclick = function(){
+    var bien = 0, total = ej.huecos.length;
+    cuerpo.querySelectorAll(".hueco").forEach(function(sel){
+      var h = ej.huecos[Number(sel.dataset.h)];
+      var correcto = h.opciones[h.correcta];
+      sel.classList.remove("bien","mal");
+      if(sel.value === correcto){sel.classList.add("bien"); bien++;}
+      else if(sel.value !== ""){sel.classList.add("mal");}
+    });
+    var f = art.querySelector(".feedback");
+    if(bien===total){
+      f.className="feedback bien"; f.textContent="Correcto. Todos los huecos están bien completados."; guardar(idx);
+    } else {
+      f.className="feedback mal";
+      f.textContent=bien+" de "+total+" huecos correctos. Los marcados en rojo no corresponden.";
+    }
+  };
+}
+
+/* ---------- arranque ---------- */
+EJERCICIOS.forEach(function(ej, i){
+  var art = armazon(ej, i);
+  art.dataset.tipo = ej.tipo;
+  tablero.appendChild(art);
+  ({orden:montarOrden, traza:montarTraza, bug:montarBug, completar:montarCompletar})[ej.tipo](ej, art, i);
+});
+pintarMarcador();
+
+document.getElementById("filtros").addEventListener("click",function(e){
+  var b = e.target.closest(".filtro");
+  if(!b) return;
+  document.querySelectorAll(".filtro").forEach(function(x){x.classList.toggle("activo",x===b);});
+  document.querySelectorAll(".ej").forEach(function(a){
+    a.style.display = (b.dataset.t==="todos"||a.dataset.tipo===b.dataset.t) ? "" : "none";
+  });
+});
+
+document.getElementById("reset").onclick = function(){if(_ls) localStorage.removeItem(CLAVE);location.reload();};
+</script>
+</body>
+</html>

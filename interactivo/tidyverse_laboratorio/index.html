@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tidyverse — Laboratorio Interactivo</title>
+<style>
+:root{
+  --bg:#F7F5F0;--bg-alt:#EDEAE3;--bg-canvas:#FFFFFF;
+  --text:#2C2C2E;--text-sec:#636366;--heading:#1A2744;
+  --accent:#3170A2;--accent-light:#E3EEF6;
+  --green:#2D8659;--green-light:#D4EDDF;
+  --red:#D45A3A;--red-light:#FBEAE5;
+  --orange:#C87A1A;--orange-light:#FDF0DB;
+  --purple:#7B5EA7;--purple-light:#EDE7F6;
+  --blue:#5B9BD5;
+  --border:#DCDAD4;--shadow:rgba(28,28,30,.07);
+  --font-d:Georgia,"Palatino Linotype","Book Antiqua",Palatino,serif;
+  --font-b:"Segoe UI",system-ui,-apple-system,sans-serif;
+  --font-m:"Cascadia Code","Fira Code",Consolas,monospace;
+  --cw:820px;
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#151820;--bg-alt:#1C2028;--bg-canvas:#1E2430;
+  --text:#D4D2CC;--text-sec:#8E8E93;--heading:#B8C8E0;
+  --accent:#6AADE8;--accent-light:#1A2A3A;
+  --green:#4DBB7F;--green-light:#1A3329;
+  --red:#F07A5A;--red-light:#3D2219;
+  --orange:#E8A84C;--orange-light:#3D2E14;
+  --purple:#A78BDB;--purple-light:#2A2040;
+  --blue:#7FC4F5;
+  --border:#2A2E36;--shadow:rgba(0,0,0,.25);
+}}
+:root[data-theme="dark"]{
+  --bg:#151820;--bg-alt:#1C2028;--bg-canvas:#1E2430;
+  --text:#D4D2CC;--text-sec:#8E8E93;--heading:#B8C8E0;
+  --accent:#6AADE8;--accent-light:#1A2A3A;
+  --green:#4DBB7F;--green-light:#1A3329;
+  --red:#F07A5A;--red-light:#3D2219;
+  --orange:#E8A84C;--orange-light:#3D2E14;
+  --purple:#A78BDB;--purple-light:#2A2040;
+  --blue:#7FC4F5;
+  --border:#2A2E36;--shadow:rgba(0,0,0,.25);
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:var(--font-b);font-size:17px;line-height:1.72}
+article{max-width:var(--cw);margin:0 auto;padding:3.5rem 1.5rem 6rem}
+
+h1{font-family:var(--font-d);font-size:clamp(2rem,5vw,2.8rem);color:var(--heading);line-height:1.12;letter-spacing:-.025em;margin-bottom:.4rem}
+h2{font-family:var(--font-d);font-size:1.55rem;color:var(--heading);line-height:1.3;margin-top:3.5rem;margin-bottom:.75rem;padding-bottom:.45rem;border-bottom:2px solid var(--accent)}
+h3{font-family:var(--font-d);font-size:1.15rem;color:var(--heading);margin-top:1.5rem;margin-bottom:.5rem}
+p{margin-bottom:1.15rem;max-width:65ch}
+strong{color:var(--heading);font-weight:600}
+code{font-family:var(--font-m);font-size:.9em;background:var(--bg-alt);padding:1px 5px;border-radius:3px}
+
+.eyebrow{font-size:.8rem;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);font-weight:600;margin-bottom:.5rem}
+.subtitle{font-family:var(--font-d);font-size:1.15rem;color:var(--text-sec);font-style:italic;margin-bottom:2rem;max-width:55ch}
+.lead{font-size:1.05rem;color:var(--text-sec);max-width:60ch}
+
+.tip{background:var(--green-light);border-left:3px solid var(--green);padding:.9rem 1.1rem;margin:1.5rem 0;border-radius:0 6px 6px 0;font-size:.95rem}
+
+/* Lab cards */
+.lab{background:var(--bg-canvas);border:1px solid var(--border);border-radius:8px;padding:1.25rem;margin:1.5rem -1rem;box-shadow:0 2px 12px var(--shadow)}
+@media(min-width:800px){.lab{margin:1.5rem -2rem;padding:1.5rem}}
+.lab-title{font-family:var(--font-d);font-size:1.05rem;color:var(--heading);font-weight:700;margin-bottom:.75rem}
+
+/* Buttons */
+.btns{display:flex;flex-wrap:wrap;gap:.4rem;margin:.75rem 0}
+.btn{font-family:var(--font-b);font-size:.82rem;padding:.4rem .85rem;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text);cursor:pointer;transition:all .15s;font-weight:500}
+.btn:hover{background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
+.btn.act{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* Controls */
+.ctrl{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;margin:.75rem 0;font-size:.88rem}
+.ctrl label{display:flex;align-items:center;gap:.4rem;color:var(--text-sec);font-size:.85rem}
+.ctrl select,.ctrl input[type=number]{font-family:var(--font-m);font-size:.85rem;padding:.3rem .5rem;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text)}
+.ctrl input[type=range]{width:140px;accent-color:var(--accent)}
+.ctrl .val{font-family:var(--font-m);font-size:.85rem;color:var(--accent);font-weight:600;min-width:50px}
+.ctrl input[type=checkbox]{accent-color:var(--accent)}
+
+/* Tables */
+.tabla-wrap{overflow-x:auto;margin:.75rem 0;border:1px solid var(--border);border-radius:6px}
+table.t{width:100%;border-collapse:collapse;font-size:.85rem;white-space:nowrap}
+table.t th{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-sec);font-weight:600;padding:.5rem .7rem;text-align:left;border-bottom:2px solid var(--border);background:var(--bg-alt);position:sticky;top:0}
+table.t td{padding:.4rem .7rem;border-bottom:1px solid var(--border);font-family:var(--font-m);font-size:.82rem}
+table.t tbody tr:hover{background:var(--bg-alt)}
+table.t .num{text-align:right}
+
+/* Row match colors for joins */
+.row-a td{background:rgba(49,112,162,.1);border-left:3px solid var(--accent)}
+.row-b td{background:rgba(45,134,89,.1);border-left:3px solid var(--green)}
+.row-c td{background:rgba(123,94,167,.1);border-left:3px solid var(--purple)}
+.row-none td{background:rgba(212,90,58,.07);color:var(--text-sec);border-left:3px solid var(--red)}
+.row-excl td{opacity:.35;text-decoration:line-through}
+td .na{color:var(--red);font-style:italic;font-family:var(--font-b);font-weight:600}
+
+/* Code block */
+.code{font-family:var(--font-m);font-size:.84rem;background:var(--bg-alt);border:1px solid var(--border);border-radius:6px;padding:.75rem 1rem;margin:.75rem 0;overflow-x:auto;line-height:1.7}
+.code .ln{display:block;padding:1px 0;border-left:3px solid transparent;padding-left:8px;transition:all .15s}
+.code .ln.hi{background:var(--accent-light);border-left-color:var(--accent);font-weight:600}
+.code .ln.dim{opacity:.4}
+
+/* Category colors for case_when */
+.cat-caro{background:rgba(45,134,89,.12);color:var(--green);font-weight:600}
+.cat-medio{background:rgba(200,122,26,.12);color:var(--orange);font-weight:600}
+.cat-barato{background:rgba(212,90,58,.08);color:var(--red)}
+
+/* Pivot highlight */
+.new-col{background:var(--accent-light)}
+.pos{color:var(--green);font-weight:600}
+.neg{color:var(--red);font-weight:600}
+
+/* Side-by-side layout */
+.lado{display:flex;gap:1.25rem;flex-wrap:wrap;align-items:flex-start}
+.lado>*{flex:1;min-width:220px}
+.flecha{display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:var(--accent);flex:0 0 40px;min-width:auto;align-self:center}
+
+/* Group colors */
+.grp-0 td:first-child{border-left:3px solid var(--accent)}
+.grp-1 td:first-child{border-left:3px solid var(--green)}
+.grp-2 td:first-child{border-left:3px solid var(--purple)}
+.grp-0{background:rgba(49,112,162,.06)}
+.grp-1{background:rgba(45,134,89,.06)}
+.grp-2{background:rgba(123,94,167,.06)}
+
+/* Desc text */
+.desc{font-size:.9rem;color:var(--text-sec);margin:.5rem 0;max-width:60ch;line-height:1.6}
+
+footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--border);font-size:.82rem;color:var(--text-sec)}
+
+@media(max-width:600px){
+  .lab{margin:1rem -.5rem;padding:1rem}
+  .lado{flex-direction:column}
+  .flecha{transform:rotate(90deg);flex:0;align-self:center}
+  table.t{font-size:.78rem}
+  table.t th,table.t td{padding:.35rem .5rem}
+}
+</style>
+</head>
+<body>
+<article>
+
+<header>
+  <p class="eyebrow">Ciencia de Datos &middot; clases 3 y 4</p>
+  <h1>Tidyverse &mdash; Laboratorio Interactivo</h1>
+  <p class="subtitle">Explorá visualmente c&oacute;mo cada transformaci&oacute;n de dplyr modifica los datos</p>
+  <p class="lead">En esta p&aacute;gina pod&eacute;s interactuar con los verbos de dplyr, armar pipelines paso a paso, visualizar c&oacute;mo funcionan los distintos tipos de join y entender c&oacute;mo pivotan los datos. No hay respuestas correctas ni incorrectas: la idea es explorar.</p>
+</header>
+
+<!-- ═══════════════════════════════════════════ -->
+<section>
+<h2>1. Los 5 verbos en vivo</h2>
+<p>Cada verbo de dplyr hace <strong>una sola cosa</strong> con los datos. Seleccion&aacute; un verbo, ajust&aacute; los par&aacute;metros y observ&aacute; c&oacute;mo cambia la tabla.</p>
+
+<div class="lab">
+  <div class="lab-title">Dataset: empleados</div>
+  <div id="verb-orig"></div>
+  <div class="btns" id="verb-btns">
+    <button class="btn" data-v="select">select</button>
+    <button class="btn" data-v="filter">filter</button>
+    <button class="btn" data-v="mutate">mutate</button>
+    <button class="btn" data-v="arrange">arrange</button>
+    <button class="btn" data-v="summarise">summarise</button>
+  </div>
+  <div id="verb-panel" style="display:none">
+    <div class="code" id="verb-code"></div>
+    <div class="ctrl" id="verb-ctrl"></div>
+    <h3 style="margin-top:.75rem">Resultado</h3>
+    <div id="verb-result"></div>
+  </div>
+</div>
+<div class="tip"><strong>Observ&aacute;:</strong> <code>select</code> elige <em>columnas</em>, <code>filter</code> elige <em>filas</em>. <code>mutate</code> agrega columnas sin perder las existentes. <code>summarise</code> colapsa toda la tabla en una fila resumen.</div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<section>
+<h2>2. El pipeline paso a paso</h2>
+<p>El operador pipe <code>|&gt;</code> encadena transformaciones: el resultado de cada paso es la entrada del siguiente. Us&aacute; el slider para avanzar por el pipeline y ver la tabla intermedia en cada etapa.</p>
+
+<div class="lab">
+  <div class="lab-title">Pipeline de an&aacute;lisis</div>
+  <div class="lado">
+    <div>
+      <div class="code" id="pipe-code"></div>
+      <div class="ctrl">
+        <label>Paso: <input type="range" id="pipe-step" min="0" max="4" value="0" style="width:200px"> <span class="val" id="pipe-step-val">0 &mdash; datos originales</span></label>
+      </div>
+    </div>
+  </div>
+  <p class="desc" id="pipe-desc"></p>
+  <div id="pipe-table"></div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<section>
+<h2>3. Joins: c&oacute;mo se conectan las tablas</h2>
+<p>Un <strong>join</strong> combina dos tablas usando una columna clave. Seleccion&aacute; el tipo de join y observ&aacute; qu&eacute; filas se conservan, cu&aacute;les se descartan y d&oacute;nde aparecen valores <code>NA</code>.</p>
+
+<div class="lab">
+  <div class="lab-title">Tablas de entrada</div>
+  <div class="lado" id="join-inputs">
+    <div>
+      <h3 style="margin:0 0 .4rem;font-size:.95rem">alumnos</h3>
+      <div id="join-left"></div>
+    </div>
+    <div>
+      <h3 style="margin:0 0 .4rem;font-size:.95rem">notas <span style="font-weight:400;font-size:.8rem;color:var(--text-sec)">(clave: alumno_id)</span></h3>
+      <div id="join-right"></div>
+    </div>
+  </div>
+  <div class="btns" id="join-btns">
+    <button class="btn" data-j="inner">inner_join</button>
+    <button class="btn" data-j="left">left_join</button>
+    <button class="btn" data-j="right">right_join</button>
+    <button class="btn" data-j="full">full_join</button>
+    <button class="btn" data-j="anti">anti_join</button>
+  </div>
+  <div id="join-panel" style="display:none">
+    <div class="code" id="join-code"></div>
+    <p class="desc" id="join-desc"></p>
+    <h3 style="margin-top:.5rem">Resultado</h3>
+    <div id="join-result"></div>
+  </div>
+</div>
+<div class="tip"><strong>Clave:</strong> <code>left_join</code> conserva <em>todas</em> las filas de la tabla izquierda. Si no hay match, las columnas de la derecha quedan como <code>NA</code>. Es el join m&aacute;s usado en la pr&aacute;ctica.</div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<section>
+<h2>4. case_when: clasificador en vivo</h2>
+<p><code>case_when</code> eval&uacute;a condiciones en orden y asigna un valor a la primera que se cumple. Mov&eacute; los umbrales y observ&aacute; c&oacute;mo cambian las categor&iacute;as de cada producto.</p>
+
+<div class="lab">
+  <div class="lab-title">Clasificar productos por precio</div>
+  <div class="ctrl">
+    <label>Umbral &laquo;caro&raquo; &ge; <input type="range" id="cw-caro" min="200" max="1200" step="50" value="500"> <span class="val" id="cw-caro-val">500</span></label>
+    <label>Umbral &laquo;medio&raquo; &ge; <input type="range" id="cw-medio" min="20" max="500" step="10" value="100"> <span class="val" id="cw-medio-val">100</span></label>
+  </div>
+  <div class="code" id="cw-code"></div>
+  <div id="cw-table"></div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<section>
+<h2>5. group_by + summarise</h2>
+<p><code>group_by</code> divide la tabla en grupos seg&uacute;n una variable. <code>summarise</code> colapsa cada grupo en una fila con un resumen estad&iacute;stico. Eleg&iacute; la variable de agrupamiento y la funci&oacute;n.</p>
+
+<div class="lab">
+  <div class="lab-title">Dataset: ventas</div>
+  <div class="ctrl">
+    <label>Agrupar por:
+      <select id="gb-var">
+        <option value="producto">producto</option>
+        <option value="region">region</option>
+      </select>
+    </label>
+    <label>Resumir:
+      <select id="gb-fun">
+        <option value="sum">sum(cantidad)</option>
+        <option value="mean">mean(cantidad)</option>
+        <option value="mean_p">mean(precio_u)</option>
+        <option value="n">n()</option>
+      </select>
+    </label>
+  </div>
+  <div class="code" id="gb-code"></div>
+  <div class="lado">
+    <div>
+      <h3 style="margin:0 0 .4rem;font-size:.95rem">Datos originales <span style="font-weight:400;font-size:.8rem;color:var(--text-sec)">(filas del mismo grupo = mismo color)</span></h3>
+      <div id="gb-orig"></div>
+    </div>
+    <div class="flecha">&rarr;</div>
+    <div>
+      <h3 style="margin:0 0 .4rem;font-size:.95rem">Resultado</h3>
+      <div id="gb-result"></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<section>
+<h2>6. Pivot: cambiar la forma de los datos</h2>
+<p><code>pivot_wider</code> transforma datos de formato largo a ancho: los valores de una columna pasan a ser nuevas columnas. Esto permite hacer operaciones entre columnas que antes eran filas.</p>
+
+<div class="lab">
+  <div class="lab-title">Notas de parciales</div>
+  <div class="btns" id="piv-btns">
+    <button class="btn act" data-p="long">Formato largo (original)</button>
+    <button class="btn" data-p="wide">pivot_wider</button>
+    <button class="btn" data-p="mutate">+ mutate(mejora)</button>
+  </div>
+  <div class="code" id="piv-code"></div>
+  <div id="piv-table"></div>
+  <p class="desc" id="piv-desc"></p>
+</div>
+<div class="tip"><strong>Ventaja del formato ancho:</strong> una vez que cada examen es una columna, calcular la diferencia entre parciales es simplemente <code>mutate(mejora = Parcial_2 - Parcial_1)</code>. En formato largo, esa resta no se puede expresar con un solo <code>mutate</code>.</div>
+</section>
+
+<footer>
+  <p>Ciencia de Datos para Econom&iacute;a y Negocios &mdash; FCE-UBA &mdash; Laboratorio interactivo de Tidyverse</p>
+</footer>
+
+</article>
+
+<script>
+/* ════════════════════════════════════════════════
+   HELPERS
+   ════════════════════════════════════════════════ */
+function $(s){return document.querySelector(s)}
+function $$(s){return document.querySelectorAll(s)}
+
+function tablaHTML(cols, filas, opts){
+  opts = opts||{};
+  var h='<div class="tabla-wrap"><table class="t"><thead><tr>';
+  for(var c=0;c<cols.length;c++) h+='<th>'+cols[c].l+'</th>';
+  h+='</tr></thead><tbody>';
+  for(var i=0;i<filas.length;i++){
+    var rc=opts.filaClase?opts.filaClase(filas[i],i):'';
+    h+='<tr'+(rc?' class="'+rc+'"':'')+'>';
+    for(var c=0;c<cols.length;c++){
+      var v=filas[i][cols[c].k];
+      var cc=opts.celdaClase?opts.celdaClase(filas[i],cols[c].k,i):'';
+      var txt=(v===null||v===undefined)?'<span class="na">NA</span>':v;
+      h+='<td'+(cc?' class="'+cc+'"':'')+(typeof v==='number'?' class="num"':'')+'>'+txt+'</td>';
+    }
+    h+='</tr>';
+  }
+  h+='</tbody></table></div>';
+  return h;
+}
+
+function fmt(v){return typeof v==='number'?(Number.isInteger(v)?v:v.toFixed(2)):v}
+
+/* ════════════════════════════════════════════════
+   DATA
+   ════════════════════════════════════════════════ */
+var EMPLEADOS=[
+  {nombre:"Ana",area:"Ventas",salario:45000,antiguedad:3},
+  {nombre:"Bruno",area:"IT",salario:62000,antiguedad:7},
+  {nombre:"Carla",area:"Ventas",salario:51000,antiguedad:5},
+  {nombre:"Diana",area:"IT",salario:48000,antiguedad:2},
+  {nombre:"Elena",area:"RRHH",salario:55000,antiguedad:4},
+  {nombre:"Franco",area:"Ventas",salario:42000,antiguedad:1},
+  {nombre:"Gabi",area:"IT",salario:71000,antiguedad:9},
+  {nombre:"Hugo",area:"RRHH",salario:47000,antiguedad:3}
+];
+var EMP_COLS=[{k:"nombre",l:"nombre"},{k:"area",l:"area"},{k:"salario",l:"salario"},{k:"antiguedad",l:"antiguedad"}];
+
+var ALUMNOS=[
+  {id:1,nombre:"Ana"},
+  {id:2,nombre:"Bruno"},
+  {id:3,nombre:"Carla"},
+  {id:4,nombre:"Diana"}
+];
+var NOTAS=[
+  {alumno_id:1,materia:"Mate",nota:8},
+  {alumno_id:2,materia:"Mate",nota:6},
+  {alumno_id:2,materia:"Estadistica",nota:9},
+  {alumno_id:4,materia:"Mate",nota:7},
+  {alumno_id:5,materia:"Estadistica",nota:4}
+];
+
+var PRODUCTOS=[
+  {producto:"Notebook",precio:1500},{producto:"Mouse",precio:25},
+  {producto:"Monitor",precio:800},{producto:"Teclado",precio:60},
+  {producto:"Auriculares",precio:200},{producto:"Cable USB",precio:8},
+  {producto:"Webcam",precio:150},{producto:"Pendrive",precio:20}
+];
+
+var VENTAS=[
+  {producto:"Manzana",region:"Norte",cantidad:120,precio_u:200},
+  {producto:"Banana",region:"Norte",cantidad:80,precio_u:150},
+  {producto:"Manzana",region:"Sur",cantidad:95,precio_u:210},
+  {producto:"Banana",region:"Sur",cantidad:110,precio_u:140},
+  {producto:"Naranja",region:"Norte",cantidad:60,precio_u:180},
+  {producto:"Manzana",region:"Centro",cantidad:150,precio_u:190},
+  {producto:"Banana",region:"Centro",cantidad:70,precio_u:160},
+  {producto:"Naranja",region:"Sur",cantidad:45,precio_u:190},
+  {producto:"Naranja",region:"Centro",cantidad:90,precio_u:170}
+];
+
+var EXAMENES=[
+  {alumno:"Ana",examen:"Parcial_1",nota:7},
+  {alumno:"Ana",examen:"Parcial_2",nota:9},
+  {alumno:"Bruno",examen:"Parcial_1",nota:5},
+  {alumno:"Bruno",examen:"Parcial_2",nota:8},
+  {alumno:"Carla",examen:"Parcial_1",nota:8},
+  {alumno:"Carla",examen:"Parcial_2",nota:6},
+  {alumno:"Diana",examen:"Parcial_1",nota:6},
+  {alumno:"Diana",examen:"Parcial_2",nota:9}
+];
+
+/* ════════════════════════════════════════════════
+   1. VERB EXPLORER
+   ════════════════════════════════════════════════ */
+(function(){
+  $("#verb-orig").innerHTML=tablaHTML(EMP_COLS,EMPLEADOS);
+
+  var activo=null;
+  var selCols={nombre:true,area:true,salario:true,antiguedad:true};
+  var filtCol="salario",filtOp=">",filtVal=50000;
+  var mutFn="salario_anual = salario * 12";
+  var arrCol="salario",arrDir="desc";
+  var sumFn="mean",sumCol="salario";
+
+  $("#verb-btns").addEventListener("click",function(e){
+    var b=e.target.closest(".btn");if(!b)return;
+    $$("#verb-btns .btn").forEach(function(x){x.classList.remove("act")});
+    b.classList.add("act");
+    activo=b.dataset.v;
+    $("#verb-panel").style.display="block";
+    renderCtrl();
+    renderVerbo();
+  });
+
+  function renderCtrl(){
+    var h='';
+    if(activo==="select"){
+      h='<label><input type="checkbox" data-c="nombre" '+(selCols.nombre?"checked":"")+'> nombre</label>';
+      h+='<label><input type="checkbox" data-c="area" '+(selCols.area?"checked":"")+'> area</label>';
+      h+='<label><input type="checkbox" data-c="salario" '+(selCols.salario?"checked":"")+'> salario</label>';
+      h+='<label><input type="checkbox" data-c="antiguedad" '+(selCols.antiguedad?"checked":"")+'> antiguedad</label>';
+    } else if(activo==="filter"){
+      h='<label>Columna: <select id="f-col"><option value="salario">salario</option><option value="antiguedad">antiguedad</option></select></label>';
+      h+='<label>Operador: <select id="f-op"><option value=">">&gt;</option><option value=">=">&ge;</option><option value="<">&lt;</option><option value="<=">&le;</option><option value="==">==</option></select></label>';
+      h+='<label>Valor: <input type="range" id="f-val" min="0" max="80000" step="1000" value="'+filtVal+'"> <span class="val" id="f-val-show">'+filtVal+'</span></label>';
+    } else if(activo==="mutate"){
+      h='<label>F&oacute;rmula: <select id="m-fn"><option value="salario_anual = salario * 12">salario_anual = salario * 12</option><option value="bonus = salario * 0.1">bonus = salario * 0.1</option><option value="salario_k = salario / 1000">salario_k = salario / 1000</option></select></label>';
+    } else if(activo==="arrange"){
+      h='<label>Columna: <select id="a-col"><option value="salario">salario</option><option value="antiguedad">antiguedad</option><option value="nombre">nombre</option></select></label>';
+      h+='<label>Orden: <select id="a-dir"><option value="desc">Descendente</option><option value="asc">Ascendente</option></select></label>';
+    } else if(activo==="summarise"){
+      h='<label>Funci&oacute;n: <select id="s-fn"><option value="mean">mean</option><option value="sum">sum</option><option value="max">max</option><option value="min">min</option><option value="n">n()</option></select></label>';
+      h+='<label>Columna: <select id="s-col"><option value="salario">salario</option><option value="antiguedad">antiguedad</option></select></label>';
+    }
+    $("#verb-ctrl").innerHTML=h;
+    $("#verb-ctrl").querySelectorAll("input,select").forEach(function(el){
+      el.addEventListener("input",function(){syncCtrl();renderVerbo()});
+      el.addEventListener("change",function(){syncCtrl();renderVerbo()});
+    });
+  }
+
+  function syncCtrl(){
+    if(activo==="select"){
+      $$("#verb-ctrl input[type=checkbox]").forEach(function(cb){selCols[cb.dataset.c]=cb.checked});
+    } else if(activo==="filter"){
+      filtCol=$("#f-col").value;filtOp=$("#f-op").value;filtVal=+$("#f-val").value;
+      var show=$("#f-val-show");if(show)show.textContent=filtVal;
+      if(filtCol==="antiguedad"){$("#f-val").max=10;$("#f-val").step=1;if(filtVal>10){filtVal=5;$("#f-val").value=5;show.textContent=5;}}
+      else{$("#f-val").max=80000;$("#f-val").step=1000;}
+    } else if(activo==="mutate"){
+      mutFn=$("#m-fn").value;
+    } else if(activo==="arrange"){
+      arrCol=$("#a-col").value;arrDir=$("#a-dir").value;
+    } else if(activo==="summarise"){
+      sumFn=$("#s-fn").value;
+      var sc=$("#s-col");if(sc)sumCol=sc.value;
+    }
+  }
+
+  function renderVerbo(){
+    var code='',result=[],cols=[];
+    if(activo==="select"){
+      var picked=EMP_COLS.filter(function(c){return selCols[c.k]});
+      code='empleados |>\n  select('+picked.map(function(c){return c.k}).join(", ")+')';
+      cols=picked;
+      result=EMPLEADOS.map(function(r){var o={};picked.forEach(function(c){o[c.k]=r[c.k]});return o});
+    } else if(activo==="filter"){
+      code='empleados |>\n  filter('+filtCol+' '+filtOp+' '+filtVal+')';
+      cols=EMP_COLS;
+      result=EMPLEADOS.filter(function(r){
+        var v=r[filtCol];
+        if(filtOp===">")return v>filtVal;if(filtOp===">=")return v>=filtVal;
+        if(filtOp==="<")return v<filtVal;if(filtOp==="<=")return v<=filtVal;
+        return v===filtVal;
+      });
+    } else if(activo==="mutate"){
+      code='empleados |>\n  mutate('+mutFn+')';
+      var parts=mutFn.split("=");var newName=parts[0].trim();
+      var expr=parts.slice(1).join("=").trim();
+      cols=EMP_COLS.concat([{k:newName,l:newName}]);
+      result=EMPLEADOS.map(function(r){
+        var o=Object.assign({},r);
+        if(expr==="salario * 12")o[newName]=r.salario*12;
+        else if(expr==="salario * 0.1")o[newName]=r.salario*0.1;
+        else if(expr==="salario / 1000")o[newName]=r.salario/1000;
+        return o;
+      });
+    } else if(activo==="arrange"){
+      code='empleados |>\n  arrange('+(arrDir==="desc"?'desc('+arrCol+')':arrCol)+')';
+      cols=EMP_COLS;
+      result=EMPLEADOS.slice().sort(function(a,b){
+        var va=a[arrCol],vb=b[arrCol];
+        if(typeof va==="string")return arrDir==="asc"?va.localeCompare(vb):vb.localeCompare(va);
+        return arrDir==="asc"?va-vb:vb-va;
+      });
+    } else if(activo==="summarise"){
+      var fnLabel=sumFn==="n"?"n()":sumFn+"("+sumCol+")";
+      code='empleados |>\n  summarise(resultado = '+fnLabel+')';
+      var val;
+      if(sumFn==="n")val=EMPLEADOS.length;
+      else{
+        var vals=EMPLEADOS.map(function(r){return r[sumCol]});
+        if(sumFn==="mean")val=fmt(vals.reduce(function(a,b){return a+b},0)/vals.length);
+        else if(sumFn==="sum")val=vals.reduce(function(a,b){return a+b},0);
+        else if(sumFn==="max")val=Math.max.apply(null,vals);
+        else if(sumFn==="min")val=Math.min.apply(null,vals);
+      }
+      cols=[{k:"resultado",l:"resultado"}];
+      result=[{resultado:val}];
+    }
+    $("#verb-code").textContent=code;
+    $("#verb-result").innerHTML=tablaHTML(cols,result,{
+      celdaClase:function(_,k){
+        if(activo==="mutate"&&EMP_COLS.every(function(c){return c.k!==k}))return"new-col";
+        return"";
+      }
+    });
+  }
+})();
+
+/* ════════════════════════════════════════════════
+   2. PIPELINE PASO A PASO
+   ════════════════════════════════════════════════ */
+(function(){
+  var lineas=[
+    'empleados',
+    '  |> filter(salario > 50000)',
+    '  |> mutate(salario_anual = salario * 12)',
+    '  |> select(nombre, area, salario_anual)',
+    '  |> arrange(desc(salario_anual))'
+  ];
+  var descs=[
+    'Datos originales: 8 empleados con 4 columnas.',
+    'filter(salario > 50000): se descartan las filas con salario &le; 50000. Quedan 4 empleados.',
+    'mutate(salario_anual = salario * 12): se agrega una columna nueva calculada.',
+    'select(nombre, area, salario_anual): se eligen solo 3 columnas, el resto se descarta.',
+    'arrange(desc(salario_anual)): se reordenan las filas de mayor a menor salario anual.'
+  ];
+
+  var pasos=[];
+  pasos[0]={cols:EMP_COLS,data:EMPLEADOS};
+  pasos[1]={cols:EMP_COLS,data:EMPLEADOS.filter(function(r){return r.salario>50000})};
+  pasos[2]={
+    cols:EMP_COLS.concat([{k:"salario_anual",l:"salario_anual"}]),
+    data:pasos[1].data.map(function(r){return Object.assign({},r,{salario_anual:r.salario*12})})
+  };
+  pasos[3]={
+    cols:[{k:"nombre",l:"nombre"},{k:"area",l:"area"},{k:"salario_anual",l:"salario_anual"}],
+    data:pasos[2].data.map(function(r){return{nombre:r.nombre,area:r.area,salario_anual:r.salario_anual}})
+  };
+  pasos[4]={
+    cols:pasos[3].cols,
+    data:pasos[3].data.slice().sort(function(a,b){return b.salario_anual-a.salario_anual})
+  };
+
+  function render(step){
+    var h='';
+    for(var i=0;i<lineas.length;i++){
+      var cls=i===step?'ln hi':(i<step?'ln dim':'ln');
+      if(step===0)cls='ln'+(i===0?' hi':'');
+      h+='<span class="'+cls+'">'+lineas[i]+'</span>';
+    }
+    $("#pipe-code").innerHTML=h;
+    var sl=$("#pipe-step-val");
+    sl.textContent=step+' — '+(step===0?'datos originales':'después de '+lineas[step].trim().replace(/\|> /,''));
+    $("#pipe-desc").innerHTML=descs[step];
+    var p=pasos[step];
+    $("#pipe-table").innerHTML=tablaHTML(p.cols,p.data,{
+      celdaClase:function(_,k){
+        if(step===2&&k==="salario_anual")return"new-col";
+        return"";
+      }
+    });
+  }
+
+  $("#pipe-step").addEventListener("input",function(){render(+this.value)});
+  render(0);
+})();
+
+/* ════════════════════════════════════════════════
+   3. JOINS
+   ════════════════════════════════════════════════ */
+(function(){
+  var colsL=[{k:"id",l:"id"},{k:"nombre",l:"nombre"}];
+  var colsR=[{k:"alumno_id",l:"alumno_id"},{k:"materia",l:"materia"},{k:"nota",l:"nota"}];
+  var colsRes=[{k:"id",l:"id"},{k:"nombre",l:"nombre"},{k:"materia",l:"materia"},{k:"nota",l:"nota"}];
+  var colsAnti=[{k:"id",l:"id"},{k:"nombre",l:"nombre"}];
+
+  var matchColorL={1:"row-a",2:"row-b",4:"row-c"};
+  var matchColorR={1:"row-a",2:"row-b",4:"row-c"};
+
+  function hasMatch(id,tabla,clave){return tabla.some(function(r){return r[clave]===id})}
+
+  var descsJoin={
+    inner:'Conserva solo las filas con match en <strong>ambas</strong> tablas. Carla (sin notas) y el alumno_id=5 (sin alumno) se pierden.',
+    left:'Conserva <strong>todas</strong> las filas de la tabla izquierda (alumnos). Si no hay match, las columnas de notas quedan como NA. Carla aparece con NA.',
+    right:'Conserva <strong>todas</strong> las filas de la tabla derecha (notas). Si no hay match, las columnas de alumnos quedan como NA. El alumno_id=5 aparece con nombre NA.',
+    full:'Conserva <strong>todas</strong> las filas de ambas tablas. Donde no hay match, se completa con NA.',
+    anti:'Devuelve las filas de la izquierda que <strong>no tienen match</strong> en la derecha. Solo Carla, que no tiene notas.'
+  };
+
+  function computeJoin(tipo){
+    var res=[];
+    if(tipo==="inner"){
+      ALUMNOS.forEach(function(a){
+        NOTAS.filter(function(n){return n.alumno_id===a.id}).forEach(function(n){
+          res.push({id:a.id,nombre:a.nombre,materia:n.materia,nota:n.nota,_m:matchColorL[a.id]||""});
+        });
+      });
+    } else if(tipo==="left"){
+      ALUMNOS.forEach(function(a){
+        var ns=NOTAS.filter(function(n){return n.alumno_id===a.id});
+        if(ns.length){ns.forEach(function(n){res.push({id:a.id,nombre:a.nombre,materia:n.materia,nota:n.nota,_m:matchColorL[a.id]||""})});}
+        else{res.push({id:a.id,nombre:a.nombre,materia:null,nota:null,_m:"row-none"});}
+      });
+    } else if(tipo==="right"){
+      NOTAS.forEach(function(n){
+        var a=ALUMNOS.find(function(a){return a.id===n.alumno_id});
+        if(a){res.push({id:a.id,nombre:a.nombre,materia:n.materia,nota:n.nota,_m:matchColorR[n.alumno_id]||""});}
+        else{res.push({id:null,nombre:null,materia:n.materia,nota:n.nota,_m:"row-none"});}
+      });
+    } else if(tipo==="full"){
+      ALUMNOS.forEach(function(a){
+        var ns=NOTAS.filter(function(n){return n.alumno_id===a.id});
+        if(ns.length){ns.forEach(function(n){res.push({id:a.id,nombre:a.nombre,materia:n.materia,nota:n.nota,_m:matchColorL[a.id]||""})});}
+        else{res.push({id:a.id,nombre:a.nombre,materia:null,nota:null,_m:"row-none"});}
+      });
+      NOTAS.forEach(function(n){
+        if(!ALUMNOS.some(function(a){return a.id===n.alumno_id})){
+          res.push({id:null,nombre:null,materia:n.materia,nota:n.nota,_m:"row-none"});
+        }
+      });
+    } else if(tipo==="anti"){
+      ALUMNOS.forEach(function(a){
+        if(!NOTAS.some(function(n){return n.alumno_id===a.id})){
+          res.push({id:a.id,nombre:a.nombre,_m:"row-none"});
+        }
+      });
+    }
+    return res;
+  }
+
+  function renderInputs(tipo){
+    var inclL={},inclR={};
+    if(tipo==="inner"||tipo==="left"||tipo==="full"){ALUMNOS.forEach(function(a){inclL[a.id]=true});}
+    if(tipo==="right"){ALUMNOS.forEach(function(a){if(hasMatch(a.id,NOTAS,"alumno_id"))inclL[a.id]=true;});}
+    if(tipo==="anti"){ALUMNOS.forEach(function(a){if(!hasMatch(a.id,NOTAS,"alumno_id"))inclL[a.id]=true;});}
+
+    if(tipo==="inner"||tipo==="right"||tipo==="full"){NOTAS.forEach(function(n,i){inclR[i]=true});}
+    if(tipo==="left"){NOTAS.forEach(function(n,i){if(hasMatch(n.alumno_id,ALUMNOS,"id"))inclR[i]=true;});}
+    if(tipo==="anti"){/* right table not relevant */}
+
+    $("#join-left").innerHTML=tablaHTML(colsL,ALUMNOS,{
+      filaClase:function(r){
+        if(!inclL[r.id])return"row-excl";
+        if(matchColorL[r.id])return matchColorL[r.id];
+        return hasMatch(r.id,NOTAS,"alumno_id")?"":"row-none";
+      }
+    });
+    $("#join-right").innerHTML=tablaHTML(colsR,NOTAS,{
+      filaClase:function(r,i){
+        if(tipo==="anti")return"row-excl";
+        if(!inclR[i])return"row-excl";
+        if(matchColorR[r.alumno_id])return matchColorR[r.alumno_id];
+        return"row-none";
+      }
+    });
+  }
+
+  // Initial render without highlighting
+  $("#join-left").innerHTML=tablaHTML(colsL,ALUMNOS);
+  $("#join-right").innerHTML=tablaHTML(colsR,NOTAS);
+
+  $("#join-btns").addEventListener("click",function(e){
+    var b=e.target.closest(".btn");if(!b)return;
+    $$("#join-btns .btn").forEach(function(x){x.classList.remove("act")});
+    b.classList.add("act");
+    var tipo=b.dataset.j;
+    $("#join-panel").style.display="block";
+    $("#join-code").textContent='alumnos |>\n  '+tipo+'_join(notas, by = c("id" = "alumno_id"))';
+    $("#join-desc").innerHTML=descsJoin[tipo];
+    renderInputs(tipo);
+    var res=computeJoin(tipo);
+    var resCols=tipo==="anti"?colsAnti:colsRes;
+    $("#join-result").innerHTML=tablaHTML(resCols,res,{
+      filaClase:function(r){return r._m||""}
+    });
+  });
+})();
+
+/* ════════════════════════════════════════════════
+   4. CASE_WHEN
+   ════════════════════════════════════════════════ */
+(function(){
+  function render(){
+    var caro=+$("#cw-caro").value;
+    var medio=+$("#cw-medio").value;
+    if(medio>=caro){medio=caro-10;$("#cw-medio").value=medio;}
+    $("#cw-caro-val").textContent=caro;
+    $("#cw-medio-val").textContent=medio;
+
+    $("#cw-code").innerHTML=
+      '<span class="ln">datos |></span>'+
+      '<span class="ln">  mutate(</span>'+
+      '<span class="ln">    categoria = case_when(</span>'+
+      '<span class="ln">      precio >= '+caro+' ~ "caro",</span>'+
+      '<span class="ln">      precio >= '+medio+' ~ "medio",</span>'+
+      '<span class="ln">      TRUE ~ "barato"</span>'+
+      '<span class="ln">    )</span>'+
+      '<span class="ln">  )</span>';
+
+    var result=PRODUCTOS.map(function(r){
+      var cat=r.precio>=caro?"caro":r.precio>=medio?"medio":"barato";
+      return{producto:r.producto,precio:r.precio,categoria:cat};
+    });
+    var cols=[{k:"producto",l:"producto"},{k:"precio",l:"precio"},{k:"categoria",l:"categoria"}];
+    $("#cw-table").innerHTML=tablaHTML(cols,result,{
+      celdaClase:function(r,k){
+        if(k==="categoria")return"cat-"+r.categoria;
+        return"";
+      }
+    });
+  }
+  $("#cw-caro").addEventListener("input",render);
+  $("#cw-medio").addEventListener("input",render);
+  render();
+})();
+
+/* ════════════════════════════════════════════════
+   5. GROUP_BY + SUMMARISE
+   ════════════════════════════════════════════════ */
+(function(){
+  var ventasCols=[{k:"producto",l:"producto"},{k:"region",l:"region"},{k:"cantidad",l:"cantidad"},{k:"precio_u",l:"precio_u"}];
+
+  function render(){
+    var gvar=$("#gb-var").value;
+    var gfun=$("#gb-fun").value;
+
+    var funLabel,colUsed;
+    if(gfun==="sum"){funLabel="sum(cantidad)";colUsed="cantidad";}
+    else if(gfun==="mean"){funLabel="mean(cantidad)";colUsed="cantidad";}
+    else if(gfun==="mean_p"){funLabel="mean(precio_u)";colUsed="precio_u";}
+    else{funLabel="n()";colUsed=null;}
+
+    $("#gb-code").innerHTML=
+      '<span class="ln">ventas |></span>'+
+      '<span class="ln">  group_by('+gvar+') |></span>'+
+      '<span class="ln">  summarise(resultado = '+funLabel+')</span>';
+
+    var groups={};var groupOrder=[];
+    VENTAS.forEach(function(r){
+      var k=r[gvar];
+      if(!groups[k]){groups[k]=[];groupOrder.push(k);}
+      groups[k].push(r);
+    });
+    var colorMap={};
+    groupOrder.forEach(function(k,i){colorMap[k]="grp-"+(i%3)});
+
+    $("#gb-orig").innerHTML=tablaHTML(ventasCols,VENTAS,{
+      filaClase:function(r){return colorMap[r[gvar]]||""}
+    });
+
+    var result=groupOrder.map(function(k){
+      var rows=groups[k];
+      var val;
+      if(gfun==="n")val=rows.length;
+      else if(gfun==="sum")val=rows.reduce(function(a,r){return a+r[colUsed]},0);
+      else{
+        var s=rows.reduce(function(a,r){return a+r[colUsed]},0);
+        val=fmt(s/rows.length);
+      }
+      var o={};o[gvar]=k;o.resultado=val;o._grp=colorMap[k];
+      return o;
+    });
+    var resCols=[{k:gvar,l:gvar},{k:"resultado",l:"resultado"}];
+    $("#gb-result").innerHTML=tablaHTML(resCols,result,{
+      filaClase:function(r){return r._grp||""}
+    });
+  }
+  $("#gb-var").addEventListener("change",render);
+  $("#gb-fun").addEventListener("change",render);
+  render();
+})();
+
+/* ════════════════════════════════════════════════
+   6. PIVOT
+   ════════════════════════════════════════════════ */
+(function(){
+  var colsLong=[{k:"alumno",l:"alumno"},{k:"examen",l:"examen"},{k:"nota",l:"nota"}];
+
+  var wide=[];
+  var alumnos=[];
+  EXAMENES.forEach(function(r){if(alumnos.indexOf(r.alumno)===-1)alumnos.push(r.alumno)});
+  alumnos.forEach(function(a){
+    var row={alumno:a};
+    EXAMENES.filter(function(r){return r.alumno===a}).forEach(function(r){row[r.examen]=r.nota});
+    wide.push(row);
+  });
+  var colsWide=[{k:"alumno",l:"alumno"},{k:"Parcial_1",l:"Parcial_1"},{k:"Parcial_2",l:"Parcial_2"}];
+
+  var wideMut=wide.map(function(r){
+    return Object.assign({},r,{mejora:r.Parcial_2-r.Parcial_1});
+  });
+  var colsMut=[{k:"alumno",l:"alumno"},{k:"Parcial_1",l:"Parcial_1"},{k:"Parcial_2",l:"Parcial_2"},{k:"mejora",l:"mejora"}];
+
+  var codes={
+    long:'# Datos en formato largo (tidy)\nexamenes',
+    wide:'examenes |>\n  pivot_wider(\n    names_from = examen,\n    values_from = nota\n  )',
+    mutate:'examenes |>\n  pivot_wider(names_from = examen, values_from = nota) |>\n  mutate(mejora = Parcial_2 - Parcial_1)'
+  };
+  var descsPiv={
+    long:'Cada fila es una observaci&oacute;n: un alumno en un examen. Es el formato <strong>tidy</strong>. Pero si quisieramos calcular cu&aacute;nto mejor&oacute; cada alumno del parcial 1 al 2, no podemos restar directamente porque los valores est&aacute;n en filas distintas.',
+    wide:'Ahora cada examen es una columna. El formato <strong>ancho</strong> permite comparar los parciales del mismo alumno en una sola fila.',
+    mutate:'Con los parciales en columnas, calcular la mejora es trivial: <code>Parcial_2 - Parcial_1</code>. Ana y Bruno mejoraron, Diana tambi&eacute;n, pero Carla baj&oacute; su nota.'
+  };
+
+  function render(modo){
+    $$("#piv-btns .btn").forEach(function(b){b.classList.toggle("act",b.dataset.p===modo)});
+    $("#piv-code").textContent=codes[modo];
+
+    if(modo==="long"){
+      $("#piv-table").innerHTML=tablaHTML(colsLong,EXAMENES);
+    } else if(modo==="wide"){
+      $("#piv-table").innerHTML=tablaHTML(colsWide,wide,{
+        celdaClase:function(_,k){return(k==="Parcial_1"||k==="Parcial_2")?"new-col":""}
+      });
+    } else{
+      $("#piv-table").innerHTML=tablaHTML(colsMut,wideMut,{
+        celdaClase:function(r,k){
+          if(k==="mejora")return r.mejora>0?"new-col pos":r.mejora<0?"new-col neg":"new-col";
+          return(k==="Parcial_1"||k==="Parcial_2")?"new-col":"";
+        }
+      });
+    }
+    $("#piv-desc").innerHTML=descsPiv[modo];
+  }
+
+  $("#piv-btns").addEventListener("click",function(e){
+    var b=e.target.closest(".btn");if(!b)return;
+    render(b.dataset.p);
+  });
+  render("long");
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conceptos del Tidyverse</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --papel:#ECEDF1;--papel-2:#F7F7FA;--tinta:#181C34;--tinta-suave:#5B6079;
+  --lapiz:#C9CBD6;--riso:#2F44D8;--ocre:#D99A16;--verde:#137A5B;--rojo:#C0392F;--r:3px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--papel);color:var(--tinta);
+  font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:16px;line-height:1.55;
+  background-image:linear-gradient(var(--lapiz) 1px,transparent 1px);
+  background-size:100% 32px;background-position:0 -1px;
+}
+.wrap{max-width:820px;margin:0 auto;padding:0 20px 96px}
+header{padding:56px 0 32px;border-bottom:2px solid var(--tinta)}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--riso);margin:0 0 10px}
+h1{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:clamp(38px,8vw,64px);line-height:.95;letter-spacing:-.03em;margin:0 0 14px}
+header p{margin:0;max-width:52ch;color:var(--tinta-suave)}
+.marcador{display:flex;gap:6px;align-items:center;margin-top:28px;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--tinta-suave)}
+.pip{width:12px;height:12px;border:1.5px solid var(--tinta);border-radius:50%}
+.pip.ok{background:var(--verde);border-color:var(--verde)}
+.filtros{display:flex;gap:8px;flex-wrap:wrap;margin-top:22px}
+.filtro{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;background:transparent;color:var(--tinta-suave);border:1.5px solid var(--lapiz);border-radius:var(--r);padding:6px 12px;cursor:pointer}
+.filtro:hover{border-color:var(--tinta);color:var(--tinta)}
+.filtro.activo{background:var(--tinta);border-color:var(--tinta);color:var(--papel)}
+.ej{border-bottom:1px solid var(--lapiz);padding:44px 0}
+.ej-cab{display:flex;gap:16px;align-items:baseline;margin-bottom:6px}
+.ej-n{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;color:var(--riso);border:1.5px solid var(--riso);border-radius:var(--r);padding:2px 7px;flex:none;letter-spacing:.06em}
+.ej-tipo{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--tinta-suave)}
+h2{font-family:"Bricolage Grotesque",sans-serif;font-weight:500;font-size:26px;letter-spacing:-.015em;margin:0 0 8px}
+.consigna{margin:0 0 22px;max-width:60ch;color:var(--tinta-suave)}
+.consigna code{font-family:"IBM Plex Mono",monospace;font-size:.9em;background:var(--papel-2);padding:1px 4px;border:1px solid var(--lapiz)}
+.pseudo{font-family:"IBM Plex Mono",monospace;font-size:14px;line-height:1.7;background:var(--papel-2);border:1.5px solid var(--tinta);border-radius:var(--r);padding:14px 0;margin:0 0 18px;overflow-x:auto}
+.linea{display:flex;gap:14px;padding:1px 16px;white-space:pre}
+.num{color:var(--lapiz);flex:none;width:1.6em;text-align:right;user-select:none}
+/* concepto */
+.opciones{list-style:none;margin:0 0 18px;padding:0;display:flex;flex-direction:column;gap:8px}
+.opcion{display:flex;align-items:center;gap:12px;background:var(--papel-2);border:1.5px solid var(--tinta);border-radius:var(--r);padding:10px 14px;cursor:pointer;font-size:14px;line-height:1.45}
+.opcion:hover{background:rgba(47,68,216,.06)}
+.opcion.elegida{border-color:var(--riso);box-shadow:inset 3px 0 0 var(--riso)}
+.opcion.correcta{border-color:var(--verde);background:rgba(19,122,91,.1);cursor:default}
+.opcion.incorrecta{border-color:var(--rojo);background:rgba(192,57,47,.1);cursor:default}
+.indicador{width:16px;height:16px;border:2px solid var(--lapiz);border-radius:50%;flex:none}
+.opcion.elegida .indicador{border-color:var(--riso);background:var(--riso)}
+.opcion.correcta .indicador{border-color:var(--verde);background:var(--verde)}
+.opcion.incorrecta .indicador{border-color:var(--rojo);background:var(--rojo)}
+.opcion-txt{flex:1}
+.opcion-txt code{font-family:"IBM Plex Mono",monospace;font-size:.9em;background:rgba(0,0,0,.05);padding:1px 4px;border:1px solid var(--lapiz)}
+/* tabla */
+.tabla-wrap{overflow-x:auto;margin:0 0 18px}
+table{border-collapse:collapse;width:100%;font-family:"IBM Plex Mono",monospace;font-size:14px;background:var(--papel-2)}
+th,td{border:1px solid var(--lapiz);padding:0;text-align:center}
+th{background:var(--tinta);color:var(--papel);font-weight:600;font-size:12px;letter-spacing:.06em;padding:7px 10px}
+td.paso{background:var(--papel);color:var(--tinta-suave);padding:7px 10px;width:80px}
+td input{width:100%;min-width:64px;border:0;background:transparent;padding:8px 6px;font:inherit;text-align:center;color:var(--tinta)}
+td input:focus{outline:2px solid var(--riso);outline-offset:-2px}
+td.bien{background:rgba(19,122,91,.12)}
+td.mal{background:rgba(192,57,47,.12)}
+table.ctx{margin:0 0 14px}
+table.ctx td{padding:6px 10px}
+.barra{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+button.accion{font-family:"IBM Plex Sans",sans-serif;font-weight:600;font-size:14px;background:var(--tinta);color:var(--papel);border:1.5px solid var(--tinta);padding:9px 18px;border-radius:var(--r);cursor:pointer}
+button.accion:hover{background:var(--riso);border-color:var(--riso)}
+button.fantasma{background:transparent;color:var(--tinta-suave);border-color:var(--lapiz)}
+button.fantasma:hover{background:transparent;color:var(--tinta);border-color:var(--tinta)}
+:focus-visible{outline:2px solid var(--riso);outline-offset:2px}
+.feedback{margin:14px 0 0;font-size:14px;max-width:58ch;min-height:1.4em}
+.feedback.bien{color:var(--verde);font-weight:600}
+.feedback.mal{color:var(--rojo)}
+.pista{margin:12px 0 0;padding:12px 14px;background:var(--papel-2);border-left:3px solid var(--ocre);font-size:14px;max-width:58ch}
+.pista[hidden]{display:none}
+footer{padding:40px 0 0;font-size:13px;color:var(--tinta-suave);max-width:58ch}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <p class="eyebrow">Tidyverse &middot; clases 3 y 4</p>
+  <h1>Conceptos del Tidyverse</h1>
+  <p>Antes de escribir c&oacute;digo, aqu&iacute; se practica la l&oacute;gica: qu&eacute; hace cada verbo, c&oacute;mo se combinan con el pipe, qu&eacute; resultado produce cada join y cu&aacute;ndo usar <code>case_when</code>.</p>
+  <div class="marcador" id="marcador"></div>
+  <nav class="filtros" id="filtros" aria-label="Filtrar por tema">
+    <button class="filtro activo" data-t="todos">Todos</button>
+    <button class="filtro" data-t="tidy">Datos tidy</button>
+    <button class="filtro" data-t="verbos">Verbos</button>
+    <button class="filtro" data-t="joins">Joins</button>
+  </nav>
+</header>
+<main id="tablero"></main>
+<footer>
+  <p>El progreso se guarda en este navegador. Para reiniciarlo, <button class="accion fantasma" id="reset" style="padding:4px 10px;font-size:13px">borrar respuestas</button></p>
+</footer>
+</div>
+
+<script>
+const EJERCICIOS = [
+
+/* ===== DATOS TIDY ===== */
+
+{
+  tipo:"concepto", tema:"tidy",
+  titulo:"Los principios de datos tidy",
+  consigna:"Hadley Wickham definió tres principios para que un dataset esté en formato <em>tidy</em>. <strong>¿Cuál de estas afirmaciones NO es un principio tidy?</strong>",
+  opciones:[
+    "Cada variable ocupa una columna",
+    "Cada observación ocupa una fila",
+    "Cada tabla debe tener menos de 1000 filas",
+    "Cada valor ocupa una celda"
+  ],
+  correcta:2,
+  explicacion:"No hay límite de filas. Los tres principios son: cada variable = una columna, cada observación = una fila, cada valor = una celda.",
+  fallo:"Esa sí es un principio tidy. Buscá la opción que no tiene que ver con la estructura de los datos.",
+  pista:"Los principios hablan de la relación entre variables, observaciones y valores. Ninguno habla de tamaño."
+},
+
+{
+  tipo:"concepto", tema:"tidy",
+  titulo:"Reconocer formato tidy",
+  consigna:"Tenemos una tabla con columnas: <code>País</code>, <code>2020</code>, <code>2021</code>, <code>2022</code>, donde cada celda tiene el PBI per cápita de ese año. <strong>¿Está en formato tidy?</strong>",
+  opciones:[
+    "Sí, cada columna es una variable distinta",
+    "No, los años son valores de una variable, no variables separadas",
+    "Sí, porque cada valor ocupa una celda",
+    "Depende de cuántos países tenga"
+  ],
+  correcta:1,
+  explicacion:"Los años son valores de la variable \"año\", no variables separadas. En formato tidy habría tres columnas: País, Año y PBI_pc. Se convierte con <code>pivot_longer()</code>.",
+  fallo:"Los años 2020, 2021, 2022 no son variables distintas: son valores de una misma variable (el año).",
+  pista:"Preguntate: ¿\"2020\" es una variable o es un valor que podría ir en una celda?"
+},
+
+{
+  tipo:"concepto", tema:"tidy",
+  titulo:"¿Qué hace el pipe?",
+  consigna:"En el código <code>datos |> filter(x > 3) |> select(a, b)</code>, ¿qué hace el operador <code>|></code>?",
+  opciones:[
+    "Asigna el resultado a una variable nueva",
+    "Pasa el resultado de la izquierda como primer argumento de la función de la derecha",
+    "Ejecuta ambas funciones en paralelo",
+    "Compara los resultados de dos funciones"
+  ],
+  correcta:1,
+  explicacion:"El pipe toma lo que está a su izquierda y lo pasa como primer argumento a la función de la derecha. Se lee como \"tomá esto, después hacé esto otro\".",
+  fallo:"El pipe no asigna ni compara: solo conecta una operación con la siguiente.",
+  pista:"Pensá en una cadena de montaje: cada paso recibe el producto del paso anterior."
+},
+
+/* ===== VERBOS ===== */
+
+{
+  tipo:"concepto", tema:"verbos",
+  titulo:"¿Qué verbo para elegir columnas?",
+  consigna:"Tenés un dataset con 10 columnas y querés quedarte solo con <code>nombre</code> y <code>edad</code>. <strong>¿Qué verbo usás?</strong>",
+  opciones:[
+    "<code>filter()</code>",
+    "<code>select()</code>",
+    "<code>mutate()</code>",
+    "<code>summarise()</code>"
+  ],
+  correcta:1,
+  explicacion:"<code>select()</code> elige columnas. <code>filter()</code> elige filas. Es la distinción más importante.",
+  fallo:"Ese verbo no trabaja con columnas. Pensá en cuál actúa sobre el eje vertical de la tabla.",
+  pista:"Columnas = select. Filas = filter. Los otros dos crean o resumen datos."
+},
+
+{
+  tipo:"concepto", tema:"verbos",
+  titulo:"¿Qué verbo para filtrar filas?",
+  consigna:"Querés quedarte solo con las filas donde <code>pais == \"ARG\"</code>. <strong>¿Qué verbo usás?</strong>",
+  opciones:[
+    "<code>select()</code>",
+    "<code>filter()</code>",
+    "<code>arrange()</code>",
+    "<code>mutate()</code>"
+  ],
+  correcta:1,
+  explicacion:"<code>filter()</code> selecciona filas que cumplen una condición lógica. <code>select()</code> trabaja con columnas, no filas.",
+  fallo:"Ese verbo no filtra filas por condición.",
+  pista:"Filtrar = quedarse solo con las filas que cumplen algo. ¿Qué verbo suena a \"filtro\"?"
+},
+
+{
+  tipo:"concepto", tema:"verbos",
+  titulo:"¿Qué hace mutate()?",
+  consigna:"Si ejecutamos <code>datos |> mutate(doble = x * 2)</code>, ¿qué pasa con la tabla?",
+  opciones:[
+    "Se elimina la columna <code>x</code> y se reemplaza por <code>doble</code>",
+    "Se agrega una nueva columna llamada <code>doble</code> con el valor de <code>x * 2</code>, sin perder ninguna columna existente",
+    "Se filtran las filas donde <code>x * 2</code> es positivo",
+    "Se reemplaza toda la tabla por una sola fila con el resultado"
+  ],
+  correcta:1,
+  explicacion:"<code>mutate()</code> agrega columnas nuevas (o modifica existentes) sin alterar las demás. La tabla conserva todas sus columnas originales más la nueva.",
+  fallo:"mutate no elimina columnas ni filtra filas: solo agrega o modifica.",
+  pista:"\"Mutar\" es transformar algo sin destruirlo. La tabla sale con una columna más."
+},
+
+{
+  tipo:"concepto", tema:"verbos",
+  titulo:"Orden descendente con arrange()",
+  consigna:"<code>datos |> arrange(desc(precio))</code> produce una tabla ordenada...",
+  opciones:[
+    "De menor a mayor precio",
+    "De mayor a menor precio",
+    "Alfabéticamente por nombre de producto",
+    "Sin cambios respecto al original"
+  ],
+  correcta:1,
+  explicacion:"<code>arrange()</code> ordena filas. Por defecto es ascendente; <code>desc()</code> invierte el orden a descendente (de mayor a menor).",
+  fallo:"Recordá que desc() significa \"descendente\": de mayor a menor.",
+  pista:"\"desc\" viene de \"descending\" (descendente). Sin desc, el orden es ascendente."
+},
+
+{
+  tipo:"concepto", tema:"verbos",
+  titulo:"¿Cuántas filas devuelve summarise()?",
+  consigna:"Si <code>datos</code> tiene 100 filas y ejecutamos <code>datos |> summarise(promedio = mean(x))</code> (sin <code>group_by</code>), ¿cuántas filas tiene el resultado?",
+  opciones:[
+    "100 filas",
+    "1 fila",
+    "0 filas",
+    "Depende del valor de x"
+  ],
+  correcta:1,
+  explicacion:"Sin <code>group_by()</code>, <code>summarise()</code> colapsa toda la tabla a una sola fila con el estadístico pedido.",
+  fallo:"summarise() resume todo el dataset en una fila (a menos que haya group_by).",
+  pista:"\"Resumir\" 100 filas es condensarlas en una sola fila con el resultado."
+},
+
+{
+  tipo:"concepto", tema:"verbos",
+  titulo:"group_by + summarise: ¿cuántas filas?",
+  consigna:"<code>datos</code> tiene 100 filas con 4 valores distintos de <code>region</code>. Si hacemos <code>datos |> group_by(region) |> summarise(n = n())</code>, ¿cuántas filas tiene el resultado?",
+  opciones:[
+    "100 filas",
+    "4 filas",
+    "1 fila",
+    "400 filas"
+  ],
+  correcta:1,
+  explicacion:"<code>group_by()</code> divide los datos por categoría. <code>summarise()</code> colapsa cada grupo a una fila. Con 4 regiones distintas, el resultado tiene 4 filas.",
+  fallo:"group_by divide los datos en tantos grupos como valores distintos tenga la variable de agrupamiento.",
+  pista:"Una fila por cada valor distinto de la variable de agrupamiento."
+},
+
+{
+  tipo:"concepto", tema:"verbos",
+  titulo:"Predecir un filter",
+  consigna:"Tenemos esta tabla y ejecutamos <code>datos |> filter(precio > 10000)</code>. <strong>¿Cuántas filas tiene el resultado?</strong>" +
+    '<div class="tabla-wrap" style="margin-top:14px"><table class="ctx"><thead><tr><th>producto</th><th>precio</th></tr></thead><tbody>' +
+    '<tr><td>Notebook</td><td>85000</td></tr><tr><td>Mouse</td><td>5500</td></tr>' +
+    '<tr><td>Monitor</td><td>42000</td></tr><tr><td>Teclado</td><td>8900</td></tr></tbody></table></div>',
+  opciones:["1 fila","2 filas","3 filas","4 filas"],
+  correcta:1,
+  explicacion:"Solo Notebook (85000) y Monitor (42000) tienen precio > 10000. Mouse (5500) y Teclado (8900) no pasan el filtro.",
+  fallo:"Revisá cada fila: ¿su precio es estrictamente mayor que 10000?",
+  pista:"Recorré la tabla fila por fila y preguntate: ¿este precio es mayor que 10000?"
+},
+
+{
+  tipo:"tabla", tema:"verbos",
+  titulo:"Calcular resúmenes por grupo",
+  consigna:"Completá el resultado de agrupar por <code>area</code> y calcular el salario promedio y la cantidad por grupo." +
+    '<div class="tabla-wrap" style="margin-top:14px"><table class="ctx"><thead><tr><th>nombre</th><th>area</th><th>salario</th></tr></thead><tbody>' +
+    '<tr><td>Ana</td><td>Ventas</td><td>45000</td></tr>' +
+    '<tr><td>Bruno</td><td>IT</td><td>62000</td></tr>' +
+    '<tr><td>Carla</td><td>Ventas</td><td>51000</td></tr>' +
+    '<tr><td>Diana</td><td>RRHH</td><td>48000</td></tr>' +
+    '<tr><td>Esteban</td><td>IT</td><td>58000</td></tr></tbody></table></div>',
+  codigo:[
+    "datos |>",
+    "  group_by(area) |>",
+    "  summarise(promedio = mean(salario), n = n())"
+  ],
+  columnas:["promedio","n"],
+  filas:["IT","RRHH","Ventas"],
+  respuestas:[["60000","2"],["48000","1"],["48000","2"]],
+  pista:"IT tiene dos empleados (62000 y 58000): promedio = 60000. RRHH tiene uno solo. Ventas tiene dos (45000 y 51000): promedio = 48000."
+},
+
+/* ===== CASE_WHEN ===== */
+
+{
+  tipo:"concepto", tema:"joins",
+  titulo:"case_when: evaluar condiciones",
+  consigna:'Si <code>nota = 6</code> y ejecutamos:<div class="pseudo" style="margin-top:12px"><div class="linea"><span class="num">1</span><span>case_when(</span></div><div class="linea"><span class="num">2</span><span>  nota >= 7 ~ \"Promociona\",</span></div><div class="linea"><span class="num">3</span><span>  nota >= 4 ~ \"Regular\",</span></div><div class="linea"><span class="num">4</span><span>  TRUE     ~ \"Libre\"</span></div><div class="linea"><span class="num">5</span><span>)</span></div></div><strong>¿Qué devuelve?</strong>',
+  opciones:["Promociona","Regular","Libre","Error"],
+  correcta:1,
+  explicacion:"<code>case_when</code> evalúa las condiciones en orden. 6 no es >= 7, pero sí es >= 4, así que devuelve \"Regular\". <code>TRUE</code> es el caso por defecto.",
+  fallo:"Las condiciones se evalúan en orden: la primera que se cumple gana.",
+  pista:"6 no llega a 7, pero sí llega a 4. ¿Qué condición se cumple primero?"
+},
+
+{
+  tipo:"concepto", tema:"joins",
+  titulo:"case_when: el orden importa",
+  consigna:'Usando el mismo <code>case_when</code> del ejercicio anterior, si <code>nota = 8</code>, ¿qué devuelve?<div class="pseudo" style="margin-top:12px"><div class="linea"><span class="num">1</span><span>case_when(</span></div><div class="linea"><span class="num">2</span><span>  nota >= 7 ~ \"Promociona\",</span></div><div class="linea"><span class="num">3</span><span>  nota >= 4 ~ \"Regular\",</span></div><div class="linea"><span class="num">4</span><span>  TRUE     ~ \"Libre\"</span></div><div class="linea"><span class="num">5</span><span>)</span></div></div>',
+  opciones:["Promociona","Regular","Libre"],
+  correcta:0,
+  explicacion:"8 cumple <em>ambas</em> condiciones (>= 7 y >= 4), pero <code>case_when</code> se queda con la primera que se cumple: \"Promociona\".",
+  fallo:"8 es mayor o igual que 7, y esa es la primera condición. Las siguientes ya no se evalúan.",
+  pista:"Si un valor cumple varias condiciones, case_when devuelve el resultado de la primera. Por eso el orden importa."
+},
+
+{
+  tipo:"tabla", tema:"joins",
+  titulo:"Predecir case_when fila por fila",
+  consigna:"Completá qué categoría (como número) le corresponde a cada alumno: <strong>3</strong> = Promociona (nota &ge; 7), <strong>2</strong> = Regular (nota &ge; 4), <strong>1</strong> = Libre (nota &lt; 4)." +
+    '<div class="tabla-wrap" style="margin-top:14px"><table class="ctx"><thead><tr><th>alumno</th><th>nota</th></tr></thead><tbody>' +
+    '<tr><td>Ana</td><td>9</td></tr><tr><td>Bruno</td><td>6</td></tr>' +
+    '<tr><td>Carla</td><td>4</td></tr><tr><td>Diana</td><td>3</td></tr></tbody></table></div>',
+  codigo:[
+    "datos |> mutate(",
+    "  cat = case_when(",
+    "    nota >= 7 ~ 3,",
+    "    nota >= 4 ~ 2,",
+    "    TRUE      ~ 1",
+    "  )",
+    ")"
+  ],
+  columnas:["cat"],
+  filas:["Ana","Bruno","Carla","Diana"],
+  respuestas:[["3"],["2"],["2"],["1"]],
+  pista:"Ana (9): 9 >= 7 → 3. Bruno (6): 6 no llega a 7, pero sí a 4 → 2. Carla (4): 4 >= 4 → 2. Diana (3): no llega a 4 → 1."
+},
+
+/* ===== JOINS ===== */
+
+{
+  tipo:"concepto", tema:"joins",
+  titulo:"¿Qué mantiene left_join?",
+  consigna:"<code>left_join(tabla_a, tabla_b, by = \"id\")</code> devuelve...",
+  opciones:[
+    "Solo las filas que están en ambas tablas",
+    "Todas las filas de <code>tabla_a</code>, completando con <code>NA</code> donde no hay coincidencia en <code>tabla_b</code>",
+    "Todas las filas de <code>tabla_b</code>, completando con <code>NA</code> donde no hay coincidencia en <code>tabla_a</code>",
+    "Todas las filas de ambas tablas"
+  ],
+  correcta:1,
+  explicacion:"<code>left_join</code> conserva todas las filas de la tabla de la izquierda (<code>tabla_a</code>). Si una fila no tiene coincidencia en la tabla derecha, las columnas de esa tabla se llenan con <code>NA</code>.",
+  fallo:"\"left\" = izquierda. La tabla de la izquierda se mantiene completa.",
+  pista:"Left = izquierda. La tabla de la izquierda no pierde ninguna fila."
+},
+
+{
+  tipo:"tabla", tema:"joins",
+  titulo:"Predecir un left_join",
+  consigna:"Completá la columna <code>nota</code> en el resultado del join. Si un alumno no tiene nota, escribí <strong>NA</strong>." +
+    '<div style="display:flex;gap:18px;flex-wrap:wrap;margin-top:14px">' +
+    '<div class="tabla-wrap"><table class="ctx" style="width:auto"><thead><tr><th colspan="2">alumnos</th></tr><tr><th>id</th><th>nombre</th></tr></thead><tbody>' +
+    '<tr><td>1</td><td>Ana</td></tr><tr><td>2</td><td>Bruno</td></tr><tr><td>3</td><td>Carla</td></tr></tbody></table></div>' +
+    '<div class="tabla-wrap"><table class="ctx" style="width:auto"><thead><tr><th colspan="2">notas</th></tr><tr><th>alumno_id</th><th>nota</th></tr></thead><tbody>' +
+    '<tr><td>1</td><td>8</td></tr><tr><td>3</td><td>6</td></tr></tbody></table></div></div>',
+  codigo:[
+    "alumnos |>",
+    "  left_join(notas, by = c(\"id\" = \"alumno_id\"))"
+  ],
+  columnas:["nota"],
+  filas:["Ana","Bruno","Carla"],
+  respuestas:[["8"],["NA"],["6"]],
+  pista:"Ana (id=1) tiene nota 8. Bruno (id=2) no aparece en la tabla de notas → NA. Carla (id=3) tiene nota 6."
+},
+
+{
+  tipo:"concepto", tema:"joins",
+  titulo:"inner_join: ¿cuántas filas?",
+  consigna:"Si <code>tabla_a</code> tiene ids 1, 2, 3 y <code>tabla_b</code> tiene ids 2, 3, 4, ¿cuántas filas tiene <code>inner_join(tabla_a, tabla_b, by = \"id\")</code>?",
+  opciones:["1 fila","2 filas","3 filas","4 filas"],
+  correcta:1,
+  explicacion:"<code>inner_join</code> conserva solo las filas que tienen coincidencia en ambas tablas. Los ids en común son 2 y 3, así que el resultado tiene 2 filas.",
+  fallo:"inner_join solo conserva las filas con id presente en AMBAS tablas.",
+  pista:"¿Cuántos ids aparecen tanto en tabla_a como en tabla_b?"
+},
+
+{
+  tipo:"concepto", tema:"joins",
+  titulo:"¿Qué join para ver todo?",
+  consigna:"Tenés una tabla de productos y una de ventas. Querés ver <strong>todos</strong> los productos (incluso los que no se vendieron) junto con sus ventas. <strong>¿Qué join usás?</strong>",
+  opciones:[
+    "<code>inner_join(productos, ventas)</code>",
+    "<code>left_join(productos, ventas)</code>",
+    "<code>anti_join(productos, ventas)</code>",
+    "<code>right_join(productos, ventas)</code>"
+  ],
+  correcta:1,
+  explicacion:"<code>left_join</code> conserva todos los productos (la tabla izquierda) y agrega la información de ventas donde hay coincidencia. Los productos sin ventas aparecen con <code>NA</code> en las columnas de ventas.",
+  fallo:"inner_join descartaría los productos sin ventas. anti_join muestra solo los que NO tienen ventas.",
+  pista:"Querés conservar TODOS los productos. ¿Qué join garantiza que la tabla izquierda no pierda filas?"
+}
+
+];
+
+/* ============================================================
+   MOTOR
+   ============================================================ */
+const CLAVE = "tidyverse-conceptos-v1";
+var _ls = true;
+try { localStorage.getItem("_test"); } catch(e){ _ls = false; }
+const estado = _ls ? JSON.parse(localStorage.getItem(CLAVE) || "{}") : {};
+const tablero = document.getElementById("tablero");
+
+function guardar(i){ estado[i] = true; if(_ls) localStorage.setItem(CLAVE, JSON.stringify(estado)); pintarMarcador(); }
+
+function pintarMarcador(){
+  const m = document.getElementById("marcador");
+  const hechos = EJERCICIOS.filter((_,i) => estado[i]).length;
+  m.innerHTML = EJERCICIOS.map((_,i) => '<span class="pip '+(estado[i]?"ok":"")+'"></span>').join("") +
+    '<span style="margin-left:8px">'+hechos+" de "+EJERCICIOS.length+" resueltos</span>";
+}
+
+function armazon(ej, i){
+  const art = document.createElement("article");
+  art.className = "ej";
+  const etiqueta = {concepto:"Concepto",tabla:"Predecir"}[ej.tipo] || ej.tipo;
+  art.innerHTML =
+    '<div class="ej-cab"><span class="ej-n">'+String(i+1).padStart(2,"0")+'</span><span class="ej-tipo">'+etiqueta+"</span></div>" +
+    "<h2>"+ej.titulo+"</h2>" +
+    '<p class="consigna">'+ej.consigna+"</p>" +
+    '<div class="cuerpo"></div>' +
+    '<div class="barra"><button class="accion verificar">Verificar</button><button class="accion fantasma pedir-pista">Ver pista</button></div>' +
+    '<p class="pista" hidden>'+(ej.pista||"")+"</p>" +
+    '<p class="feedback" role="status"></p>';
+  art.querySelector(".pedir-pista").onclick = function(e){ art.querySelector(".pista").hidden = false; e.target.remove(); };
+  return art;
+}
+
+function bloqueCodigo(lineas){
+  return '<div class="pseudo">' +
+    lineas.map(function(l,k){ return '<div class="linea"><span class="num">'+(k+1)+'</span><span>'+l+"</span></div>"; }).join("") +
+    "</div>";
+}
+
+/* ---------- tipo: concepto ---------- */
+function montarConcepto(ej, art, idx){
+  var cuerpo = art.querySelector(".cuerpo");
+  var html = '<div class="opciones">';
+  ej.opciones.forEach(function(op, i){
+    html += '<div class="opcion" tabindex="0" data-i="'+i+'"><span class="indicador"></span><span class="opcion-txt">'+op+"</span></div>";
+  });
+  html += "</div>";
+  cuerpo.innerHTML = html;
+
+  var elegida = null;
+  cuerpo.querySelectorAll(".opcion").forEach(function(op){
+    function marcar(){
+      cuerpo.querySelectorAll(".opcion").forEach(function(x){ x.classList.remove("elegida"); });
+      op.classList.add("elegida");
+      elegida = Number(op.dataset.i);
+    }
+    op.onclick = marcar;
+    op.onkeydown = function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); marcar(); } };
+  });
+
+  art.querySelector(".verificar").onclick = function(){
+    var f = art.querySelector(".feedback");
+    if(elegida === null){ f.className="feedback mal"; f.textContent="Elegí una opción antes de verificar."; return; }
+    cuerpo.querySelectorAll(".opcion").forEach(function(op, i){
+      op.classList.remove("elegida");
+      op.style.pointerEvents = "none";
+      if(i === ej.correcta) op.classList.add("correcta");
+      else if(i === elegida) op.classList.add("incorrecta");
+    });
+    if(elegida === ej.correcta){
+      f.className="feedback bien"; f.innerHTML="Correcto. "+(ej.explicacion||""); guardar(idx);
+    } else {
+      f.className="feedback mal"; f.textContent = ej.fallo || "No es esa opción. Revisá la pista.";
+    }
+  };
+}
+
+/* ---------- tipo: tabla ---------- */
+function montarTabla(ej, art, idx){
+  var cuerpo = art.querySelector(".cuerpo");
+  var html = "";
+  if(ej.codigo) html += bloqueCodigo(ej.codigo);
+  html += '<div class="tabla-wrap"><table>' +
+    "<thead><tr><th></th>" + ej.columnas.map(function(c){ return "<th>"+c+"</th>"; }).join("") + "</tr></thead>" +
+    "<tbody>" + ej.filas.map(function(fila, r){
+      return "<tr><td class=\"paso\">"+fila+"</td>" +
+        ej.columnas.map(function(_, c){ return '<td><input autocomplete="off" data-r="'+r+'" data-c="'+c+'"></td>'; }).join("") +
+        "</tr>";
+    }).join("") + "</tbody></table></div>";
+  cuerpo.innerHTML = html;
+
+  art.querySelector(".verificar").onclick = function(){
+    var bien = 0, total = 0;
+    cuerpo.querySelectorAll("input").forEach(function(inp){
+      var esperado = ej.respuestas[inp.dataset.r][inp.dataset.c].trim().toUpperCase();
+      var dado = inp.value.trim().toUpperCase();
+      inp.parentElement.className = "";
+      total++;
+      if(esperado === "NA"){
+        if(dado === "NA" || dado === "N/A"){ inp.parentElement.className="bien"; bien++; }
+        else if(dado !== ""){ inp.parentElement.className="mal"; }
+      } else {
+        if(dado === esperado){ inp.parentElement.className="bien"; bien++; }
+        else if(dado !== ""){ inp.parentElement.className="mal"; }
+      }
+    });
+    var f = art.querySelector(".feedback");
+    if(bien === total){
+      f.className="feedback bien"; f.textContent="Todos los valores son correctos."; guardar(idx);
+    } else {
+      f.className="feedback mal";
+      f.textContent = bien+" de "+total+" celdas correctas. Las marcadas en rojo no coinciden.";
+    }
+  };
+}
+
+/* ---------- arranque ---------- */
+EJERCICIOS.forEach(function(ej, i){
+  var art = armazon(ej, i);
+  art.dataset.tema = ej.tema;
+  tablero.appendChild(art);
+  if(ej.tipo === "concepto") montarConcepto(ej, art, i);
+  else if(ej.tipo === "tabla") montarTabla(ej, art, i);
+});
+pintarMarcador();
+
+document.getElementById("filtros").addEventListener("click", function(e){
+  var b = e.target.closest(".filtro");
+  if(!b) return;
+  document.querySelectorAll(".filtro").forEach(function(x){ x.classList.toggle("activo", x === b); });
+  document.querySelectorAll(".ej").forEach(function(a){
+    a.style.display = (b.dataset.t === "todos" || a.dataset.tema === b.dataset.t) ? "" : "none";
+  });
+});
+
+document.getElementById("reset").onclick = function(){ if(_ls) localStorage.removeItem(CLAVE); location.reload(); };
+</script>
+</body>
+</html>
