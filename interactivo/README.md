@@ -16,6 +16,7 @@ Este es un material nuevo y de prueba, por lo que si encuentran errores o proble
 | Tidyverse: laboratorio | Explorar visualmente verbos, pipelines, joins, case_when, group_by y pivot con datos interactivos | [Laboratorio interactivo](./tidyverse_laboratorio/) |
 | Tidyverse: conceptos | Comprender qué hacen los verbos de dplyr, joins, case_when y los principios de datos tidy | [Conceptos del Tidyverse](./tidyverse_conceptos/) |
 | Tidyverse: práctica | Ordenar pipelines, completar código, trazar resultados y encontrar errores en dplyr | [Práctica pre-código](./tidyverse_practica/) |
+| Práctica de R | Escribir código de R base y Tidyverse: completar funciones, argumentos y expresiones, encontrar errores y armar pipelines completos, con pistas y puntaje | [Práctica de R](./practica_r/) |
 
 
 ## Cómo se usan

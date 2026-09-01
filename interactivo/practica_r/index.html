@@ -1,0 +1,2808 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Práctica de R</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --papel:#ECEDF1;--papel-2:#F7F7FA;--tinta:#181C34;--tinta-suave:#5B6079;
+  --lapiz:#C9CBD6;--riso:#2F44D8;--ocre:#D99A16;--verde:#137A5B;--rojo:#C0392F;--r:3px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--papel);color:var(--tinta);
+  font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:16px;line-height:1.55;
+}
+.wrap{max-width:880px;margin:0 auto;padding:0 20px}
+
+/* ---------- encabezado fijo ---------- */
+.tope{position:sticky;top:0;z-index:6;background:var(--papel);border-bottom:2px solid var(--tinta)}
+.tope-fila{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;padding:14px 0 10px}
+.marca{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:20px;letter-spacing:-.02em;margin:0;flex:none}
+.ubic{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.06em;color:var(--tinta-suave);flex:1;min-width:220px;margin:0}
+.ubic b{color:var(--riso);font-weight:600}
+.tanteo{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.06em;color:var(--tinta-suave);text-align:right;margin:0}
+.tanteo b{color:var(--tinta);font-weight:600}
+.barra-prog{height:6px;background:var(--lapiz)}
+.barra-prog i{display:block;height:100%;width:0;background:var(--riso);transition:width .3s ease}
+.modulos{display:flex;gap:6px;overflow-x:auto;padding:9px 0}
+.mod{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.06em;white-space:nowrap;
+  background:transparent;color:var(--tinta-suave);border:1.5px solid var(--lapiz);border-radius:var(--r);
+  padding:5px 9px;cursor:pointer;flex:none}
+.mod:hover{border-color:var(--tinta);color:var(--tinta)}
+.mod.activo{background:var(--tinta);border-color:var(--tinta);color:var(--papel)}
+.mod .cuenta{opacity:.6;margin-left:5px}
+.mod.completo{border-color:var(--verde);color:var(--verde)}
+.mod.completo.activo{background:var(--verde);border-color:var(--verde);color:var(--papel)}
+
+/* ---------- intro ---------- */
+.intro{padding:34px 0 18px;border-bottom:1px solid var(--lapiz)}
+.intro h1{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:clamp(34px,7vw,54px);line-height:.96;letter-spacing:-.03em;margin:0 0 12px}
+.intro p{margin:0 0 10px;max-width:62ch;color:var(--tinta-suave)}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--riso);margin:0 0 10px}
+
+/* ---------- tarjeta de ejercicio ---------- */
+.tarjeta{padding:26px 0 12px}
+.ej-cab{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.ej-n{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;color:var(--riso);border:1.5px solid var(--riso);border-radius:var(--r);padding:2px 7px;letter-spacing:.06em;flex:none}
+.chip{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--tinta-suave);border:1px solid var(--lapiz);border-radius:var(--r);padding:2px 7px}
+.chip.dif-facil{color:var(--verde);border-color:var(--verde)}
+.chip.dif-media{color:var(--ocre);border-color:var(--ocre)}
+.chip.dif-dificil{color:var(--rojo);border-color:var(--rojo)}
+.chip.hecho{color:var(--papel);background:var(--verde);border-color:var(--verde)}
+h2{font-family:"Bricolage Grotesque",sans-serif;font-weight:500;font-size:clamp(22px,3.4vw,28px);letter-spacing:-.015em;margin:0 0 10px;line-height:1.15}
+.consigna{margin:0 0 18px;max-width:64ch}
+.consigna code,.feedback code,.pista code,.explica code,.datos code,.solucion code{font-family:"IBM Plex Mono",monospace;font-size:.9em;background:var(--papel-2);padding:1px 4px;border:1px solid var(--lapiz)}
+
+/* ---------- panel de datos ---------- */
+.datos{margin:0 0 18px;border:1px solid var(--lapiz);border-radius:var(--r);background:var(--papel-2)}
+.datos summary{cursor:pointer;padding:8px 12px;font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.06em;color:var(--tinta-suave)}
+.datos summary:hover{color:var(--tinta)}
+.datos .cuerpo-datos{padding:0 12px 12px;font-size:14px;color:var(--tinta-suave)}
+.datos .cols{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--tinta);margin-top:6px;word-break:break-word}
+
+/* ---------- editor ---------- */
+.editor{font-family:"IBM Plex Mono",monospace;font-size:14px;line-height:2.1;background:var(--papel-2);
+  border:1.5px solid var(--tinta);border-radius:var(--r);padding:12px 0;margin:0 0 16px;overflow-x:auto}
+.linea{display:flex;gap:14px;padding:0 16px;white-space:pre;align-items:center}
+.num{color:var(--lapiz);flex:none;width:1.6em;text-align:right;user-select:none;font-size:13px}
+.cod{white-space:pre}
+.hueco{font-family:inherit;font-size:13px;background:var(--papel);color:var(--tinta);
+  border:0;border-bottom:2px solid var(--riso);padding:2px 5px;border-radius:2px 2px 0 0;min-width:3.5em}
+.hueco::placeholder{color:var(--lapiz)}
+.hueco:focus{outline:none;background:rgba(47,68,216,.10)}
+.hueco.bien{border-bottom-color:var(--verde);background:rgba(19,122,91,.14)}
+.hueco.mal{border-bottom-color:var(--rojo);background:rgba(192,57,47,.10)}
+.editor.ok{border-color:var(--verde)}
+
+/* ---------- opción múltiple ---------- */
+.opciones{list-style:none;margin:0 0 16px;padding:0;display:flex;flex-direction:column;gap:8px}
+.opcion{display:flex;gap:10px;align-items:flex-start;background:var(--papel-2);border:1.5px solid var(--lapiz);
+  border-radius:var(--r);padding:10px 12px;cursor:pointer;font-size:14px;position:relative}
+.opcion:hover{border-color:var(--tinta)}
+.opcion.elegida{border-color:var(--riso);background:rgba(47,68,216,.08)}
+.opcion.bien{border-color:var(--verde);background:rgba(19,122,91,.12)}
+.opcion.mal{border-color:var(--rojo);background:rgba(192,57,47,.10)}
+.opcion .letra{font-family:"IBM Plex Mono",monospace;font-weight:600;color:var(--riso);flex:none}
+.opcion .txt{font-family:"IBM Plex Mono",monospace;white-space:pre-wrap;min-width:0}
+.opcion input{position:absolute;opacity:0;pointer-events:none}
+
+/* ---------- ordenar (Parsons) ---------- */
+.piezas{list-style:none;margin:0 0 16px;padding:0;display:flex;flex-direction:column;gap:6px}
+.pieza{display:flex;align-items:center;gap:10px;background:var(--papel-2);border:1.5px solid var(--tinta);
+  border-radius:var(--r);padding:8px 10px 8px 12px;font-family:"IBM Plex Mono",monospace;font-size:14px;cursor:grab}
+.pieza:active{cursor:grabbing}
+.pieza.arrastrando{opacity:.35}
+.pieza.sobre{box-shadow:0 -3px 0 var(--riso)}
+.pieza-txt{flex:1;white-space:pre-wrap;min-width:0}
+.mover{display:flex;flex-direction:column;gap:2px;flex:none}
+.mover button{border:1px solid var(--lapiz);background:transparent;color:var(--tinta-suave);font-size:11px;
+  line-height:1;padding:3px 6px;border-radius:2px;cursor:pointer;font-family:inherit}
+.mover button:hover{border-color:var(--tinta);color:var(--tinta)}
+.piezas.ok .pieza{border-color:var(--verde)}
+
+/* ---------- cazar el error ---------- */
+.editor.cazable .linea{cursor:pointer;border-radius:2px}
+.editor.cazable .linea:hover{background:rgba(47,68,216,.09)}
+.editor .linea.elegida{background:rgba(47,68,216,.16);box-shadow:inset 3px 0 0 var(--riso)}
+.editor .linea.acierto{background:rgba(19,122,91,.16);box-shadow:inset 3px 0 0 var(--verde)}
+.editor .linea.error{background:rgba(192,57,47,.14);box-shadow:inset 3px 0 0 var(--rojo)}
+
+/* ---------- controles y feedback ---------- */
+.barra{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:4px}
+button.accion{font-family:"IBM Plex Sans",sans-serif;font-weight:600;font-size:14px;background:var(--tinta);
+  color:var(--papel);border:1.5px solid var(--tinta);padding:10px 20px;border-radius:var(--r);cursor:pointer}
+button.accion:hover{background:var(--riso);border-color:var(--riso)}
+button.fantasma{background:transparent;color:var(--tinta-suave);border-color:var(--lapiz)}
+button.fantasma:hover{background:transparent;color:var(--tinta);border-color:var(--tinta)}
+button:disabled{opacity:.35;cursor:not-allowed}
+button.accion:disabled:hover{background:var(--tinta);border-color:var(--tinta)}
+button.fantasma:disabled:hover{color:var(--tinta-suave);border-color:var(--lapiz)}
+.espacio{flex:1}
+:focus-visible{outline:2px solid var(--riso);outline-offset:2px}
+.feedback{margin:14px 0 0;font-size:14px;max-width:62ch;min-height:1.4em}
+.feedback.bien{color:var(--verde)}
+.feedback b{font-weight:600}
+.feedback.mal{color:var(--rojo)}
+.feedback .explica{color:var(--tinta-suave);display:block;margin-top:4px}
+.pista{margin:12px 0 0;padding:12px 14px;background:var(--papel-2);border-left:3px solid var(--ocre);font-size:14px;max-width:62ch}
+.solucion{margin:12px 0 0;padding:12px 14px;background:var(--papel-2);border-left:3px solid var(--riso);font-size:14px;max-width:62ch}
+.solucion code{border:0;background:transparent;padding:0;font-size:13px}
+.puntos-flotante{position:fixed;left:50%;bottom:70px;transform:translateX(-50%);background:var(--verde);color:#fff;
+  font-family:"IBM Plex Mono",monospace;font-size:14px;font-weight:600;padding:8px 16px;border-radius:999px;
+  z-index:20;pointer-events:none;animation:subir 1.4s ease forwards}
+@keyframes subir{0%{opacity:0;transform:translate(-50%,14px)}18%{opacity:1;transform:translate(-50%,0)}
+  75%{opacity:1;transform:translate(-50%,-8px)}100%{opacity:0;transform:translate(-50%,-24px)}}
+.festejo .editor,.festejo .piezas,.festejo .opciones{animation:latido .5s ease}
+@keyframes latido{0%{transform:scale(1)}40%{transform:scale(1.012)}100%{transform:scale(1)}}
+
+/* ---------- pie ---------- */
+footer{padding:26px 0 60px;margin-top:22px;border-top:1px solid var(--lapiz);font-size:13px;color:var(--tinta-suave);max-width:64ch}
+footer button{padding:4px 10px;font-size:13px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media(max-width:600px){
+  .mover{display:none}.pieza{cursor:default}
+  .tanteo{text-align:left}
+  .editor{font-size:13px}
+}
+</style>
+</head>
+<body>
+
+<div class="tope">
+  <div class="wrap">
+    <div class="tope-fila">
+      <p class="marca">Práctica de R</p>
+      <p class="ubic" id="ubicacion"></p>
+      <p class="tanteo" id="tanteo"></p>
+    </div>
+  </div>
+  <div class="barra-prog"><i id="barraProg"></i></div>
+  <div class="wrap"><nav class="modulos" id="modulos" aria-label="Módulos del curso"></nav></div>
+</div>
+
+<div class="wrap">
+  <section class="intro">
+    <p class="eyebrow">Ejercicios · R y Tidyverse</p>
+    <h1>Escribir código sin ejecutarlo</h1>
+    <p>Práctica de escritura de código en R, desde los objetos básicos hasta pipelines completos de Tidyverse. Acá no corre R: lo que se corrige es el código que escribís. La idea es que puedas razonar la sintaxis y la lógica antes de sentarte frente a la consola.</p>
+    <p>Avanzá con los botones de abajo y usá las pistas recién cuando te trabes en serio. El progreso se guarda en este navegador.</p>
+  </section>
+
+  <main id="tarjeta" class="tarjeta"></main>
+
+  <footer>
+    <p>No se entrega ni se corrige: es material de práctica. El progreso y los puntos se guardan solo en este navegador. Para empezar de cero, <button class="accion fantasma" id="reset">borrar progreso</button></p>
+  </footer>
+</div>
+
+<script>
+/* ================================================================
+   PRÁCTICA DE R — motor de ejercicios sin intérprete
+   ================================================================
+
+   CÓMO AGREGAR UN EJERCICIO
+   -------------------------
+   Agregá un objeto al array EJERCICIOS. El orden del array es el orden en
+   que aparecen. Campos comunes a todos los tipos:
+
+     modulo      número de módulo (ver MODULOS más abajo)
+     dificultad  "facil" | "media" | "dificil"
+     concepto    texto corto que se muestra como etiqueta (ej. "filter()")
+     titulo      título del ejercicio
+     consigna    admite HTML (se usa <code> para nombres de funciones)
+     datos       clave opcional de DATASETS: muestra el panel de columnas
+     pistas      array de 1 a N pistas, de más general a más específica
+     explicacion HTML que se muestra al responder bien
+     fallo       devolución conceptual que se muestra al equivocarse
+
+   TIPOS DE EJERCICIO
+   ------------------
+   1) tipo:"codigo"  — completar huecos dentro de código.
+      codigo: array de líneas. Los huecos se marcan con ___1___, ___2___…
+      huecos: array paralelo, uno por marca:
+        { respuestas:["filter"], ancho:10, estricto:false }
+      El primer elemento de "respuestas" es el que se muestra como solución.
+
+   2) tipo:"opcion"  — selección múltiple.
+      opciones: array de textos; correcta: índice de la opción válida.
+
+   3) tipo:"bug"     — hacer clic en la línea que tiene el error.
+      codigo: array de líneas; linea_bug: número de línea (empieza en 1).
+
+   4) tipo:"orden"   — ordenar fragmentos (Parsons).
+      lineas: array de {t:"texto de la línea", s:nivel_de_sangria}
+      El array se escribe en el orden correcto; la app lo mezcla solo.
+
+   CÓMO DEFINIR RESPUESTAS ALTERNATIVAS
+   ------------------------------------
+   "respuestas" acepta varias cadenas: cualquiera se da por buena.
+   Antes de comparar, la app normaliza espacios, comillas simples/dobles,
+   los dos pipes (|> y %>%) y summarize/summarise. Por eso normalmente
+   alcanza con escribir una sola forma. Si el ejercicio evalúa justamente
+   esas diferencias (por ejemplo <- contra =), agregale estricto:true al
+   hueco para que se compare casi literal.
+
+   CÓMO AGREGAR UN MÓDULO
+   ----------------------
+   Sumá una entrada a MODULOS con {n:13, nombre:"…", corto:"…"} y usá
+   modulo:13 en los ejercicios nuevos. Los chips de navegación, el
+   contador y la barra de progreso se arman solos.
+
+   CÓMO MODIFICAR EL PUNTAJE
+   -------------------------
+   Editá PUNTOS_POR_INTENTO (puntos según el número de intento) y
+   PENALIZA_PISTA (multiplicador que se aplica si se pidió una pista).
+
+   ================================================================ */
+
+const PUNTOS_POR_INTENTO = [100, 50, 25, 10];  /* 1er intento, 2do, 3ro, 4to en adelante */
+const PENALIZA_PISTA = 0.5;                    /* multiplicador si se usó al menos una pista */
+const INTENTOS_PARA_SOLUCION = 3;              /* fallos antes de habilitar "Ver solución" */
+
+const MODULOS = [
+  {n:1,  nombre:"R básico",                  corto:"1 · R básico"},
+  {n:2,  nombre:"Estructuras de datos",      corto:"2 · Estructuras"},
+  {n:3,  nombre:"Importación y exploración", corto:"3 · Importar"},
+  {n:4,  nombre:"Tidyverse: fundamentos",    corto:"4 · Tidyverse"},
+  {n:5,  nombre:"dplyr",                     corto:"5 · dplyr"},
+  {n:6,  nombre:"tidyr",                     corto:"6 · tidyr"},
+  {n:7,  nombre:"stringr",                   corto:"7 · stringr"},
+  {n:8,  nombre:"forcats",                   corto:"8 · forcats"},
+  {n:9,  nombre:"lubridate",                 corto:"9 · lubridate"},
+  {n:10, nombre:"purrr",                     corto:"10 · purrr"},
+  {n:11, nombre:"ggplot2",                   corto:"11 · ggplot2"},
+  {n:12, nombre:"Integradores",              corto:"12 · Integradores"}
+];
+
+/* Datasets de referencia. No se cargan ni se ejecutan: sirven para que el
+   estudiante sepa qué columnas tiene disponibles al escribir el código. */
+const DATASETS = {
+  penguins:{
+    desc:"Pingüinos del archipiélago Palmer (paquete palmerpenguins). 344 filas, con algunos NA.",
+    cols:"species, island, bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g, sex, year"
+  },
+  mtcars:{
+    desc:"Autos de la revista Motor Trend (1974). 32 filas.",
+    cols:"mpg, cyl, disp, hp, drat, wt, qsec, vs, am, gear, carb"
+  },
+  iris:{
+    desc:"Medidas de flores de iris. 150 filas.",
+    cols:"Sepal.Length, Sepal.Width, Petal.Length, Petal.Width, Species"
+  },
+  airquality:{
+    desc:"Mediciones diarias de calidad del aire en Nueva York. Tiene NA en Ozone y Solar.R.",
+    cols:"Ozone, Solar.R, Wind, Temp, Month, Day"
+  },
+  ventas:{
+    desc:"Dataset ficticio: una fila por operación de venta.",
+    cols:"id_venta, fecha, sucursal, producto, categoria, unidades, precio_unit"
+  },
+  empleados:{
+    desc:"Dataset ficticio: una fila por empleado.",
+    cols:"id_emp, nombre, sucursal, puesto, edad, antiguedad, salario"
+  },
+  clientes:{
+    desc:"Dataset ficticio: una fila por cliente.",
+    cols:"id_cliente, nombre, provincia, fecha_alta, segmento"
+  },
+  pedidos:{
+    desc:"Dataset ficticio: una fila por pedido. Se vincula con clientes por id_cliente.",
+    cols:"id_pedido, id_cliente, fecha, monto, estado"
+  },
+  censo:{
+    desc:"Dataset ficticio en formato ancho: una fila por provincia, una columna por año.",
+    cols:"provincia, pob_2001, pob_2010, pob_2022"
+  },
+  encuesta:{
+    desc:"Dataset ficticio de una encuesta de hogares.",
+    cols:"id_hogar, provincia, aglomerado, ingreso, edad, nivel_educativo, fecha_relevamiento"
+  }
+};
+
+/* ================================================================
+   EJERCICIOS
+   ================================================================ */
+const EJERCICIOS = [
+
+/* ---------------- MÓDULO 1 — R básico ---------------- */
+{
+  modulo:1, dificultad:"facil", tipo:"codigo", concepto:"asignación",
+  titulo:"Guardar un valor en un objeto",
+  consigna:"Creá un objeto llamado <code>n_alumnos</code> que valga 35, usando el operador de asignación habitual en R.",
+  codigo:["n_alumnos ___1___ 35"],
+  huecos:[{respuestas:["<-"], ancho:5, estricto:true}],
+  pistas:["No es el signo igual. Es un operador que se dibuja como una flecha.","Se escribe con dos caracteres: el menor y el guion."],
+  explicacion:"En R la asignación se hace con <code>&lt;-</code>. El <code>=</code> también funciona en algunos contextos, pero se reserva para pasar argumentos a funciones.",
+  fallo:"En R, <code>=</code> se usa para nombrar argumentos dentro de una función. Para crear objetos se usa un operador con forma de flecha."
+},
+{
+  modulo:1, dificultad:"facil", tipo:"opcion", concepto:"tipos de datos",
+  titulo:"¿Qué tipo de dato es?",
+  consigna:"¿Qué devuelve <code>class(TRUE)</code>?",
+  opciones:['"logical"','"character"','"numeric"','"integer"'],
+  correcta:0,
+  pistas:["TRUE y FALSE son valores de verdad, no texto ni números.","En R el tipo de los valores de verdad se llama igual que en lógica."],
+  explicacion:"<code>TRUE</code> y <code>FALSE</code> son de tipo <code>logical</code>. Ojo: <code>\"TRUE\"</code> entre comillas sería <code>character</code>.",
+  fallo:"Fijate que TRUE va sin comillas: no es texto. Y aunque en operaciones aritméticas se comporte como 1, su clase no es numérica."
+},
+{
+  modulo:1, dificultad:"facil", tipo:"codigo", concepto:"vectores",
+  titulo:"Armar un vector",
+  consigna:"Guardá en <code>notas</code> las cuatro notas 7, 9, 4 y 10, en ese orden.",
+  codigo:["notas <- ___1___(7, 9, 4, 10)"],
+  huecos:[{respuestas:["c"], ancho:4}],
+  pistas:["Es la función más usada de R y tiene una sola letra.","Viene de <em>combine</em>."],
+  explicacion:"<code>c()</code> combina valores en un vector. Todos los elementos de un vector tienen que ser del mismo tipo.",
+  fallo:"Necesitás la función que combina varios valores sueltos en un único vector."
+},
+{
+  modulo:1, dificultad:"facil", tipo:"codigo", concepto:"indexing",
+  titulo:"Extraer un elemento",
+  consigna:"A partir de <code>notas &lt;- c(7, 9, 4, 10)</code>, quedate con la tercera nota.",
+  codigo:["notas[___1___]"],
+  huecos:[{respuestas:["3"], ancho:4}],
+  pistas:["En R los índices arrancan en 1, no en 0.","La tercera posición es, literalmente, la posición 3."],
+  explicacion:"Los corchetes seleccionan por posición y R empieza a contar desde 1. <code>notas[3]</code> devuelve 4.",
+  fallo:"Cuidado: R no empieza a contar en cero como Python. La primera posición es la 1."
+},
+{
+  modulo:1, dificultad:"media", tipo:"codigo", concepto:"indexing lógico",
+  titulo:"Filtrar un vector por condición",
+  consigna:"De <code>notas</code>, quedate solamente con las notas mayores o iguales a 7. No uses posiciones: usá una condición.",
+  codigo:["notas[___1___]"],
+  huecos:[{respuestas:["notas >= 7","notas>=7"], ancho:16}],
+  pistas:["Dentro de los corchetes podés poner un vector de TRUE y FALSE del mismo largo.","Escribí la comparación completa, nombrando otra vez el vector."],
+  explicacion:"Dentro de los corchetes va una condición que devuelve TRUE/FALSE para cada elemento. R conserva los que dieron TRUE. Hay que volver a nombrar el objeto: <code>notas[notas &gt;= 7]</code>.",
+  fallo:"Adentro de los corchetes tiene que haber una comparación que se pueda evaluar por sí sola, así que necesita mencionar el vector."
+},
+{
+  modulo:1, dificultad:"facil", tipo:"codigo", concepto:"mean() y NA",
+  titulo:"Promediar ignorando los faltantes",
+  consigna:"Calculá el promedio de <code>Temp</code> del dataset <code>airquality</code> ignorando los valores faltantes.",
+  datos:"airquality",
+  codigo:["promedio <- mean(airquality$Temp, ___1___)"],
+  huecos:[{respuestas:["na.rm = TRUE"], ancho:16}],
+  pistas:["Hay un argumento de mean() que descarta los NA antes de calcular.","Se escribe con un punto en el medio y va igualado a TRUE."],
+  explicacion:"Sin <code>na.rm = TRUE</code>, cualquier NA contamina el resultado y <code>mean()</code> devuelve NA.",
+  fallo:"Un solo NA hace que el promedio dé NA. Hay que pedirle explícitamente a la función que los saque."
+},
+{
+  modulo:1, dificultad:"media", tipo:"codigo", concepto:"seq()",
+  titulo:"Generar una secuencia",
+  consigna:"Guardá en <code>pares</code> todos los números pares del 2 al 20 inclusive, sin escribirlos uno por uno.",
+  codigo:["pares <- ___1___"],
+  huecos:[{respuestas:["seq(2, 20, by = 2)","seq(from = 2, to = 20, by = 2)","seq(2, 20, 2)"], ancho:26}],
+  pistas:["Hay una función que arma secuencias con un paso configurable.","Necesita tres datos: desde dónde, hasta dónde y de a cuánto."],
+  explicacion:"<code>seq(2, 20, by = 2)</code> genera la secuencia con paso 2. <code>2:20</code> también sirve, pero avanza de a uno.",
+  fallo:"Con <code>2:20</code> obtenés todos los enteros, no solo los pares. Te falta indicar el paso."
+},
+{
+  modulo:1, dificultad:"media", tipo:"codigo", concepto:"ifelse()",
+  titulo:"Clasificar todo un vector",
+  consigna:"Creá el vector <code>resultado</code> que diga <code>\"aprueba\"</code> cuando la nota es 4 o más y <code>\"desaprueba\"</code> en el resto de los casos. Tiene que funcionar sobre las cuatro notas de una sola vez.",
+  codigo:["resultado <- ___1___(notas >= 4, \"aprueba\", \"desaprueba\")"],
+  huecos:[{respuestas:["ifelse"], ancho:10}],
+  pistas:["No es la estructura de control con llaves: acá querés una función vectorizada.","Es una sola palabra que junta el if y el else."],
+  explicacion:"<code>ifelse()</code> evalúa la condición elemento por elemento y devuelve un vector del mismo largo. El <code>if</code> clásico, en cambio, solo mira el primer valor.",
+  fallo:"El <code>if</code> con llaves evalúa una sola condición, no un vector entero. Necesitás la versión vectorizada."
+},
+{
+  modulo:1, dificultad:"media", tipo:"codigo", concepto:"if / else",
+  titulo:"Estructura condicional",
+  consigna:"Completá la estructura para que imprima <code>\"aprueba\"</code> cuando <code>nota</code> es 4 o más, y <code>\"recursa\"</code> en cualquier otro caso.",
+  codigo:[
+    "if (nota ___1___ 4) {",
+    "  print(\"aprueba\")",
+    "} ___2___ {",
+    "  print(\"recursa\")",
+    "}"
+  ],
+  huecos:[{respuestas:[">="], ancho:5, estricto:true},{respuestas:["else"], ancho:7}],
+  pistas:["\"4 o más\" incluye al 4.","El segundo hueco es la palabra que abre la rama alternativa."],
+  explicacion:"<code>&gt;=</code> incluye el valor límite. La rama alternativa se abre con <code>else</code>, y tiene que ir en la misma línea que la llave que cierra el if.",
+  fallo:"Revisá si la comparación incluye o excluye el 4, y qué palabra abre la rama alternativa."
+},
+{
+  modulo:1, dificultad:"media", tipo:"codigo", concepto:"funciones",
+  titulo:"Definir una función con valor por defecto",
+  consigna:"Completá la definición de una función que calcule el promedio de un vector, con un argumento <code>na_rm</code> que valga TRUE si no se especifica otra cosa.",
+  codigo:[
+    "promedio_limpio <- ___1___(x, na_rm = TRUE) {",
+    "  mean(x, na.rm = na_rm)",
+    "}"
+  ],
+  huecos:[{respuestas:["function"], ancho:11}],
+  pistas:["Una función se crea con una palabra reservada y se guarda en un objeto como cualquier otro valor.","Es la misma palabra en inglés que usarías para decir \"función\"."],
+  explicacion:"En R las funciones se definen con <code>function(argumentos) { cuerpo }</code> y se guardan en un objeto. Al escribir <code>na_rm = TRUE</code> en la definición se fija el valor por defecto.",
+  fallo:"En R las funciones no se declaran con una palabra clave especial de bloque: se crean con una función y se asignan a un nombre."
+},
+{
+  modulo:1, dificultad:"media", tipo:"codigo", concepto:"for",
+  titulo:"Acumular con un for",
+  consigna:"Completá el bucle para que <code>total</code> termine con la suma de todos los elementos de <code>notas</code>.",
+  codigo:[
+    "total <- 0",
+    "for (n ___1___ notas) {",
+    "  total <- total ___2___ n",
+    "}"
+  ],
+  huecos:[{respuestas:["in"], ancho:5},{respuestas:["+"], ancho:4, estricto:true}],
+  pistas:["El encabezado del for dice \"para cada n dentro de notas\".","La segunda línea acumula: al total anterior le suma el elemento actual."],
+  explicacion:"El <code>for</code> de R recorre un vector con la forma <code>for (elemento in vector)</code>. Dentro, cada vuelta le suma el elemento al acumulador.",
+  fallo:"Fijate cómo se lee el encabezado en voz alta: \"para cada n <em>en</em> notas\". Y en el cuerpo el total tiene que crecer."
+},
+{
+  modulo:1, dificultad:"media", tipo:"codigo", concepto:"while",
+  titulo:"Repetir mientras se cumpla una condición",
+  consigna:"Completá el bucle que imprime los números del 1 al 5.",
+  codigo:[
+    "i <- 1",
+    "___1___ (i <= 5) {",
+    "  print(i)",
+    "  i <- i + 1",
+    "}"
+  ],
+  huecos:[{respuestas:["while"], ancho:7}],
+  pistas:["No sabemos de antemano un vector a recorrer: repetimos mientras una condición siga siendo verdadera.","Es la palabra inglesa para \"mientras\"."],
+  explicacion:"<code>while</code> repite el bloque mientras la condición sea TRUE. Si te olvidás de actualizar <code>i</code>, el bucle no termina nunca.",
+  fallo:"Acá no estamos recorriendo un vector conocido: la repetición depende de que se siga cumpliendo una condición."
+},
+{
+  modulo:1, dificultad:"media", tipo:"codigo", concepto:"paste()",
+  titulo:"Pegar texto",
+  consigna:"Armá el texto <code>\"Hola, Ana\"</code> combinando el saludo con el contenido del objeto <code>nombre</code>, que vale <code>\"Ana\"</code>.",
+  codigo:["saludo <- ___1___(\"Hola,\", nombre)"],
+  huecos:[{respuestas:["paste"], ancho:8}],
+  pistas:["Buscás la función base de R que concatena cadenas separándolas con un espacio.","Su prima <code>paste0()</code> hace lo mismo pero sin separador."],
+  explicacion:"<code>paste()</code> une textos usando un espacio como separador; <code>paste0()</code> los pega sin nada en el medio.",
+  fallo:"No alcanza con el operador <code>+</code>: en R no se pueden sumar cadenas de texto."
+},
+{
+  modulo:1, dificultad:"media", tipo:"opcion", concepto:"length() y NA",
+  titulo:"Contar elementos con faltantes",
+  consigna:"¿Cuánto devuelve <code>length(c(3, NA, 5))</code>?",
+  opciones:["3","2","NA","1"],
+  correcta:0,
+  pistas:["NA no es la ausencia de un elemento: es un elemento cuyo valor se desconoce.","El vector sigue teniendo tres casilleros."],
+  explicacion:"<code>length()</code> cuenta posiciones, no valores válidos. El NA ocupa una posición. Para contar los no faltantes se usa <code>sum(!is.na(x))</code>.",
+  fallo:"El NA ocupa lugar en el vector: length() no lo descarta. Eso lo hace na.rm en funciones de cálculo, no en length()."
+},
+{
+  modulo:1, dificultad:"media", tipo:"codigo", concepto:"unique() y sort()",
+  titulo:"Valores distintos y ordenados",
+  consigna:"A partir del vector <code>provincias</code>, obtené los valores distintos ordenados alfabéticamente, en una sola línea.",
+  codigo:["___1___(___2___(provincias))"],
+  huecos:[{respuestas:["sort"], ancho:8},{respuestas:["unique"], ancho:9}],
+  pistas:["Son dos funciones anidadas: primero se ejecuta la de adentro.","Primero hay que sacar los repetidos y después ordenar el resultado."],
+  explicacion:"La función de adentro se ejecuta primero: <code>unique()</code> saca los repetidos y <code>sort()</code> ordena lo que quedó.",
+  fallo:"Fijate el orden en que se ejecutan las funciones anidadas: la de adentro primero. ¿Cuál conviene aplicar antes?"
+},
+{
+  modulo:1, dificultad:"dificil", tipo:"bug", concepto:"errores frecuentes",
+  titulo:"El TRUE que quedó entre comillas",
+  consigna:"Este código debería calcular el promedio ignorando los NA, pero falla. Tocá la línea donde está el problema.",
+  codigo:[
+    "notas <- c(7, 9, NA, 10)",
+    "promedio <- mean(notas, na.rm = \"TRUE\")",
+    "print(promedio)"
+  ],
+  linea_bug:2,
+  pistas:["Mirá con cuidado el valor que recibe cada argumento.","Un valor lógico y un texto que dice lo mismo no son la misma cosa."],
+  explicacion:"<code>\"TRUE\"</code> entre comillas es texto, no un valor lógico. <code>na.rm</code> espera <code>TRUE</code> sin comillas.",
+  fallo:"Esa línea está bien. El problema es un valor que está escrito con el tipo equivocado."
+},
+{
+  modulo:1, dificultad:"dificil", tipo:"codigo", concepto:"operadores lógicos",
+  titulo:"Combinar dos condiciones",
+  consigna:"De un vector <code>edades</code>, quedate con las edades que están entre 18 y 65 inclusive. Tienen que cumplirse las dos condiciones a la vez.",
+  codigo:["edades[___1___]"],
+  huecos:[{respuestas:["edades >= 18 & edades <= 65","edades <= 65 & edades >= 18"], ancho:32}],
+  pistas:["Hacen falta dos comparaciones unidas por un operador lógico.","En R no se puede escribir <code>18 &lt;= x &lt;= 65</code>: hay que nombrar el vector en cada comparación."],
+  explicacion:"Cada comparación se escribe completa y se unen con <code>&amp;</code> (y). Con <code>|</code> (o) alcanzaría con que se cumpla una sola, que no es lo que pide la consigna.",
+  fallo:"Ojo con dos cosas: en R cada comparación necesita nombrar el vector, y el operador tiene que exigir que se cumplan ambas condiciones."
+},
+
+/* ---------------- MÓDULO 2 — Estructuras de datos ---------------- */
+{
+  modulo:2, dificultad:"facil", tipo:"codigo", concepto:"matrix()",
+  titulo:"Crear una matriz",
+  consigna:"Armá una matriz con los números del 1 al 6 distribuidos en 2 filas.",
+  codigo:["m <- ___1___(1:6, nrow = 2)"],
+  huecos:[{respuestas:["matrix"], ancho:9}],
+  pistas:["La función se llama igual que la estructura.","Recibe un vector y la cantidad de filas o de columnas."],
+  explicacion:"<code>matrix()</code> acomoda un vector en filas y columnas. Por defecto llena por columna; con <code>byrow = TRUE</code> llena por fila.",
+  fallo:"Es una función de R base cuyo nombre coincide con el de la estructura que crea."
+},
+{
+  modulo:2, dificultad:"facil", tipo:"codigo", concepto:"indexing de matrices",
+  titulo:"Acceder a una celda",
+  consigna:"De la matriz <code>m</code>, extraé el valor de la fila 2, columna 3.",
+  codigo:["m[___1___, ___2___]"],
+  huecos:[{respuestas:["2"], ancho:4},{respuestas:["3"], ancho:4}],
+  pistas:["En las matrices, los corchetes llevan dos posiciones separadas por coma.","El orden es siempre fila primero, columna después."],
+  explicacion:"La convención es <code>[fila, columna]</code>. Si dejás vacío uno de los dos lugares, R devuelve la fila o la columna completa.",
+  fallo:"Revisá el orden: el primer índice es la fila y el segundo la columna, no al revés."
+},
+{
+  modulo:2, dificultad:"facil", tipo:"codigo", concepto:"list()",
+  titulo:"Crear una lista",
+  consigna:"Guardá en <code>persona</code> una estructura con el nombre <code>\"Ana\"</code> y la edad <code>30</code>. No puede ser un vector, porque mezcla texto con números.",
+  codigo:["persona <- ___1___(nombre = \"Ana\", edad = 30)"],
+  huecos:[{respuestas:["list"], ancho:7}],
+  pistas:["Los vectores obligan a que todo sea del mismo tipo. Necesitás la estructura que no tiene esa restricción.","Se llama igual en inglés y en castellano."],
+  explicacion:"Las listas pueden guardar elementos de tipos distintos y hasta de largos distintos. Si usaras <code>c()</code>, R convertiría el 30 en <code>\"30\"</code>.",
+  fallo:"Con <code>c()</code> R fuerza todo al mismo tipo y el número se transformaría en texto. Necesitás otra estructura."
+},
+{
+  modulo:2, dificultad:"media", tipo:"codigo", concepto:"$ y [[ ]]",
+  titulo:"Sacar un elemento de la lista",
+  consigna:"De <code>persona</code>, obtené el valor de <code>edad</code> (el número 30, no una lista de un elemento).",
+  codigo:["persona___1___edad"],
+  huecos:[{respuestas:["$"], ancho:4, estricto:true}],
+  pistas:["Es el mismo operador que se usa para llamar una columna de un data frame.","Es un solo carácter, el símbolo del dólar."],
+  explicacion:"<code>$</code> extrae el contenido del elemento. <code>persona[[\"edad\"]]</code> hace lo mismo; <code>persona[\"edad\"]</code>, en cambio, devuelve una lista más chica.",
+  fallo:"Buscá el operador de un solo carácter que se usa también para las columnas de un data frame."
+},
+{
+  modulo:2, dificultad:"media", tipo:"opcion", concepto:"[ ] contra [[ ]]",
+  titulo:"Un corchete o dos",
+  consigna:"Sobre la lista <code>persona</code>, ¿cuál es la diferencia entre <code>persona[\"edad\"]</code> y <code>persona[[\"edad\"]]</code>?",
+  opciones:[
+    "El primero devuelve una lista de un elemento; el segundo, el valor 30",
+    "Son exactamente equivalentes",
+    "El primero devuelve el valor 30; el segundo, una lista",
+    "El segundo da error porque las listas se indexan con un solo corchete"
+  ],
+  correcta:0,
+  pistas:["Pensá en el corchete simple como \"quedarme con un pedazo de la misma estructura\".","El doble corchete es el que baja un nivel y saca el contenido."],
+  explicacion:"Con un corchete el resultado sigue siendo una lista (un subconjunto). Con doble corchete se extrae el contenido del elemento. Es la misma lógica que <code>$</code>.",
+  fallo:"Uno de los dos conserva la estructura original y el otro extrae lo que hay adentro. Revisá cuál es cuál."
+},
+{
+  modulo:2, dificultad:"facil", tipo:"codigo", concepto:"data.frame()",
+  titulo:"Crear un data frame",
+  consigna:"Armá una tabla con dos columnas, <code>nombre</code> y <code>edad</code>, con los datos de Ana (30) y Luis (41). Usá la función de R base.",
+  codigo:["df <- ___1___(nombre = c(\"Ana\", \"Luis\"), edad = c(30, 41))"],
+  huecos:[{respuestas:["data.frame"], ancho:13}],
+  pistas:["Es la función de R base para tablas rectangulares.","Se escribe con un punto en el medio."],
+  explicacion:"<code>data.frame()</code> es la función de R base. En tidyverse el equivalente es <code>tibble()</code>, que no convierte texto en factores y tiene una impresión más prolija.",
+  fallo:"En R base la función se escribe con un punto en el medio, no con guion bajo."
+},
+{
+  modulo:2, dificultad:"media", tipo:"codigo", concepto:"factor()",
+  titulo:"Ordenar categorías",
+  consigna:"Convertí el vector <code>c(\"bajo\", \"alto\", \"medio\")</code> en una variable categórica cuyas categorías tengan el orden bajo, medio, alto.",
+  codigo:["nivel <- ___1___(c(\"bajo\", \"alto\", \"medio\"), levels = c(\"bajo\", \"medio\", \"alto\"))"],
+  huecos:[{respuestas:["factor"], ancho:9}],
+  pistas:["Es la estructura de R para variables categóricas con un conjunto fijo de valores posibles.","La función se llama igual que la estructura."],
+  explicacion:"Un <code>factor</code> guarda las categorías posibles en <code>levels</code>. Sin definirlos, R los ordena alfabéticamente y el orden queda mal (alto, bajo, medio).",
+  fallo:"Un vector de texto común no tiene noción de orden entre categorías. Hace falta la estructura que sí lo guarda."
+},
+{
+  modulo:2, dificultad:"facil", tipo:"codigo", concepto:"levels()",
+  titulo:"Ver las categorías",
+  consigna:"Mostrá las categorías posibles del factor <code>nivel</code>, en su orden.",
+  codigo:["___1___(nivel)"],
+  huecos:[{respuestas:["levels"], ancho:9}],
+  pistas:["El nombre de la función coincide con el del argumento que usaste al crear el factor.","Está en plural."],
+  explicacion:"<code>levels()</code> devuelve el vector de categorías en el orden en que están definidas.",
+  fallo:"<code>unique()</code> te daría los valores presentes, pero no el orden declarado de las categorías."
+},
+{
+  modulo:2, dificultad:"facil", tipo:"codigo", concepto:"tibble()",
+  titulo:"Crear un tibble",
+  consigna:"Armá la versión tidyverse de una tabla, con una columna <code>x</code> del 1 al 3 y una columna <code>y</code> con las letras a, b y c.",
+  codigo:["tb <- ___1___(x = 1:3, y = c(\"a\", \"b\", \"c\"))"],
+  huecos:[{respuestas:["tibble"], ancho:9}],
+  pistas:["Es la tabla del tidyverse.","Se llama igual que el paquete que la define."],
+  explicacion:"<code>tibble()</code> crea la tabla del tidyverse: no convierte texto en factores, no cambia los nombres de columna y al imprimir muestra solo las primeras 10 filas con el tipo de cada columna.",
+  fallo:"En tidyverse las tablas no se crean con la función de R base."
+},
+{
+  modulo:2, dificultad:"media", tipo:"opcion", concepto:"tibble contra data.frame",
+  titulo:"¿En qué se diferencian?",
+  consigna:"¿Cuál de estas afirmaciones sobre los tibbles es correcta?",
+  opciones:[
+    "Al imprimirse muestran solo las primeras filas y el tipo de cada columna",
+    "No pueden tener columnas de texto",
+    "Al seleccionar una columna con [ ] devuelven siempre un vector",
+    "Se pueden usar sin cargar ningún paquete"
+  ],
+  correcta:0,
+  pistas:["Pensá en qué pasa en la consola cuando escribís el nombre de la tabla.","Una de las diferencias más visibles es la impresión."],
+  explicacion:"Los tibbles imprimen 10 filas y el tipo de cada columna. Además, <code>tb[\"x\"]</code> devuelve un tibble (no un vector) y hace falta cargar tidyverse o tibble para usarlos.",
+  fallo:"Los tibbles admiten texto sin problemas, forman parte del tidyverse (hay que cargarlo) y con corchete simple devuelven otro tibble."
+},
+{
+  modulo:2, dificultad:"media", tipo:"codigo", concepto:"modificar un data frame",
+  titulo:"Cambiar un valor puntual",
+  consigna:"En el data frame <code>df</code>, cambiá a 50 la edad de la primera fila.",
+  codigo:["df$edad[___1___] <- 50"],
+  huecos:[{respuestas:["1"], ancho:4}],
+  pistas:["<code>df$edad</code> ya es un vector: dentro de los corchetes va la posición.","Es la primera fila."],
+  explicacion:"<code>df$edad</code> devuelve la columna como vector, así que los corchetes indexan filas. La asignación reemplaza ese valor en la tabla.",
+  fallo:"Al usar <code>$</code> ya bajaste a un vector, así que alcanza con una sola posición."
+},
+{
+  modulo:2, dificultad:"media", tipo:"codigo", concepto:"dim(), nrow(), ncol()",
+  titulo:"Tamaño de una tabla",
+  consigna:"Guardá en <code>cant_filas</code> la cantidad de filas del data frame <code>empleados</code>.",
+  datos:"empleados",
+  codigo:["cant_filas <- ___1___(empleados)"],
+  huecos:[{respuestas:["nrow"], ancho:7}],
+  pistas:["Hay una función específica para filas y otra para columnas.","La palabra inglesa para fila es <em>row</em>."],
+  explicacion:"<code>nrow()</code> devuelve la cantidad de filas y <code>ncol()</code> la de columnas. <code>dim()</code> devuelve las dos juntas.",
+  fallo:"<code>length()</code> sobre un data frame devuelve la cantidad de columnas, no de filas."
+},
+
+/* ---------------- MÓDULO 3 — Importación y exploración ---------------- */
+{
+  modulo:3, dificultad:"facil", tipo:"codigo", concepto:"read_csv()",
+  titulo:"Leer un CSV",
+  consigna:"Importá el archivo <code>datos/ventas.csv</code> usando la función de readr (tidyverse) y guardalo en <code>ventas</code>.",
+  datos:"ventas",
+  codigo:["ventas <- ___1___(\"datos/ventas.csv\")"],
+  huecos:[{respuestas:["read_csv","readr::read_csv"], ancho:12}],
+  pistas:["La versión de readr se escribe con guion bajo.","La de R base usa punto; la del tidyverse, guion bajo."],
+  explicacion:"<code>read_csv()</code> es de readr: devuelve un tibble, no convierte texto en factores y avisa qué tipo asignó a cada columna. <code>read.csv()</code>, con punto, es la de R base.",
+  fallo:"Ojo con el separador del nombre: readr usa guion bajo, R base usa punto."
+},
+{
+  modulo:3, dificultad:"media", tipo:"opcion", concepto:"read_csv contra read.csv",
+  titulo:"Dos maneras de leer",
+  consigna:"¿Cuál es una diferencia real entre <code>read_csv()</code> y <code>read.csv()</code>?",
+  opciones:[
+    "read_csv() devuelve un tibble y read.csv() un data frame",
+    "read_csv() solo lee archivos separados por punto y coma",
+    "read.csv() no puede leer archivos con encabezado",
+    "read_csv() ejecuta el archivo como código de R"
+  ],
+  correcta:0,
+  pistas:["Una es del tidyverse y la otra es de R base: pensá qué tipo de tabla devuelve cada una.","Fijate qué estructura de datos sale de cada función."],
+  explicacion:"<code>read_csv()</code> devuelve un tibble, es más rápida y no toca los tipos de columna sin avisar. Para archivos separados por punto y coma existe <code>read_csv2()</code>.",
+  fallo:"Las dos leen archivos separados por coma y las dos manejan encabezados. La diferencia está en qué devuelven y cómo tratan las columnas."
+},
+{
+  modulo:3, dificultad:"facil", tipo:"codigo", concepto:"write_csv()",
+  titulo:"Exportar resultados",
+  consigna:"Guardá el objeto <code>ventas_limpias</code> en el archivo <code>output/ventas_limpias.csv</code> usando la función de readr.",
+  codigo:["___1___(ventas_limpias, \"output/ventas_limpias.csv\")"],
+  huecos:[{respuestas:["write_csv","readr::write_csv"], ancho:12}],
+  pistas:["Es la función espejo de la que usaste para leer.","Cambia solo el verbo: en lugar de leer, escribe."],
+  explicacion:"<code>write_csv()</code> escribe el archivo. El primer argumento es siempre el objeto y el segundo la ruta de destino.",
+  fallo:"Revisá el orden de los argumentos y el nombre de la función: primero va el objeto, después la ruta."
+},
+{
+  modulo:3, dificultad:"facil", tipo:"codigo", concepto:"head()",
+  titulo:"Mirar las primeras filas",
+  consigna:"Mostrá las primeras 10 filas de <code>ventas</code>.",
+  datos:"ventas",
+  codigo:["___1___(ventas, ___2___)"],
+  huecos:[{respuestas:["head"], ancho:7},{respuestas:["10","n = 10"], ancho:6}],
+  pistas:["Por defecto esta función muestra 6 filas: hay que pedirle otra cantidad.","El segundo argumento es simplemente el número de filas."],
+  explicacion:"<code>head(x, 10)</code> devuelve las primeras 10 filas; <code>tail()</code> hace lo mismo con las últimas.",
+  fallo:"La función está bien pensada como \"la cabeza\" de la tabla. Y necesita que le digas cuántas filas querés."
+},
+{
+  modulo:3, dificultad:"media", tipo:"opcion", concepto:"glimpse() y str()",
+  titulo:"Radiografía de la tabla",
+  consigna:"Querés ver de un vistazo cuántas filas y columnas tiene <code>ventas</code>, el tipo de cada columna y sus primeros valores. ¿Qué usás?",
+  opciones:[
+    "glimpse(ventas)",
+    "head(ventas)",
+    "nrow(ventas)",
+    "names(ventas)"
+  ],
+  correcta:0,
+  pistas:["Necesitás las tres cosas a la vez: dimensiones, tipos y valores.","Es la versión tidyverse de <code>str()</code>."],
+  explicacion:"<code>glimpse()</code> (dplyr) muestra dimensiones, nombres, tipos y los primeros valores de cada columna, con una fila por variable. <code>str()</code> es el equivalente en R base.",
+  fallo:"Esas opciones te dan solo una parte: filas, nombres o un pedazo de la tabla. Buscás la que resume todo junto."
+},
+{
+  modulo:3, dificultad:"facil", tipo:"codigo", concepto:"summary()",
+  titulo:"Resumen estadístico",
+  consigna:"Obtené el resumen con mínimo, cuartiles, media y máximo de todas las columnas numéricas de <code>airquality</code>.",
+  datos:"airquality",
+  codigo:["___1___(airquality)"],
+  huecos:[{respuestas:["summary"], ancho:10}],
+  pistas:["Es una función de R base que resume cada columna según su tipo.","Su nombre es directamente la palabra \"resumen\" en inglés."],
+  explicacion:"<code>summary()</code> da el resumen de cinco números más la media para cada columna numérica, y de paso te muestra cuántos NA tiene cada una.",
+  fallo:"No confundas la exploración rápida de la estructura con el resumen estadístico de los valores."
+},
+{
+  modulo:3, dificultad:"facil", tipo:"codigo", concepto:"$",
+  titulo:"Una columna como vector",
+  consigna:"Calculá el precio unitario promedio de <code>ventas</code> usando funciones de R base (sin pipes ni dplyr).",
+  datos:"ventas",
+  codigo:["mean(ventas___1___precio_unit)"],
+  huecos:[{respuestas:["$"], ancho:4, estricto:true}],
+  pistas:["Para que <code>mean()</code> funcione necesita recibir un vector, no una tabla.","Es el operador de un solo carácter que extrae columnas."],
+  explicacion:"<code>ventas$precio_unit</code> devuelve la columna como vector, que es lo que <code>mean()</code> necesita.",
+  fallo:"Necesitás bajar de la tabla al vector de esa columna. El operador es de un solo carácter."
+},
+{
+  modulo:3, dificultad:"media", tipo:"codigo", concepto:"indexing con [ , ]",
+  titulo:"Recortar filas y columnas",
+  consigna:"De <code>ventas</code>, quedate con las primeras 5 filas y las columnas 2 y 3, usando corchetes de R base.",
+  datos:"ventas",
+  codigo:["ventas[___1___, ___2___]"],
+  huecos:[{respuestas:["1:5"], ancho:7},{respuestas:["c(2, 3)","2:3"], ancho:9}],
+  pistas:["Antes de la coma van las filas, después las columnas.","Para un rango consecutivo sirve el operador de dos puntos; para posiciones sueltas, <code>c()</code>."],
+  explicacion:"La sintaxis es <code>[filas, columnas]</code>. <code>1:5</code> genera el rango de filas y <code>c(2, 3)</code> (o <code>2:3</code>) elige las columnas.",
+  fallo:"Revisá qué va antes y qué va después de la coma, y cómo se escribe un conjunto de posiciones."
+},
+{
+  modulo:3, dificultad:"dificil", tipo:"bug", concepto:"errores frecuentes",
+  titulo:"La coma que falta",
+  consigna:"Este código intenta quedarse con las ventas de más de 100 pesos por unidad usando R base, pero no devuelve lo esperado. Tocá la línea con el problema.",
+  datos:"ventas",
+  codigo:[
+    "ventas <- read_csv(\"datos/ventas.csv\")",
+    "caras <- ventas[ventas$precio_unit > 100]",
+    "nrow(caras)"
+  ],
+  linea_bug:2,
+  pistas:["Cuando indexás un data frame con corchetes, ¿cuántas posiciones hay que indicar?","Sin la coma, R interpreta que estás eligiendo columnas."],
+  explicacion:"Al indexar un data frame hay que escribir <code>[filas, columnas]</code>. Sin la coma, R interpreta el contenido como selección de columnas. Lo correcto es <code>ventas[ventas$precio_unit &gt; 100, ]</code>.",
+  fallo:"Esa línea está bien. El problema es cómo está escrito el corchete que hace el recorte."
+},
+{
+  modulo:3, dificultad:"media", tipo:"codigo", concepto:"names()",
+  titulo:"Nombres de las columnas",
+  consigna:"Mostrá los nombres de todas las columnas de <code>empleados</code>.",
+  datos:"empleados",
+  codigo:["___1___(empleados)"],
+  huecos:[{respuestas:["names","colnames"], ancho:9}],
+  pistas:["Es una función corta de R base que devuelve un vector de texto.","También existe una versión específica para columnas, con el prefijo col."],
+  explicacion:"<code>names()</code> devuelve los nombres de las columnas de un data frame. <code>colnames()</code> hace lo mismo y es más explícita.",
+  fallo:"Buscás una función que devuelva los nombres, no los valores ni las dimensiones."
+},
+/* ---------------- MÓDULO 4 — Tidyverse: fundamentos ---------------- */
+{
+  modulo:4, dificultad:"facil", tipo:"codigo", concepto:"library()",
+  titulo:"Cargar el tidyverse",
+  consigna:"Escribí la línea que carga en memoria el paquete <code>tidyverse</code>, dando por hecho que ya está instalado.",
+  codigo:["___1___(tidyverse)"],
+  huecos:[{respuestas:["library"], ancho:10}],
+  pistas:["Instalar y cargar son dos cosas distintas: acá solo hay que cargar.","Es la palabra inglesa para \"biblioteca\"."],
+  explicacion:"<code>install.packages()</code> se corre una sola vez por computadora; <code>library()</code> hay que escribirlo en cada sesión.",
+  fallo:"<code>install.packages()</code> descarga el paquete, no lo carga. Y cuando se carga, el nombre va sin comillas."
+},
+{
+  modulo:4, dificultad:"facil", tipo:"codigo", concepto:"pipe",
+  titulo:"Encadenar con el pipe",
+  consigna:"Mostrá las primeras 5 filas de <code>ventas</code> encadenando con un pipe, sin anidar funciones.",
+  datos:"ventas",
+  codigo:["ventas ___1___ head(5)"],
+  huecos:[{respuestas:["|>","%>%"], ancho:6}],
+  pistas:["El operador toma lo que viene de la izquierda y se lo pasa a la función de la derecha.","Sirve tanto el pipe nativo de R como el de magrittr."],
+  explicacion:"El pipe pasa el objeto de la izquierda como primer argumento de la función de la derecha. <code>|&gt;</code> es el pipe nativo de R (4.1 en adelante) y <code>%&gt;%</code> el de magrittr, que viene con el tidyverse.",
+  fallo:"Buscás el operador que conecta pasos de un pipeline. Se escribe con dos o tres caracteres, sin espacios en el medio."
+},
+{
+  modulo:4, dificultad:"media", tipo:"opcion", concepto:"qué hace el pipe",
+  titulo:"Traducir un pipe",
+  consigna:"¿A qué es equivalente <code>datos |&gt; filter(edad &gt; 18)</code>?",
+  opciones:[
+    "filter(datos, edad > 18)",
+    "filter(edad > 18, datos)",
+    "datos$filter(edad > 18)",
+    "filter(datos$edad > 18)"
+  ],
+  correcta:0,
+  pistas:["Lo que está a la izquierda del pipe entra en la función de la derecha.","Entra siempre en el <em>primer</em> lugar de los argumentos."],
+  explicacion:"El pipe inserta el objeto de la izquierda como primer argumento. Por eso los verbos de dplyr reciben siempre los datos primero y nunca hay que repetirlos dentro del paréntesis.",
+  fallo:"Fijate en qué posición de la lista de argumentos entra el objeto que viene por el pipe."
+},
+{
+  modulo:4, dificultad:"media", tipo:"codigo", concepto:"as_tibble()",
+  titulo:"Pasar a tibble",
+  consigna:"Convertí el data frame <code>mtcars</code>, que es de R base, en un tibble.",
+  datos:"mtcars",
+  codigo:["autos <- ___1___(mtcars)"],
+  huecos:[{respuestas:["as_tibble"], ancho:12}],
+  pistas:["Las funciones de conversión del tidyverse arrancan con <code>as_</code>.","El destino de la conversión es un tibble."],
+  explicacion:"<code>as_tibble()</code> convierte cualquier data frame en tibble. Ojo: los nombres de fila de <code>mtcars</code> se pierden, salvo que uses <code>rownames_to_column()</code> antes.",
+  fallo:"En tidyverse las conversiones se nombran con el prefijo <code>as_</code> y guion bajo."
+},
+{
+  modulo:4, dificultad:"media", tipo:"bug", concepto:"errores frecuentes",
+  titulo:"El dato repetido",
+  consigna:"Este pipeline debería quedarse con las ventas de más de 10 unidades, pero da error. Tocá la línea donde está el problema.",
+  datos:"ventas",
+  codigo:[
+    "ventas |>",
+    "  filter(ventas, unidades > 10) |>",
+    "  arrange(desc(unidades))"
+  ],
+  linea_bug:2,
+  pistas:["¿Qué le pasa al primer argumento de una función cuando usás pipe?","Los datos ya vienen por el pipe: no hace falta nombrarlos otra vez."],
+  explicacion:"El pipe ya pasa <code>ventas</code> como primer argumento, así que escribirlo de nuevo dentro de <code>filter()</code> lo convierte en un segundo argumento inválido. Lo correcto es <code>filter(unidades &gt; 10)</code>.",
+  fallo:"Esa línea está bien. Mirá qué argumentos recibe cada verbo cuando trabajás con pipes."
+},
+{
+  modulo:4, dificultad:"media", tipo:"orden", concepto:"pipeline",
+  titulo:"Armar un pipeline simple",
+  consigna:"Ordená las líneas para armar un pipeline que se quede con las ventas de la sucursal <code>\"Centro\"</code>, deje solo las columnas <code>producto</code> y <code>unidades</code>, y ordene de mayor a menor por unidades.",
+  datos:"ventas",
+  lineas:[
+    {t:"ventas |>", s:0},
+    {t:"  filter(sucursal == \"Centro\") |>", s:0},
+    {t:"  select(producto, unidades) |>", s:0},
+    {t:"  arrange(desc(unidades))", s:0}
+  ],
+  pistas:["Un pipeline siempre arranca con los datos.","Conviene filtrar filas antes de recortar columnas, y ordenar al final."],
+  explicacion:"El orden natural es: datos, filtro de filas, selección de columnas y ordenamiento. Si seleccionaras antes de filtrar, la columna <code>sucursal</code> ya no estaría disponible para el filtro.",
+  fallo:"Revisá con qué tiene que arrancar el pipeline y qué columnas necesita cada paso para poder trabajar."
+},
+
+/* ---------------- MÓDULO 5 — dplyr ---------------- */
+{
+  modulo:5, dificultad:"facil", tipo:"codigo", concepto:"select()",
+  titulo:"Elegir columnas",
+  consigna:"De <code>penguins</code>, quedate solamente con las columnas <code>species</code>, <code>island</code> y <code>flipper_length_mm</code>.",
+  datos:"penguins",
+  codigo:[
+    "penguins |>",
+    "  ___1___(species, island, flipper_length_mm)"
+  ],
+  huecos:[{respuestas:["select"], ancho:9}],
+  pistas:["¿Qué dimensión de la tabla estás recortando: filas o columnas?","El verbo se llama igual que en SQL."],
+  explicacion:"<code>select()</code> trabaja sobre columnas: elige cuáles quedan y en qué orden.",
+  fallo:"<code>filter()</code> trabaja sobre filas. Acá estás decidiendo qué columnas conservar."
+},
+{
+  modulo:5, dificultad:"facil", tipo:"codigo", concepto:"filter()",
+  titulo:"Quedarse con algunas filas",
+  consigna:"De <code>penguins</code>, conservá solo las observaciones de la especie <code>\"Gentoo\"</code>.",
+  datos:"penguins",
+  codigo:[
+    "penguins |>",
+    "  ___1___(___2___)"
+  ],
+  huecos:[{respuestas:["filter"], ancho:9},{respuestas:["species == \"Gentoo\""], ancho:22}],
+  pistas:["Estás sacando filas que no cumplen una condición.","La comparación de igualdad en R usa dos signos igual, y el texto va entre comillas."],
+  explicacion:"<code>filter()</code> conserva las filas donde la condición da TRUE. La igualdad se compara con <code>==</code> y los valores de texto van entre comillas.",
+  fallo:"Revisá dos cosas: el verbo que trabaja sobre filas y cómo se escribe una comparación de igualdad en R."
+},
+{
+  modulo:5, dificultad:"media", tipo:"codigo", concepto:"filter() con varias condiciones",
+  titulo:"Dos condiciones a la vez",
+  consigna:"De <code>penguins</code>, quedate con los pingüinos de la isla <code>\"Biscoe\"</code> que además pesen más de 5000 gramos.",
+  datos:"penguins",
+  codigo:[
+    "penguins |>",
+    "  filter(___1___)"
+  ],
+  huecos:[{respuestas:["island == \"Biscoe\" & body_mass_g > 5000","island == \"Biscoe\", body_mass_g > 5000","body_mass_g > 5000 & island == \"Biscoe\""], ancho:40}],
+  pistas:["Tienen que cumplirse las dos condiciones, no una u otra.","En <code>filter()</code> podés unirlas con <code>&amp;</code> o simplemente separarlas con una coma."],
+  explicacion:"Dentro de <code>filter()</code> la coma equivale al <code>&amp;</code>: ambas exigen que se cumplan todas las condiciones. Con <code>|</code> alcanzaría con una sola, que no es lo pedido.",
+  fallo:"Con <code>|</code> entrarían pingüinos de Biscoe que pesan poco. Necesitás que se cumplan las dos condiciones simultáneamente."
+},
+{
+  modulo:5, dificultad:"media", tipo:"opcion", concepto:"filter() contra select()",
+  titulo:"Filas o columnas",
+  consigna:"Querés quedarte con los autos de <code>mtcars</code> que tienen 4 cilindros. ¿Cuál de estas líneas lo hace?",
+  datos:"mtcars",
+  opciones:[
+    "mtcars |> filter(cyl == 4)",
+    "mtcars |> select(cyl == 4)",
+    "mtcars |> filter(cyl)",
+    "mtcars |> select(cyl)"
+  ],
+  correcta:0,
+  pistas:["\"Quedarme con los autos que…\" habla de observaciones, es decir, de filas.","Además necesitás una condición lógica completa."],
+  explicacion:"<code>filter()</code> recorta filas según una condición lógica; <code>select()</code> recorta columnas por nombre. <code>select(cyl)</code> te devolvería la columna entera de los 32 autos.",
+  fallo:"Pensá qué dimensión de la tabla estás recortando y si la expresión que escribís devuelve TRUE/FALSE."
+},
+{
+  modulo:5, dificultad:"facil", tipo:"codigo", concepto:"arrange()",
+  titulo:"Ordenar de mayor a menor",
+  consigna:"Ordená <code>penguins</code> de mayor a menor según <code>body_mass_g</code>.",
+  datos:"penguins",
+  codigo:[
+    "penguins |>",
+    "  arrange(___1___)"
+  ],
+  huecos:[{respuestas:["desc(body_mass_g)","-body_mass_g"], ancho:20}],
+  pistas:["Por defecto <code>arrange()</code> ordena de menor a mayor.","Hay una función auxiliar que invierte el orden."],
+  explicacion:"<code>arrange()</code> ordena en forma ascendente; para invertirlo se envuelve la variable en <code>desc()</code>.",
+  fallo:"Escribir solo el nombre de la columna ordena de menor a mayor. Falta indicar que querés el orden inverso."
+},
+{
+  modulo:5, dificultad:"media", tipo:"codigo", concepto:"mutate()",
+  titulo:"Crear una columna nueva",
+  consigna:"En <code>ventas</code>, agregá una columna <code>total</code> que sea el producto entre las unidades vendidas y el precio unitario.",
+  datos:"ventas",
+  codigo:[
+    "ventas |>",
+    "  ___1___(___2___)"
+  ],
+  huecos:[{respuestas:["mutate"], ancho:9},{respuestas:["total = unidades * precio_unit","total = precio_unit * unidades"], ancho:32}],
+  pistas:["Estás sumando una columna, no resumiendo la tabla.","Dentro del verbo se escribe <code>nombre_nuevo = expresión</code>, con un solo signo igual."],
+  explicacion:"<code>mutate()</code> agrega o modifica columnas conservando todas las filas. El nombre nuevo se asigna con <code>=</code>, no con <code>&lt;-</code>.",
+  fallo:"Ojo con dos cosas: el verbo que agrega columnas sin colapsar filas, y que adentro se usa un solo signo igual."
+},
+{
+  modulo:5, dificultad:"media", tipo:"opcion", concepto:"mutate() contra summarise()",
+  titulo:"¿Cuántas filas quedan?",
+  consigna:"Si <code>ventas</code> tiene 500 filas, ¿cuántas filas devuelve <code>ventas |&gt; mutate(total = unidades * precio_unit)</code>?",
+  datos:"ventas",
+  opciones:["500","1","Depende de cuántos productos distintos haya","0"],
+  correcta:0,
+  pistas:["Uno de los dos verbos colapsa la tabla y el otro no.","<code>mutate()</code> agrega una columna a cada fila existente."],
+  explicacion:"<code>mutate()</code> conserva todas las filas y agrega una columna. El que colapsa la tabla a una fila (o a una por grupo) es <code>summarise()</code>.",
+  fallo:"Ese es el resultado de resumir, no de agregar una columna. <code>mutate()</code> no cambia la cantidad de filas."
+},
+{
+  modulo:5, dificultad:"media", tipo:"codigo", concepto:"summarise()",
+  titulo:"Resumir en un solo número",
+  consigna:"Calculá el peso promedio de todos los pingüinos, en una columna llamada <code>peso_medio</code>, ignorando los faltantes.",
+  datos:"penguins",
+  codigo:[
+    "penguins |>",
+    "  ___1___(peso_medio = ___2___)"
+  ],
+  huecos:[{respuestas:["summarise","summarize"], ancho:11},{respuestas:["mean(body_mass_g, na.rm = TRUE)"], ancho:34}],
+  pistas:["El resultado tiene que ser una tabla de una sola fila.","Acordate de que <code>body_mass_g</code> tiene NA."],
+  explicacion:"<code>summarise()</code> colapsa la tabla a una fila por grupo (o a una sola si no hay grupos). Sin <code>na.rm = TRUE</code> el promedio daría NA.",
+  fallo:"Fijate si el verbo que elegiste colapsa la tabla, y si la función de resumen está tratando los NA."
+},
+{
+  modulo:5, dificultad:"media", tipo:"codigo", concepto:"group_by() + summarise()",
+  titulo:"Resumir por grupo",
+  consigna:"Calculá el peso promedio por especie de pingüino, ignorando los faltantes.",
+  datos:"penguins",
+  codigo:[
+    "penguins |>",
+    "  ___1___(species) |>",
+    "  summarise(peso_medio = mean(body_mass_g, na.rm = TRUE))"
+  ],
+  huecos:[{respuestas:["group_by"], ancho:11}],
+  pistas:["Antes de resumir hay que declarar dentro de qué grupos se calcula el resumen.","El verbo lleva guion bajo."],
+  explicacion:"<code>group_by()</code> no cambia los datos: marca la tabla para que los verbos siguientes trabajen por grupo. Con esa marca, <code>summarise()</code> devuelve una fila por especie.",
+  fallo:"Sin declarar los grupos, <code>summarise()</code> devolvería un único promedio para toda la tabla."
+},
+{
+  modulo:5, dificultad:"media", tipo:"codigo", concepto:"n()",
+  titulo:"Contar dentro del resumen",
+  consigna:"Para cada isla, calculá cuántos pingüinos hay (columna <code>casos</code>) y el largo de aleta promedio (columna <code>aleta_media</code>), ignorando los faltantes.",
+  datos:"penguins",
+  codigo:[
+    "penguins |>",
+    "  group_by(island) |>",
+    "  summarise(",
+    "    casos = ___1___,",
+    "    aleta_media = mean(flipper_length_mm, na.rm = TRUE)",
+    "  )"
+  ],
+  huecos:[{respuestas:["n()"], ancho:7}],
+  pistas:["Hay una función de dplyr que devuelve la cantidad de filas del grupo actual.","Es la más corta de todas: una letra y paréntesis vacíos."],
+  explicacion:"<code>n()</code> devuelve la cantidad de filas del grupo. No recibe argumentos y solo funciona dentro de verbos de dplyr.",
+  fallo:"<code>count()</code> es un verbo aparte que arma su propia tabla. Adentro de <code>summarise()</code> hace falta la función que cuenta filas del grupo."
+},
+{
+  modulo:5, dificultad:"media", tipo:"codigo", concepto:"count()",
+  titulo:"Frecuencias en un paso",
+  consigna:"Contá cuántas ventas hay por sucursal, con un solo verbo.",
+  datos:"ventas",
+  codigo:[
+    "ventas |>",
+    "  ___1___(sucursal)"
+  ],
+  huecos:[{respuestas:["count"], ancho:8}],
+  pistas:["Hay un atajo que hace group_by + summarise(n()) de una sola vez.","Se llama como la palabra inglesa para contar."],
+  explicacion:"<code>count(sucursal)</code> equivale a <code>group_by(sucursal) |&gt; summarise(n = n())</code> y además desagrupa el resultado.",
+  fallo:"Ese verbo no arma la tabla de frecuencias por sí solo. Buscá el atajo que cuenta filas por categoría."
+},
+{
+  modulo:5, dificultad:"media", tipo:"codigo", concepto:"n_distinct()",
+  titulo:"Cuántos valores distintos",
+  consigna:"Calculá, para cada sucursal, cuántos productos distintos se vendieron. Llamá a la columna <code>productos_unicos</code>.",
+  datos:"ventas",
+  codigo:[
+    "ventas |>",
+    "  group_by(sucursal) |>",
+    "  summarise(productos_unicos = ___1___)"
+  ],
+  huecos:[{respuestas:["n_distinct(producto)"], ancho:24}],
+  pistas:["No querés contar filas: querés contar valores diferentes de una columna.","Hay una función de dplyr que combina <code>unique()</code> con el conteo."],
+  explicacion:"<code>n_distinct(producto)</code> cuenta los valores diferentes. <code>n()</code> contaría todas las filas, incluidas las repeticiones del mismo producto.",
+  fallo:"<code>n()</code> cuenta filas, aunque el mismo producto aparezca muchas veces. Necesitás contar valores distintos."
+},
+{
+  modulo:5, dificultad:"media", tipo:"codigo", concepto:"rename()",
+  titulo:"Cambiar el nombre de una columna",
+  consigna:"Renombrá <code>flipper_length_mm</code> como <code>aleta</code>, sin perder ninguna otra columna.",
+  datos:"penguins",
+  codigo:[
+    "penguins |>",
+    "  ___1___(aleta = flipper_length_mm)"
+  ],
+  huecos:[{respuestas:["rename"], ancho:9}],
+  pistas:["<code>select()</code> también puede renombrar, pero descarta el resto de las columnas.","El verbo se llama directamente como la acción."],
+  explicacion:"En <code>rename()</code> la sintaxis es <code>nombre_nuevo = nombre_viejo</code>, igual que en <code>select()</code>, pero conserva todas las columnas.",
+  fallo:"Ese verbo dejaría afuera todas las demás columnas. Buscá el que solo cambia nombres."
+},
+{
+  modulo:5, dificultad:"media", tipo:"codigo", concepto:"distinct()",
+  titulo:"Sacar duplicados",
+  consigna:"Obtené las combinaciones únicas de <code>sucursal</code> y <code>categoria</code> presentes en <code>ventas</code>.",
+  datos:"ventas",
+  codigo:[
+    "ventas |>",
+    "  ___1___(sucursal, categoria)"
+  ],
+  huecos:[{respuestas:["distinct"], ancho:11}],
+  pistas:["Es el equivalente de <code>unique()</code> pero para filas de una tabla.","Se llama igual que en SQL."],
+  explicacion:"<code>distinct()</code> devuelve las filas únicas según las columnas indicadas. Con <code>.keep_all = TRUE</code> conserva el resto de las columnas de la primera aparición.",
+  fallo:"<code>count()</code> te daría también la frecuencia de cada combinación. Acá alcanza con las combinaciones sin repetir."
+},
+{
+  modulo:5, dificultad:"media", tipo:"codigo", concepto:"slice_max()",
+  titulo:"Los más grandes",
+  consigna:"Quedate con los 5 pingüinos más pesados de la tabla.",
+  datos:"penguins",
+  codigo:[
+    "penguins |>",
+    "  ___1___(body_mass_g, n = 5)"
+  ],
+  huecos:[{respuestas:["slice_max"], ancho:12}],
+  pistas:["Hay una familia de verbos <code>slice_*()</code> que recorta filas por posición o por valor.","Buscás el que se queda con los valores más altos de una variable."],
+  explicacion:"<code>slice_max(body_mass_g, n = 5)</code> devuelve las 5 filas con mayor peso. También podrías hacer <code>arrange(desc(body_mass_g)) |&gt; slice_head(n = 5)</code>.",
+  fallo:"<code>slice_head()</code> se queda con las primeras filas tal como están ordenadas, sin mirar el valor de ninguna variable."
+},
+{
+  modulo:5, dificultad:"media", tipo:"codigo", concepto:"pull()",
+  titulo:"De tabla a vector",
+  consigna:"Extraé la columna <code>body_mass_g</code> como vector, al final de un pipeline.",
+  datos:"penguins",
+  codigo:[
+    "penguins |>",
+    "  ___1___(body_mass_g)"
+  ],
+  huecos:[{respuestas:["pull"], ancho:7}],
+  pistas:["<code>select()</code> devuelve siempre una tabla, aunque tenga una sola columna.","Buscás el equivalente de <code>$</code> pensado para usarse con pipes."],
+  explicacion:"<code>pull()</code> baja de tabla a vector. Es el <code>$</code> del pipeline, y suele ser el último paso cuando el resultado va a alimentar una función que espera un vector.",
+  fallo:"<code>select()</code> devuelve un tibble de una columna, no un vector. Buscá el verbo que extrae el contenido."
+},
+{
+  modulo:5, dificultad:"media", tipo:"codigo", concepto:"relocate()",
+  titulo:"Mover una columna de lugar",
+  consigna:"Llevá la columna <code>species</code> al principio de la tabla, sin perder ninguna otra.",
+  datos:"penguins",
+  codigo:[
+    "penguins |>",
+    "  ___1___(species)"
+  ],
+  huecos:[{respuestas:["relocate"], ancho:11}],
+  pistas:["<code>select()</code> también reordena, pero descarta lo que no nombres.","El verbo alude a reubicar."],
+  explicacion:"<code>relocate()</code> cambia el orden de las columnas conservando todas. Con <code>.before</code> y <code>.after</code> podés ubicarlas en cualquier posición.",
+  fallo:"Con ese verbo te quedarías con una sola columna. Buscá el que reordena sin descartar."
+},
+{
+  modulo:5, dificultad:"media", tipo:"codigo", concepto:"case_when()",
+  titulo:"Clasificar en más de dos categorías",
+  consigna:"Agregá una columna <code>tamanio</code> que valga <code>\"chico\"</code> si el peso es menor a 3500, <code>\"mediano\"</code> si es menor a 4500 y <code>\"grande\"</code> en el resto de los casos.",
+  datos:"penguins",
+  codigo:[
+    "penguins |>",
+    "  mutate(tamanio = ___1___(",
+    "    body_mass_g < 3500 ~ \"chico\",",
+    "    body_mass_g < 4500 ~ \"mediano\",",
+    "    .default = \"grande\"",
+    "  ))"
+  ],
+  huecos:[{respuestas:["case_when"], ancho:12}],
+  pistas:["Con dos categorías alcanzaría <code>if_else()</code>, pero acá hay tres.","El verbo usa fórmulas con <code>~</code> para cada condición."],
+  explicacion:"<code>case_when()</code> evalúa las condiciones en orden y se queda con la primera que se cumple. Por eso la segunda condición no necesita repetir que el peso ya es mayor o igual a 3500.",
+  fallo:"<code>if_else()</code> solo maneja dos salidas. Con tres categorías hace falta el verbo que acepta varias condiciones encadenadas."
+},
+{
+  modulo:5, dificultad:"dificil", tipo:"codigo", concepto:"case_when() y el orden",
+  titulo:"El orden de las condiciones",
+  consigna:"Completá las dos condiciones para que un empleado con 3 años de antigüedad quede clasificado como <code>\"medio\"</code> y uno con 10 como <code>\"senior\"</code>. Las condiciones se evalúan de arriba hacia abajo.",
+  datos:"empleados",
+  codigo:[
+    "empleados |>",
+    "  mutate(nivel = case_when(",
+    "    ___1___ ~ \"junior\",",
+    "    ___2___ ~ \"medio\",",
+    "    .default = \"senior\"",
+    "  ))"
+  ],
+  huecos:[{respuestas:["antiguedad < 2","antiguedad <= 1"], ancho:18},{respuestas:["antiguedad < 5","antiguedad <= 4"], ancho:18}],
+  pistas:["Como se evalúa en orden, la segunda condición ya sabe que la primera no se cumplió.","Con 3 años tiene que caer en \"medio\" y con 10 en \"senior\": elegí cortes coherentes con eso."],
+  explicacion:"<code>case_when()</code> se queda con la primera condición verdadera, así que las condiciones posteriores no necesitan excluir a las anteriores. Con cortes en 2 y 5 años, 3 cae en \"medio\" y 10 en \"senior\".",
+  fallo:"Fijate qué pasa con un caso de 3 años y con uno de 10 usando los cortes que escribiste: uno de los dos está cayendo en la categoría equivocada."
+},
+{
+  modulo:5, dificultad:"media", tipo:"codigo", concepto:"if_else()",
+  titulo:"Dos salidas posibles",
+  consigna:"Agregá una columna <code>caro</code> que valga <code>\"sí\"</code> cuando el precio unitario supera los 1000 pesos y <code>\"no\"</code> en caso contrario. Usá la versión estricta del tidyverse.",
+  datos:"ventas",
+  codigo:[
+    "ventas |>",
+    "  mutate(caro = ___1___(precio_unit > 1000, \"sí\", \"no\"))"
+  ],
+  huecos:[{respuestas:["if_else"], ancho:10}],
+  pistas:["La versión de R base se escribe todo junto; la del tidyverse lleva guion bajo.","Esta versión chequea que las dos salidas sean del mismo tipo."],
+  explicacion:"<code>if_else()</code> (dplyr) exige que las dos ramas devuelvan el mismo tipo de dato y permite definir qué pasa con los NA. <code>ifelse()</code> de R base es más permisiva y por eso más propensa a sorpresas.",
+  fallo:"Esa es la versión de R base. La del tidyverse se escribe con guion bajo."
+},
+{
+  modulo:5, dificultad:"media", tipo:"codigo", concepto:"coalesce()",
+  titulo:"Rellenar faltantes con otra columna",
+  consigna:"Creá una columna <code>contacto</code> que use el mail del cliente y, cuando falte, el teléfono. Si faltan los dos, tiene que quedar <code>\"sin dato\"</code>.",
+  codigo:[
+    "clientes |>",
+    "  mutate(contacto = ___1___(mail, telefono, \"sin dato\"))"
+  ],
+  huecos:[{respuestas:["coalesce"], ancho:11}],
+  pistas:["Buscás una función que recorra varios valores y se quede con el primero que no sea NA.","Se llama igual que en SQL."],
+  explicacion:"<code>coalesce()</code> devuelve el primer valor no faltante de los que le pases, evaluando de izquierda a derecha. Es la forma corta de escribir varios <code>if_else(is.na(...))</code> anidados.",
+  fallo:"Con <code>if_else()</code> tendrías que anidar dos condiciones. Hay una función pensada exactamente para esto."
+},
+{
+  modulo:5, dificultad:"dificil", tipo:"codigo", concepto:"across()",
+  titulo:"Aplicar lo mismo a varias columnas",
+  consigna:"Calculá el promedio de <code>bill_length_mm</code>, <code>bill_depth_mm</code> y <code>flipper_length_mm</code> por especie, sin escribir tres veces <code>mean()</code>. Los NA tienen que ignorarse.",
+  datos:"penguins",
+  codigo:[
+    "penguins |>",
+    "  group_by(species) |>",
+    "  summarise(___1___(",
+    "    c(bill_length_mm, bill_depth_mm, flipper_length_mm),",
+    "    ~ mean(.x, na.rm = TRUE)",
+    "  ))"
+  ],
+  huecos:[{respuestas:["across"], ancho:9}],
+  pistas:["Hay una función auxiliar que aplica la misma operación a un conjunto de columnas.","Se usa adentro de <code>mutate()</code> o <code>summarise()</code> y se llama como la palabra inglesa para \"a lo largo de\"."],
+  explicacion:"<code>across()</code> recibe una selección de columnas y una función, y la aplica a todas. La fórmula <code>~ mean(.x, na.rm = TRUE)</code> es una función anónima donde <code>.x</code> es cada columna.",
+  fallo:"Esa función no existe dentro de <code>summarise()</code>. Buscá la auxiliar de dplyr que recorre columnas."
+},
+{
+  modulo:5, dificultad:"media", tipo:"codigo", concepto:"ungroup()",
+  titulo:"Soltar los grupos",
+  consigna:"Después de calcular el total vendido por sucursal, hay que sacar la marca de agrupamiento antes de seguir trabajando. Completá el verbo que falta.",
+  datos:"ventas",
+  codigo:[
+    "ventas |>",
+    "  group_by(sucursal, categoria) |>",
+    "  summarise(total = sum(unidades)) |>",
+    "  ___1___() |>",
+    "  arrange(desc(total))"
+  ],
+  huecos:[{respuestas:["ungroup"], ancho:10}],
+  pistas:["Es el verbo inverso de <code>group_by()</code>.","Lleva el prefijo un-."],
+  explicacion:"<code>summarise()</code> saca un solo nivel de agrupamiento, así que después de agrupar por dos variables la tabla sigue agrupada por la primera. <code>ungroup()</code> evita que los cálculos siguientes se hagan por grupo sin que te des cuenta.",
+  fallo:"Buscá el verbo que deshace el agrupamiento. Es literalmente el opuesto del que agrupa."
+},
+{
+  modulo:5, dificultad:"dificil", tipo:"opcion", concepto:"group_by() y mutate()",
+  titulo:"Proporción dentro del grupo",
+  consigna:"Querés agregar a <code>ventas</code> una columna con la participación de cada venta en el total de su sucursal. ¿Cuál de estos pipelines lo hace?",
+  datos:"ventas",
+  opciones:[
+    "ventas |> group_by(sucursal) |> mutate(part = unidades / sum(unidades))",
+    "ventas |> group_by(sucursal) |> summarise(part = unidades / sum(unidades))",
+    "ventas |> mutate(part = unidades / sum(unidades))",
+    "ventas |> group_by(sucursal) |> mutate(part = unidades / n())"
+  ],
+  correcta:0,
+  pistas:["El resultado tiene que conservar todas las filas originales.","Y el denominador tiene que ser el total de la sucursal, no el de toda la tabla."],
+  explicacion:"Con <code>group_by()</code> seguido de <code>mutate()</code>, las funciones de resumen como <code>sum()</code> se calculan dentro de cada grupo pero el resultado se pega a todas las filas. Con <code>summarise()</code> perderías el detalle, sin agrupar el denominador sería el total general, y <code>n()</code> cuenta filas, no unidades.",
+  fallo:"Revisá dos cosas: si el pipeline conserva una fila por venta y si el denominador corresponde a la sucursal."
+},
+{
+  modulo:5, dificultad:"dificil", tipo:"codigo", concepto:"lag() y lead()",
+  titulo:"Comparar con el período anterior",
+  consigna:"En una tabla <code>serie</code> con las columnas <code>anio</code> y <code>pbi</code> ordenada cronológicamente, agregá una columna <code>variacion</code> con la diferencia entre el PBI del año y el del año anterior.",
+  codigo:[
+    "serie |>",
+    "  arrange(anio) |>",
+    "  mutate(variacion = pbi - ___1___(pbi))"
+  ],
+  huecos:[{respuestas:["lag"], ancho:6}],
+  pistas:["Hay dos funciones espejo: una corre la columna hacia atrás y la otra hacia adelante.","La que trae el valor <em>anterior</em> se llama como la palabra inglesa para retraso."],
+  explicacion:"<code>lag()</code> devuelve el valor de la fila anterior (la primera queda en NA) y <code>lead()</code> el de la siguiente. Por eso es imprescindible ordenar antes.",
+  fallo:"<code>lead()</code> te traería el valor del año siguiente, así que la diferencia daría con el signo cambiado y desfasada."
+},
+{
+  modulo:5, dificultad:"media", tipo:"codigo", concepto:"first() y last()",
+  titulo:"Primer y último valor del grupo",
+  consigna:"Para cada cliente, obtené el monto de su primer pedido y el del último, ordenando previamente por fecha.",
+  datos:"pedidos",
+  codigo:[
+    "pedidos |>",
+    "  arrange(id_cliente, fecha) |>",
+    "  group_by(id_cliente) |>",
+    "  summarise(",
+    "    primer_monto = ___1___(monto),",
+    "    ultimo_monto = ___2___(monto)",
+    "  )"
+  ],
+  huecos:[{respuestas:["first"], ancho:8},{respuestas:["last"], ancho:7}],
+  pistas:["Son dos funciones de dplyr con nombres muy transparentes.","Devuelven el primer y el último valor del grupo según el orden actual de las filas."],
+  explicacion:"<code>first()</code> y <code>last()</code> dependen del orden de las filas, por eso hay que hacer <code>arrange()</code> antes. <code>min()</code> y <code>max()</code>, en cambio, miran el valor y no la posición.",
+  fallo:"No confundas la primera fila del grupo con el valor más chico: acá interesa la posición, no el tamaño del monto."
+},
+{
+  modulo:5, dificultad:"facil", tipo:"codigo", concepto:"left_join()",
+  titulo:"Traer datos de otra tabla",
+  consigna:"Agregá a <code>pedidos</code> la información de <code>clientes</code>, conservando todos los pedidos aunque el cliente no figure en la otra tabla.",
+  datos:"pedidos",
+  codigo:[
+    "pedidos |>",
+    "  ___1___(clientes, by = \"id_cliente\")"
+  ],
+  huecos:[{respuestas:["left_join"], ancho:12}],
+  pistas:["Querés conservar todas las filas de la tabla que viene por el pipe, que es la de la izquierda.","El nombre del join indica qué tabla se conserva entera."],
+  explicacion:"<code>left_join()</code> conserva todas las filas de la tabla izquierda (la que entra por el pipe) y completa con NA cuando no hay coincidencia en la derecha.",
+  fallo:"<code>inner_join()</code> descartaría los pedidos sin cliente asociado. Acá hay que conservarlos todos."
+},
+{
+  modulo:5, dificultad:"media", tipo:"opcion", concepto:"tipos de join",
+  titulo:"¿Qué join corresponde?",
+  consigna:"Necesitás quedarte solamente con los clientes que <strong>nunca</strong> hicieron un pedido. ¿Qué join usás?",
+  datos:"clientes",
+  opciones:[
+    "clientes |> anti_join(pedidos, by = \"id_cliente\")",
+    "clientes |> semi_join(pedidos, by = \"id_cliente\")",
+    "clientes |> inner_join(pedidos, by = \"id_cliente\")",
+    "clientes |> full_join(pedidos, by = \"id_cliente\")"
+  ],
+  correcta:0,
+  pistas:["Hay dos joins que filtran filas sin agregar columnas: uno se queda con los que sí coinciden y el otro con los que no.","Buscás quedarte con los que NO tienen coincidencia."],
+  explicacion:"<code>anti_join()</code> devuelve las filas de la izquierda sin coincidencia en la derecha, sin agregar columnas. <code>semi_join()</code> hace lo contrario: se queda con las que sí coinciden.",
+  fallo:"Ese join te devolvería clientes que sí compraron, o directamente les agregaría columnas de pedidos. Necesitás el que filtra por ausencia de coincidencia."
+},
+{
+  modulo:5, dificultad:"media", tipo:"codigo", concepto:"join con nombres distintos",
+  titulo:"Claves que se llaman distinto",
+  consigna:"Uní <code>pedidos</code> con <code>clientes</code> conservando todos los pedidos, sabiendo que en <code>pedidos</code> la clave se llama <code>id_cliente</code> y en <code>clientes</code> se llama <code>cliente_id</code>.",
+  codigo:[
+    "pedidos |>",
+    "  left_join(clientes, by = ___1___)"
+  ],
+  huecos:[{respuestas:["c(id_cliente = \"cliente_id\")","join_by(id_cliente == cliente_id)","c(\"id_cliente\" = \"cliente_id\")"], ancho:32}],
+  pistas:["El argumento <code>by</code> acepta un vector con nombre: a la izquierda la columna de la primera tabla, a la derecha la de la segunda.","También sirve <code>join_by()</code>, la sintaxis moderna de dplyr."],
+  explicacion:"Con <code>by = c(id_cliente = \"cliente_id\")</code> le decís a dplyr qué columna de cada tabla se corresponde. La forma moderna es <code>by = join_by(id_cliente == cliente_id)</code>.",
+  fallo:"Con un solo nombre entre comillas dplyr busca una columna que se llame igual en las dos tablas, y acá no existe."
+},
+{
+  modulo:5, dificultad:"media", tipo:"codigo", concepto:"join por varias claves",
+  titulo:"Unir por más de una columna",
+  consigna:"Uní <code>ventas</code> con la tabla <code>metas</code> usando como clave la combinación de <code>sucursal</code> y <code>categoria</code>, conservando todas las ventas.",
+  datos:"ventas",
+  codigo:[
+    "ventas |>",
+    "  left_join(metas, by = ___1___)"
+  ],
+  huecos:[{respuestas:["c(\"sucursal\", \"categoria\")","join_by(sucursal, categoria)"], ancho:30}],
+  pistas:["Cuando las columnas se llaman igual en ambas tablas, alcanza con nombrarlas.","Son dos claves: van juntas dentro de un vector."],
+  explicacion:"Con <code>by = c(\"sucursal\", \"categoria\")</code> la coincidencia se busca por la combinación de ambas columnas. Si pusieras solo una, cada venta se cruzaría con varias metas y aparecerían filas de más.",
+  fallo:"Con una sola clave el cruce sería ambiguo y se multiplicarían las filas. Hay que pasar las dos columnas juntas."
+},
+{
+  modulo:5, dificultad:"dificil", tipo:"opcion", concepto:"full_join()",
+  titulo:"Quedarse con todo",
+  consigna:"Tenés dos tablas de sucursales, <code>presupuesto</code> y <code>ejecutado</code>, y algunas sucursales aparecen en una sola de las dos. Querés una tabla con todas las sucursales de ambas. ¿Qué usás?",
+  opciones:[
+    "presupuesto |> full_join(ejecutado, by = \"sucursal\")",
+    "presupuesto |> inner_join(ejecutado, by = \"sucursal\")",
+    "presupuesto |> left_join(ejecutado, by = \"sucursal\")",
+    "presupuesto |> semi_join(ejecutado, by = \"sucursal\")"
+  ],
+  correcta:0,
+  pistas:["No querés perder filas de ninguna de las dos tablas.","El nombre del join dice cuánto se conserva."],
+  explicacion:"<code>full_join()</code> conserva todas las filas de ambas tablas y completa con NA lo que falte. <code>inner_join()</code> se quedaría solo con las sucursales presentes en las dos.",
+  fallo:"Con ese join perderías las sucursales que aparecen únicamente en una de las dos tablas."
+},
+{
+  modulo:5, dificultad:"dificil", tipo:"bug", concepto:"errores frecuentes",
+  titulo:"Resumir cuando había que mutar",
+  consigna:"Este pipeline debería agregar a cada empleado su salario expresado en miles, manteniendo las 200 filas originales. Tocá la línea que hace que el resultado tenga una sola fila.",
+  datos:"empleados",
+  codigo:[
+    "empleados |>",
+    "  summarise(salario_miles = salario / 1000) |>",
+    "  arrange(desc(salario_miles))"
+  ],
+  linea_bug:2,
+  pistas:["¿Qué verbo agrega columnas conservando las filas y cuál colapsa la tabla?","La operación en sí está bien: el problema es el verbo que la envuelve."],
+  explicacion:"<code>summarise()</code> colapsa la tabla. Para agregar una columna fila por fila hay que usar <code>mutate(salario_miles = salario / 1000)</code>.",
+  fallo:"Esa línea está bien. Buscá el verbo que está cambiando la cantidad de filas del resultado."
+},
+{
+  modulo:5, dificultad:"dificil", tipo:"orden", concepto:"pipeline completo",
+  titulo:"Ranking por grupo",
+  consigna:"Ordená el pipeline que calcula el salario promedio por sucursal y devuelve las tres sucursales con el promedio más alto.",
+  datos:"empleados",
+  lineas:[
+    {t:"empleados |>", s:0},
+    {t:"  group_by(sucursal) |>", s:0},
+    {t:"  summarise(salario_medio = mean(salario, na.rm = TRUE)) |>", s:0},
+    {t:"  arrange(desc(salario_medio)) |>", s:0},
+    {t:"  slice_head(n = 3)", s:0}
+  ],
+  pistas:["Primero hay que crear la variable por la que después vas a ordenar.","El recorte de las tres primeras filas va al final, cuando la tabla ya está ordenada."],
+  explicacion:"No se puede ordenar por <code>salario_medio</code> antes de crearlo, ni recortar las tres primeras filas antes de ordenar. El orden es: agrupar, resumir, ordenar, recortar.",
+  fallo:"Fijate qué columnas existen en cada paso: no podés usar una variable antes de haberla creado."
+},
+{
+  modulo:5, dificultad:"dificil", tipo:"codigo", concepto:"add_count()",
+  titulo:"Contar sin perder el detalle",
+  consigna:"Agregá a <code>ventas</code> una columna con la cantidad de ventas de cada sucursal, conservando todas las filas originales, con un solo verbo.",
+  datos:"ventas",
+  codigo:[
+    "ventas |>",
+    "  ___1___(sucursal)"
+  ],
+  huecos:[{respuestas:["add_count"], ancho:12}],
+  pistas:["<code>count()</code> colapsa la tabla; buscás la versión que agrega la columna sin colapsar.","Lleva el prefijo add_."],
+  explicacion:"<code>add_count(sucursal)</code> equivale a <code>group_by(sucursal) |&gt; mutate(n = n()) |&gt; ungroup()</code>: agrega la columna de frecuencia a cada fila.",
+  fallo:"<code>count()</code> devuelve una fila por sucursal y pierde el detalle de las ventas. Buscá la variante que suma la columna sin resumir."
+},
+/* ---------------- MÓDULO 6 — tidyr ---------------- */
+{
+  modulo:6, dificultad:"media", tipo:"opcion", concepto:"datos tidy",
+  titulo:"¿Está tidy?",
+  consigna:"La tabla <code>censo</code> tiene una fila por provincia y las columnas <code>pob_2001</code>, <code>pob_2010</code> y <code>pob_2022</code>. ¿Por qué no cumple los principios de datos tidy?",
+  datos:"censo",
+  opciones:[
+    "Porque el año, que es una variable, está guardado en los nombres de las columnas",
+    "Porque tiene más de tres columnas",
+    "Porque las provincias deberían estar en columnas",
+    "Porque los nombres de columna tienen guiones bajos"
+  ],
+  correcta:0,
+  pistas:["En datos tidy, cada variable ocupa una columna y cada observación una fila.","Preguntate cuántas variables hay en realidad: provincia, ¿y qué más?"],
+  explicacion:"Hay tres variables (provincia, año y población), pero el año está codificado en los nombres de las columnas. La versión tidy tiene una fila por provincia y año.",
+  fallo:"La cantidad de columnas no define si una tabla es tidy. Fijate si alguna variable está escondida en los nombres de las columnas."
+},
+{
+  modulo:6, dificultad:"media", tipo:"codigo", concepto:"pivot_longer()",
+  titulo:"De ancho a largo",
+  consigna:"Pasá <code>censo</code> a formato largo: una fila por provincia y año, con las columnas <code>anio</code> y <code>poblacion</code>.",
+  datos:"censo",
+  codigo:[
+    "censo |>",
+    "  ___1___(",
+    "    cols = starts_with(\"pob_\"),",
+    "    names_to = \"anio\",",
+    "    values_to = \"poblacion\"",
+    "  )"
+  ],
+  huecos:[{respuestas:["pivot_longer"], ancho:14}],
+  pistas:["La tabla tiene que quedar con más filas y menos columnas.","El nombre del verbo describe la forma que va a tomar la tabla."],
+  explicacion:"<code>pivot_longer()</code> apila varias columnas en dos: una con los nombres originales y otra con los valores. Es el camino habitual para llevar datos a formato tidy.",
+  fallo:"Ese verbo hace lo contrario: convierte filas en columnas. Fijate hacia qué forma querés llevar la tabla."
+},
+{
+  modulo:6, dificultad:"dificil", tipo:"codigo", concepto:"pivot_longer() con names_prefix",
+  titulo:"Limpiar el nombre al pivotear",
+  consigna:"Al pasar <code>censo</code> a formato largo, la columna <code>anio</code> queda con valores como <code>\"pob_2010\"</code>. Completá el argumento que saca ese prefijo para que quede solo <code>\"2010\"</code>.",
+  datos:"censo",
+  codigo:[
+    "censo |>",
+    "  pivot_longer(",
+    "    cols = starts_with(\"pob_\"),",
+    "    names_to = \"anio\",",
+    "    ___1___ = \"pob_\",",
+    "    values_to = \"poblacion\"",
+    "  )"
+  ],
+  huecos:[{respuestas:["names_prefix"], ancho:15}],
+  pistas:["Los argumentos que tocan los nombres de columna arrancan con <code>names_</code>.","Buscás el que descarta un texto fijo al principio de cada nombre."],
+  explicacion:"<code>names_prefix</code> elimina ese texto del inicio de cada nombre de columna antes de guardarlo. Después conviene convertir <code>anio</code> a numérico con <code>as.numeric()</code> o con <code>names_transform</code>.",
+  fallo:"<code>values_to</code> y <code>names_to</code> definen cómo se llaman las columnas nuevas, no cómo se limpian los valores."
+},
+{
+  modulo:6, dificultad:"media", tipo:"codigo", concepto:"pivot_wider()",
+  titulo:"De largo a ancho",
+  consigna:"Tenés una tabla <code>largo</code> con las columnas <code>provincia</code>, <code>anio</code> y <code>poblacion</code>. Armá una tabla con una fila por provincia y una columna por año.",
+  codigo:[
+    "largo |>",
+    "  ___1___(",
+    "    names_from = anio,",
+    "    values_from = poblacion",
+    "  )"
+  ],
+  huecos:[{respuestas:["pivot_wider"], ancho:14}],
+  pistas:["El resultado tiene que ser más ancho: más columnas y menos filas.","Es el verbo espejo del que apila columnas."],
+  explicacion:"<code>pivot_wider()</code> toma los valores de una columna y los convierte en nombres de columnas nuevas. Es el paso típico para armar tablas de salida, aunque el resultado ya no sea tidy.",
+  fallo:"Ese verbo apila columnas en filas. Acá querés lo contrario."
+},
+{
+  modulo:6, dificultad:"dificil", tipo:"bug", concepto:"errores frecuentes",
+  titulo:"names_from y values_from cambiados",
+  consigna:"Este pipeline quiere una columna por año con la población, pero devuelve algo raro. Tocá la línea donde está el error.",
+  codigo:[
+    "largo |>",
+    "  pivot_wider(",
+    "    names_from = poblacion,",
+    "    values_from = anio",
+    "  )"
+  ],
+  linea_bug:3,
+  pistas:["¿De qué columna tienen que salir los <em>nombres</em> de las columnas nuevas?","Los nombres salen del año; los valores, de la población."],
+  explicacion:"<code>names_from</code> indica de qué columna salen los nombres nuevos (el año) y <code>values_from</code> de dónde salen los valores (la población). Al invertirlos se crea una columna por cada población distinta.",
+  fallo:"Esa línea está bien. Fijate cuál de los dos argumentos define los nombres de las columnas nuevas."
+},
+{
+  modulo:6, dificultad:"media", tipo:"codigo", concepto:"separate_wider_delim()",
+  titulo:"Partir una columna en dos",
+  consigna:"La columna <code>nombre_completo</code> tiene valores como <code>\"Ana Pérez\"</code>. Separala en <code>nombre</code> y <code>apellido</code> usando el espacio como separador.",
+  codigo:[
+    "personas |>",
+    "  ___1___(",
+    "    nombre_completo,",
+    "    delim = \" \",",
+    "    names = c(\"nombre\", \"apellido\")",
+    "  )"
+  ],
+  huecos:[{respuestas:["separate_wider_delim"], ancho:22}],
+  pistas:["La versión moderna de <code>separate()</code> dice en el nombre que ensancha la tabla y que corta por un delimitador.","Empieza con separate_wider_."],
+  explicacion:"<code>separate_wider_delim()</code> reemplaza a la vieja <code>separate()</code>: corta la columna por un delimitador y crea una columna por pedazo.",
+  fallo:"<code>unite()</code> hace lo contrario: junta columnas. Buscá la que las parte."
+},
+{
+  modulo:6, dificultad:"media", tipo:"codigo", concepto:"unite()",
+  titulo:"Juntar dos columnas",
+  consigna:"Combiná <code>nombre</code> y <code>apellido</code> en una sola columna llamada <code>nombre_completo</code>, separadas por un espacio.",
+  codigo:[
+    "personas |>",
+    "  ___1___(nombre_completo, nombre, apellido, sep = \" \")"
+  ],
+  huecos:[{respuestas:["unite"], ancho:8}],
+  pistas:["Es el verbo inverso del que separa columnas.","Se llama como la palabra inglesa para unir."],
+  explicacion:"<code>unite()</code> recibe primero el nombre de la columna nueva y después las columnas a combinar. Por defecto borra las originales; con <code>remove = FALSE</code> las conserva.",
+  fallo:"Revisá el orden de los argumentos: primero va el nombre de la columna nueva y después las que se combinan."
+},
+{
+  modulo:6, dificultad:"facil", tipo:"codigo", concepto:"drop_na()",
+  titulo:"Descartar filas incompletas",
+  consigna:"De <code>airquality</code>, eliminá las filas que tienen faltantes en <code>Ozone</code>.",
+  datos:"airquality",
+  codigo:[
+    "airquality |>",
+    "  ___1___(Ozone)"
+  ],
+  huecos:[{respuestas:["drop_na"], ancho:10}],
+  pistas:["Es un verbo de tidyr pensado exactamente para esto.","Lleva guion bajo entre las dos partes del nombre."],
+  explicacion:"<code>drop_na(Ozone)</code> saca las filas con NA en esa columna. Sin argumentos, elimina toda fila que tenga algún NA en cualquier columna.",
+  fallo:"También podrías escribir <code>filter(!is.na(Ozone))</code>, pero acá se busca el verbo específico de tidyr."
+},
+{
+  modulo:6, dificultad:"media", tipo:"codigo", concepto:"replace_na()",
+  titulo:"Reemplazar faltantes por un valor",
+  consigna:"En <code>ventas</code>, reemplazá los NA de la columna <code>unidades</code> por 0, conservando todas las filas.",
+  datos:"ventas",
+  codigo:[
+    "ventas |>",
+    "  mutate(unidades = ___1___(unidades, 0))"
+  ],
+  huecos:[{respuestas:["replace_na"], ancho:12}],
+  pistas:["Buscás una función de tidyr que cambia los NA por un valor fijo.","Su nombre describe la acción: reemplazar NA."],
+  explicacion:"<code>replace_na(unidades, 0)</code> deja el resto de los valores intactos y solo cambia los faltantes. Cuidado: reemplazar NA por 0 no siempre es correcto, porque un faltante no es lo mismo que un cero.",
+  fallo:"<code>drop_na()</code> eliminaría las filas y acá hay que conservarlas."
+},
+{
+  modulo:6, dificultad:"media", tipo:"codigo", concepto:"fill()",
+  titulo:"Arrastrar el último valor conocido",
+  consigna:"En una tabla donde la columna <code>provincia</code> aparece escrita solo en la primera fila de cada bloque y después queda en NA, completá los faltantes con el último valor visto hacia abajo.",
+  codigo:[
+    "tabla |>",
+    "  ___1___(provincia, .direction = \"down\")"
+  ],
+  huecos:[{respuestas:["fill"], ancho:7}],
+  pistas:["Es un verbo corto de tidyr que propaga el último valor no faltante.","Se llama como la palabra inglesa para rellenar."],
+  explicacion:"<code>fill()</code> arrastra el último valor conocido en la dirección indicada. Es típico de tablas exportadas de planillas, donde las etiquetas se escriben una sola vez.",
+  fallo:"<code>replace_na()</code> pone siempre el mismo valor fijo. Acá el relleno depende de la fila anterior."
+},
+{
+  modulo:6, dificultad:"dificil", tipo:"codigo", concepto:"complete()",
+  titulo:"Hacer explícitas las combinaciones que faltan",
+  consigna:"En una tabla de ventas por sucursal y mes faltan las filas de los meses sin ventas. Generá todas las combinaciones posibles, poniendo 0 en <code>total</code> donde no había registro.",
+  codigo:[
+    "resumen |>",
+    "  ___1___(sucursal, mes, fill = list(total = 0))"
+  ],
+  huecos:[{respuestas:["complete"], ancho:11}],
+  pistas:["Buscás un verbo de tidyr que arma todas las combinaciones de las variables que le pases.","Se llama como la palabra inglesa para completar."],
+  explicacion:"<code>complete()</code> vuelve explícitos los faltantes implícitos: crea las filas que no existían y las rellena con lo que indiques en <code>fill</code>. Es clave antes de graficar series de tiempo con huecos.",
+  fallo:"<code>fill()</code> completa valores dentro de filas existentes. Acá hay que crear filas que no están."
+},
+
+/* ---------------- MÓDULO 7 — stringr ---------------- */
+{
+  modulo:7, dificultad:"facil", tipo:"codigo", concepto:"str_detect()",
+  titulo:"¿Contiene ese texto?",
+  consigna:"De <code>clientes</code>, quedate con los que tienen la palabra <code>\"Buenos\"</code> en la columna <code>provincia</code>.",
+  datos:"clientes",
+  codigo:[
+    "clientes |>",
+    "  filter(___1___(provincia, \"Buenos\"))"
+  ],
+  huecos:[{respuestas:["str_detect"], ancho:12}],
+  pistas:["Necesitás una función que devuelva TRUE o FALSE para cada texto.","Todas las funciones de stringr arrancan con str_."],
+  explicacion:"<code>str_detect()</code> devuelve un vector lógico, que es justo lo que <code>filter()</code> necesita. <code>str_extract()</code>, en cambio, devolvería el texto encontrado.",
+  fallo:"Dentro de <code>filter()</code> hace falta algo que dé TRUE/FALSE. Esa función devuelve texto, no un valor lógico."
+},
+{
+  modulo:7, dificultad:"media", tipo:"codigo", concepto:"str_to_lower()",
+  titulo:"Todo en minúsculas",
+  consigna:"Pasá la columna <code>provincia</code> a minúsculas para poder comparar sin problemas de mayúsculas.",
+  datos:"clientes",
+  codigo:[
+    "clientes |>",
+    "  mutate(provincia = ___1___(provincia))"
+  ],
+  huecos:[{respuestas:["str_to_lower"], ancho:14}],
+  pistas:["En stringr las conversiones de mayúsculas y minúsculas usan el prefijo <code>str_to_</code>.","Minúscula en inglés es <em>lower</em>."],
+  explicacion:"<code>str_to_lower()</code> pasa todo a minúsculas. La familia se completa con <code>str_to_upper()</code> y <code>str_to_title()</code>.",
+  fallo:"Revisá el nombre: en stringr las funciones de conversión llevan <code>to</code> en el medio."
+},
+{
+  modulo:7, dificultad:"media", tipo:"codigo", concepto:"str_trim()",
+  titulo:"Sacar espacios de los bordes",
+  consigna:"La columna <code>sucursal</code> tiene valores con espacios al principio y al final, como <code>\" Centro \"</code>. Limpiala.",
+  datos:"ventas",
+  codigo:[
+    "ventas |>",
+    "  mutate(sucursal = ___1___(sucursal))"
+  ],
+  huecos:[{respuestas:["str_trim"], ancho:11}],
+  pistas:["Hay una función corta que recorta los espacios de los extremos.","<em>Trim</em> es recortar."],
+  explicacion:"<code>str_trim()</code> saca los espacios del principio y del final. <code>str_squish()</code> además colapsa los espacios repetidos del interior.",
+  fallo:"<code>str_remove()</code> necesitaría un patrón. Hay una función específica para los espacios de los bordes."
+},
+{
+  modulo:7, dificultad:"media", tipo:"codigo", concepto:"str_replace_all()",
+  titulo:"Reemplazar todas las apariciones",
+  consigna:"En la columna <code>producto</code>, reemplazá todos los guiones bajos por espacios. Puede haber más de uno por valor.",
+  datos:"ventas",
+  codigo:[
+    "ventas |>",
+    "  mutate(producto = ___1___(producto, \"_\", \" \"))"
+  ],
+  huecos:[{respuestas:["str_replace_all"], ancho:17}],
+  pistas:["Hay dos versiones: una cambia solo la primera aparición y la otra todas.","La que cambia todas termina en _all."],
+  explicacion:"<code>str_replace()</code> reemplaza solo la primera coincidencia de cada valor; <code>str_replace_all()</code> reemplaza todas.",
+  fallo:"Esa versión solo cambia la primera aparición dentro de cada texto, y acá puede haber varias."
+},
+{
+  modulo:7, dificultad:"media", tipo:"codigo", concepto:"str_length()",
+  titulo:"Largo del texto",
+  consigna:"Agregá una columna <code>largo_nombre</code> con la cantidad de caracteres del nombre de cada cliente.",
+  datos:"clientes",
+  codigo:[
+    "clientes |>",
+    "  mutate(largo_nombre = ___1___(nombre))"
+  ],
+  huecos:[{respuestas:["str_length"], ancho:12}],
+  pistas:["No sirve <code>length()</code>: esa cuenta elementos del vector, no caracteres.","En stringr todo empieza con str_."],
+  explicacion:"<code>str_length()</code> cuenta caracteres de cada texto; <code>length()</code> devolvería la cantidad de filas del vector.",
+  fallo:"<code>length()</code> te daría la cantidad de clientes, no el largo de cada nombre."
+},
+{
+  modulo:7, dificultad:"media", tipo:"codigo", concepto:"str_sub()",
+  titulo:"Cortar un pedazo",
+  consigna:"De la columna <code>id_venta</code>, que tiene valores como <code>\"AR2024001\"</code>, extraé los dos primeros caracteres en una columna <code>pais</code>.",
+  datos:"ventas",
+  codigo:[
+    "ventas |>",
+    "  mutate(pais = ___1___(id_venta, 1, 2))"
+  ],
+  huecos:[{respuestas:["str_sub"], ancho:10}],
+  pistas:["Buscás la función que devuelve un subconjunto de caracteres por posición.","Es la abreviatura de <em>substring</em>."],
+  explicacion:"<code>str_sub(x, 1, 2)</code> devuelve del primer al segundo carácter. Admite posiciones negativas para contar desde el final.",
+  fallo:"<code>str_extract()</code> trabaja con patrones, no con posiciones. Acá el corte es por posición fija."
+},
+{
+  modulo:7, dificultad:"dificil", tipo:"codigo", concepto:"expresiones regulares",
+  titulo:"Detectar un patrón numérico",
+  consigna:"Quedate con los productos cuyo código termina en tres dígitos. Completá la expresión regular.",
+  datos:"ventas",
+  codigo:[
+    "ventas |>",
+    "  filter(str_detect(id_venta, \"___1___\"))"
+  ],
+  huecos:[{respuestas:["\\\\d{3}$","[0-9]{3}$"], ancho:14, estricto:true}],
+  pistas:["<code>\\\\d</code> representa un dígito y las llaves indican cuántas veces se repite.","El signo pesos ancla el patrón al final del texto."],
+  explicacion:"<code>\\\\d{3}$</code> busca tres dígitos seguidos al final del texto. Sin el <code>$</code>, el patrón podría aparecer en cualquier lugar del código.",
+  fallo:"Revisá dos cosas: cómo se escribe \"un dígito repetido tres veces\" y cómo se ancla el patrón al final."
+},
+{
+  modulo:7, dificultad:"media", tipo:"codigo", concepto:"str_c()",
+  titulo:"Pegar texto en tidyverse",
+  consigna:"Armá una columna <code>etiqueta</code> que combine la sucursal y la categoría separadas por un guion, usando la función de stringr.",
+  datos:"ventas",
+  codigo:[
+    "ventas |>",
+    "  mutate(etiqueta = ___1___(sucursal, \" - \", categoria))"
+  ],
+  huecos:[{respuestas:["str_c"], ancho:8}],
+  pistas:["Es el equivalente de <code>paste0()</code> dentro de stringr.","Es la más corta de la familia str_."],
+  explicacion:"<code>str_c()</code> concatena sin separador por defecto (como <code>paste0()</code>) y admite el argumento <code>sep</code>. A diferencia de <code>paste()</code>, propaga los NA en lugar de convertirlos en <code>\"NA\"</code>.",
+  fallo:"Buscás la función de stringr, no la de R base."
+},
+{
+  modulo:7, dificultad:"dificil", tipo:"opcion", concepto:"str_extract() contra str_detect()",
+  titulo:"Extraer o detectar",
+  consigna:"Querés crear una columna con el año que aparece dentro de un texto como <code>\"informe 2023 final\"</code>. ¿Qué función usás?",
+  opciones:[
+    "str_extract(texto, \"\\\\d{4}\")",
+    "str_detect(texto, \"\\\\d{4}\")",
+    "str_length(texto)",
+    "str_replace(texto, \"\\\\d{4}\", \"\")"
+  ],
+  correcta:0,
+  pistas:["Una devuelve TRUE/FALSE y la otra devuelve el pedazo de texto encontrado.","Querés quedarte con el año, no saber si está."],
+  explicacion:"<code>str_extract()</code> devuelve el fragmento que coincide con el patrón (o NA si no hay coincidencia). <code>str_detect()</code> solo dice si el patrón aparece.",
+  fallo:"Esa opción te dice si el patrón está o directamente lo borra, pero no te devuelve el año."
+},
+
+/* ---------------- MÓDULO 8 — forcats ---------------- */
+{
+  modulo:8, dificultad:"media", tipo:"codigo", concepto:"fct_reorder()",
+  titulo:"Ordenar categorías por un valor",
+  consigna:"Antes de graficar, reordená las especies de pingüinos según el peso promedio, para que el gráfico salga ordenado.",
+  datos:"penguins",
+  codigo:[
+    "resumen |>",
+    "  mutate(species = ___1___(species, peso_medio))"
+  ],
+  huecos:[{respuestas:["fct_reorder"], ancho:13}],
+  pistas:["Todas las funciones de forcats arrancan con fct_.","Buscás la que reordena los niveles según otra variable."],
+  explicacion:"<code>fct_reorder(factor, variable)</code> ordena los niveles según los valores de otra variable. Es el paso previo típico a un gráfico de barras ordenado.",
+  fallo:"<code>fct_relevel()</code> requiere que escribas el orden a mano. Acá el orden sale de una variable numérica."
+},
+{
+  modulo:8, dificultad:"media", tipo:"codigo", concepto:"fct_relevel()",
+  titulo:"Poner una categoría primero",
+  consigna:"Hacé que <code>\"Adelie\"</code> sea el primer nivel del factor <code>species</code>, dejando el resto en el orden que ya tenían.",
+  datos:"penguins",
+  codigo:[
+    "penguins |>",
+    "  mutate(species = ___1___(species, \"Adelie\"))"
+  ],
+  huecos:[{respuestas:["fct_relevel"], ancho:13}],
+  pistas:["Buscás la función que mueve niveles concretos a la primera posición.","Los que no nombres quedan detrás, en su orden original."],
+  explicacion:"<code>fct_relevel()</code> mueve los niveles indicados al principio. Es la forma habitual de fijar la categoría de referencia en un modelo.",
+  fallo:"Esa función ordena según otra variable o según la frecuencia. Acá el orden lo estás fijando a mano."
+},
+{
+  modulo:8, dificultad:"media", tipo:"codigo", concepto:"fct_infreq()",
+  titulo:"Ordenar por frecuencia",
+  consigna:"Ordená los niveles de <code>categoria</code> de la más frecuente a la menos frecuente.",
+  datos:"ventas",
+  codigo:[
+    "ventas |>",
+    "  mutate(categoria = ___1___(categoria))"
+  ],
+  huecos:[{respuestas:["fct_infreq"], ancho:12}],
+  pistas:["El nombre alude a ordenar \"por frecuencia\".","No hace falta pasarle ninguna otra variable: cuenta sola."],
+  explicacion:"<code>fct_infreq()</code> ordena los niveles de mayor a menor frecuencia de aparición. Combinada con <code>fct_rev()</code> se invierte el orden.",
+  fallo:"<code>fct_reorder()</code> necesita una segunda variable. Acá el criterio es cuántas veces aparece cada categoría."
+},
+{
+  modulo:8, dificultad:"facil", tipo:"codigo", concepto:"fct_rev()",
+  titulo:"Dar vuelta el orden",
+  consigna:"Invertí el orden de los niveles del factor <code>nivel_educativo</code>.",
+  datos:"encuesta",
+  codigo:[
+    "encuesta |>",
+    "  mutate(nivel_educativo = ___1___(nivel_educativo))"
+  ],
+  huecos:[{respuestas:["fct_rev"], ancho:10}],
+  pistas:["Es una de las funciones más cortas de forcats.","<em>Reverse</em>, abreviado."],
+  explicacion:"<code>fct_rev()</code> invierte el orden de los niveles. Es muy útil en gráficos de barras horizontales, donde ggplot dibuja el primer nivel abajo.",
+  fallo:"<code>sort()</code> ordenaría los valores alfabéticamente, no invertiría los niveles del factor."
+},
+{
+  modulo:8, dificultad:"dificil", tipo:"codigo", concepto:"fct_lump()",
+  titulo:"Agrupar la cola larga",
+  consigna:"Quedate con las 5 categorías más frecuentes de <code>producto</code> y agrupá todo el resto en una categoría <code>\"Otros\"</code>.",
+  datos:"ventas",
+  codigo:[
+    "ventas |>",
+    "  mutate(producto = ___1___(producto, n = 5, other_level = \"Otros\"))"
+  ],
+  huecos:[{respuestas:["fct_lump","fct_lump_n"], ancho:13}],
+  pistas:["El nombre alude a \"amontonar\" las categorías menos frecuentes.","La variante que recibe una cantidad fija termina en _n."],
+  explicacion:"<code>fct_lump_n(x, n = 5)</code> conserva las 5 categorías más frecuentes y manda el resto a un nivel común. Sirve para no llenar un gráfico con decenas de categorías marginales.",
+  fallo:"<code>fct_infreq()</code> solo reordena: no agrupa las categorías chicas en una sola."
+},
+{
+  modulo:8, dificultad:"media", tipo:"codigo", concepto:"fct_recode()",
+  titulo:"Renombrar categorías",
+  consigna:"Renombrá los niveles de <code>sex</code>: <code>\"female\"</code> pasa a ser <code>\"Hembra\"</code> y <code>\"male\"</code> a <code>\"Macho\"</code>.",
+  datos:"penguins",
+  codigo:[
+    "penguins |>",
+    "  mutate(sex = ___1___(sex,",
+    "    \"Hembra\" = \"female\",",
+    "    \"Macho\" = \"male\"",
+    "  ))"
+  ],
+  huecos:[{respuestas:["fct_recode"], ancho:12}],
+  pistas:["Buscás la función de forcats que cambia el nombre de los niveles.","La sintaxis es <code>nuevo = \"viejo\"</code>, igual que en <code>rename()</code>."],
+  explicacion:"<code>fct_recode()</code> cambia las etiquetas de los niveles sin tocar el orden. Como en <code>rename()</code>, el nombre nuevo va a la izquierda.",
+  fallo:"<code>fct_relevel()</code> cambia el orden, no las etiquetas."
+},
+
+/* ---------------- MÓDULO 9 — lubridate ---------------- */
+{
+  modulo:9, dificultad:"facil", tipo:"codigo", concepto:"ymd()",
+  titulo:"Texto a fecha",
+  consigna:"La columna <code>fecha</code> viene como texto con el formato <code>\"2024-03-15\"</code>. Convertila a fecha.",
+  datos:"ventas",
+  codigo:[
+    "ventas |>",
+    "  mutate(fecha = ___1___(fecha))"
+  ],
+  huecos:[{respuestas:["ymd","as_date","as.Date"], ancho:8}],
+  pistas:["Las funciones de lubridate se llaman según el orden en que aparecen año, mes y día.","Acá el orden es año, mes, día."],
+  explicacion:"<code>ymd()</code> lee fechas escritas en orden año-mes-día, sin importar el separador. Para el formato <code>\"15/03/2024\"</code> usarías <code>dmy()</code>.",
+  fallo:"Fijate en qué orden vienen las partes de la fecha: el nombre de la función replica ese orden."
+},
+{
+  modulo:9, dificultad:"media", tipo:"codigo", concepto:"dmy()",
+  titulo:"Fecha en formato argentino",
+  consigna:"La columna <code>fecha_relevamiento</code> viene como <code>\"15/03/2024\"</code>. Convertila a fecha.",
+  datos:"encuesta",
+  codigo:[
+    "encuesta |>",
+    "  mutate(fecha_relevamiento = ___1___(fecha_relevamiento))"
+  ],
+  huecos:[{respuestas:["dmy"], ancho:7}],
+  pistas:["El nombre de la función es la inicial de cada parte, en el orden en que aparecen.","Día, mes, año."],
+  explicacion:"<code>dmy()</code> interpreta día-mes-año. Elegir mal la función es el error clásico: <code>ymd(\"15/03/2024\")</code> devuelve NA con una advertencia.",
+  fallo:"Con esa función lubridate esperaría las partes en otro orden y devolvería NA."
+},
+{
+  modulo:9, dificultad:"facil", tipo:"codigo", concepto:"year() y month()",
+  titulo:"Extraer partes de una fecha",
+  consigna:"Agregá dos columnas: <code>anio</code> con el año de la fecha y <code>mes</code> con el número de mes.",
+  datos:"ventas",
+  codigo:[
+    "ventas |>",
+    "  mutate(",
+    "    anio = ___1___(fecha),",
+    "    mes = ___2___(fecha)",
+    "  )"
+  ],
+  huecos:[{respuestas:["year"], ancho:7},{respuestas:["month"], ancho:8}],
+  pistas:["Cada componente de la fecha tiene una función con su nombre en inglés.","Año y mes, en singular."],
+  explicacion:"<code>year()</code>, <code>month()</code>, <code>day()</code>, <code>hour()</code>, <code>minute()</code> y <code>second()</code> extraen cada componente. <code>month(x, label = TRUE)</code> devuelve el nombre del mes en lugar del número.",
+  fallo:"Las funciones de lubridate para componentes van en singular y sin prefijo."
+},
+{
+  modulo:9, dificultad:"media", tipo:"codigo", concepto:"wday()",
+  titulo:"Día de la semana",
+  consigna:"Agregá una columna <code>dia_semana</code> con el nombre del día de la semana de cada venta (no el número).",
+  datos:"ventas",
+  codigo:[
+    "ventas |>",
+    "  mutate(dia_semana = ___1___(fecha, label = TRUE))"
+  ],
+  huecos:[{respuestas:["wday"], ancho:7}],
+  pistas:["La función abrevia \"día de la semana\" en inglés.","Son cuatro letras: w de <em>week</em> y day."],
+  explicacion:"<code>wday()</code> devuelve el día de la semana; con <code>label = TRUE</code> da la etiqueta en lugar del número. El resultado depende del idioma de la sesión (locale).",
+  fallo:"<code>day()</code> devuelve el número de día del mes, no el día de la semana."
+},
+{
+  modulo:9, dificultad:"media", tipo:"codigo", concepto:"floor_date()",
+  titulo:"Agrupar por mes",
+  consigna:"Creá una columna <code>mes_calendario</code> que lleve cada fecha al primer día de su mes, para poder agrupar la serie por mes.",
+  datos:"ventas",
+  codigo:[
+    "ventas |>",
+    "  mutate(mes_calendario = ___1___(fecha, unit = \"month\"))"
+  ],
+  huecos:[{respuestas:["floor_date"], ancho:12}],
+  pistas:["Buscás la función que redondea una fecha hacia abajo a la unidad que le indiques.","<em>Floor</em> es el redondeo hacia abajo."],
+  explicacion:"<code>floor_date(fecha, \"month\")</code> devuelve el primer día del mes. Es preferible a usar <code>month()</code> cuando la serie abarca más de un año, porque no mezcla el mismo mes de años distintos.",
+  fallo:"<code>month()</code> devuelve solo el número de mes y mezclaría marzo de 2023 con marzo de 2024."
+},
+{
+  modulo:9, dificultad:"dificil", tipo:"codigo", concepto:"diferencia entre fechas",
+  titulo:"Días entre dos fechas",
+  consigna:"Calculá cuántos días pasaron entre <code>fecha_alta</code> y la fecha del pedido, en una columna <code>dias</code> que sea numérica.",
+  codigo:[
+    "datos |>",
+    "  mutate(dias = ___1___(fecha, fecha_alta, units = \"days\"))"
+  ],
+  huecos:[{respuestas:["difftime"], ancho:11}],
+  pistas:["Restar dos fechas devuelve un objeto de diferencia cuya unidad depende del rango; hay una función que fija la unidad.","Es de R base y su nombre junta \"diferencia\" y \"tiempo\"."],
+  explicacion:"<code>difftime(fin, inicio, units = \"days\")</code> fija la unidad explícitamente. Después conviene envolverlo en <code>as.numeric()</code> para trabajar con un número común.",
+  fallo:"La resta directa funciona, pero la unidad la elige R y puede salir en horas o semanas. Buscá la función que la fija."
+},
+{
+  modulo:9, dificultad:"dificil", tipo:"opcion", concepto:"períodos y duraciones",
+  titulo:"Sumar un mes",
+  consigna:"¿Cuál es la forma correcta de sumarle un mes calendario a la columna <code>fecha</code>?",
+  opciones:[
+    "fecha + months(1)",
+    "fecha + 30",
+    "fecha + month(1)",
+    "fecha + ddays(30)"
+  ],
+  correcta:0,
+  pistas:["Un mes calendario no siempre tiene la misma cantidad de días.","Las funciones de período de lubridate van en plural."],
+  explicacion:"<code>months(1)</code> es un período: respeta el calendario, así que del 31 de enero pasa a fin de febrero. <code>month()</code>, en singular, extrae el mes de una fecha en lugar de crear un período.",
+  fallo:"Sumar 30 días no equivale a sumar un mes, y la función en singular sirve para extraer, no para sumar."
+},
+/* ---------------- MÓDULO 10 — purrr ---------------- */
+{
+  modulo:10, dificultad:"media", tipo:"codigo", concepto:"map()",
+  titulo:"Aplicar una función a cada elemento",
+  consigna:"Aplicá <code>mean()</code> a cada elemento de la lista <code>lista_vectores</code>. El resultado tiene que seguir siendo una lista.",
+  codigo:["___1___(lista_vectores, mean)"],
+  huecos:[{respuestas:["map","purrr::map"], ancho:7}],
+  pistas:["Es la función central de purrr y tiene tres letras.","Devuelve siempre una lista del mismo largo que la entrada."],
+  explicacion:"<code>map()</code> recorre cada elemento y devuelve una lista. Las variantes con sufijo (<code>map_dbl()</code>, <code>map_chr()</code>, etc.) devuelven vectores del tipo indicado.",
+  fallo:"Buscá la función base de purrr, la que devuelve una lista sin simplificar el resultado."
+},
+{
+  modulo:10, dificultad:"media", tipo:"codigo", concepto:"map_dbl()",
+  titulo:"Devolver un vector numérico",
+  consigna:"Calculá el promedio de cada columna de <code>mtcars</code> y obtené un vector numérico (no una lista).",
+  datos:"mtcars",
+  codigo:["___1___(mtcars, mean)"],
+  huecos:[{respuestas:["map_dbl"], ancho:10}],
+  pistas:["El sufijo de la función indica el tipo del vector de salida.","<em>Double</em> es el tipo de los números con decimales en R."],
+  explicacion:"<code>map_dbl()</code> devuelve un vector de tipo double y falla si algún resultado no es un único número. Esa exigencia es una ventaja: te avisa temprano cuando algo salió distinto de lo esperado.",
+  fallo:"<code>map()</code> devolvería una lista. Necesitás la variante que simplifica a vector numérico."
+},
+{
+  modulo:10, dificultad:"media", tipo:"codigo", concepto:"map_chr()",
+  titulo:"Salida de texto",
+  consigna:"Obtené la clase de cada columna de <code>penguins</code> como un vector de texto.",
+  datos:"penguins",
+  codigo:["___1___(penguins, class)"],
+  huecos:[{respuestas:["map_chr"], ancho:10}],
+  pistas:["El sufijo indica el tipo de salida: acá querés caracteres.","<em>Character</em>, abreviado."],
+  explicacion:"<code>map_chr()</code> devuelve un vector de texto. Si alguna columna tuviera más de una clase (como los factores ordenados), la función fallaría y habría que usar <code>map()</code>.",
+  fallo:"Fijate qué tipo de dato tiene que tener el vector de salida y qué sufijo le corresponde."
+},
+{
+  modulo:10, dificultad:"dificil", tipo:"codigo", concepto:"funciones anónimas",
+  titulo:"Función anónima con fórmula",
+  consigna:"Calculá el promedio de cada columna de <code>airquality</code> ignorando los NA. Como <code>mean()</code> necesita un argumento extra, hay que escribir una función anónima con la sintaxis de fórmula.",
+  datos:"airquality",
+  codigo:["map_dbl(airquality, ___1___ mean(___2___, na.rm = TRUE))"],
+  huecos:[{respuestas:["~"], ancho:4, estricto:true},{respuestas:[".x"], ancho:5}],
+  pistas:["La fórmula empieza con un símbolo de una sola tecla.","Dentro de la fórmula, el elemento actual se nombra con un punto seguido de una letra."],
+  explicacion:"En purrr, <code>~ mean(.x, na.rm = TRUE)</code> define una función anónima donde <code>.x</code> es cada elemento. La sintaxis moderna equivalente es <code>\\(x) mean(x, na.rm = TRUE)</code>.",
+  fallo:"La fórmula se abre con la virgulilla y el elemento actual se referencia con un nombre especial que empieza con punto."
+},
+{
+  modulo:10, dificultad:"dificil", tipo:"codigo", concepto:"map2()",
+  titulo:"Recorrer dos vectores a la vez",
+  consigna:"Tenés dos vectores, <code>precios</code> y <code>cantidades</code>, del mismo largo. Calculá el total de cada operación recorriéndolos en paralelo y devolviendo un vector numérico.",
+  codigo:["___1___(precios, cantidades, ~ .x * ___2___)"],
+  huecos:[{respuestas:["map2_dbl"], ancho:11},{respuestas:[".y"], ancho:5}],
+  pistas:["Cuando hay dos entradas, la familia cambia de nombre y agrega un número.","El segundo elemento se nombra con la letra siguiente a la del primero."],
+  explicacion:"<code>map2()</code> recorre dos vectores en paralelo: <code>.x</code> es el elemento del primero y <code>.y</code> el del segundo. El sufijo <code>_dbl</code> hace que devuelva un vector numérico. Para tres o más entradas se usa <code>pmap()</code>.",
+  fallo:"Con <code>map()</code> solo podés recorrer una entrada. Y fijate cómo se nombra el elemento de la segunda."
+},
+{
+  modulo:10, dificultad:"dificil", tipo:"codigo", concepto:"map_df()",
+  titulo:"Leer varios archivos de una vez",
+  consigna:"Tenés un vector <code>rutas</code> con las rutas de varios CSV de la misma estructura. Leelos todos y devolvelos apilados en una sola tabla.",
+  codigo:["___1___(rutas, read_csv)"],
+  huecos:[{respuestas:["map_df","map_dfr","list_rbind"], ancho:10}],
+  pistas:["El sufijo indica que la salida es un data frame.","Las filas de cada archivo se apilan una debajo de la otra."],
+  explicacion:"<code>map_df()</code> (o <code>map_dfr()</code>) aplica la función a cada elemento y apila los resultados en una sola tabla. La alternativa moderna es <code>map(rutas, read_csv) |&gt; list_rbind()</code>.",
+  fallo:"<code>map()</code> devolvería una lista de tablas separadas. Falta el sufijo que las apila en una sola."
+},
+{
+  modulo:10, dificultad:"media", tipo:"opcion", concepto:"walk()",
+  titulo:"Cuando no interesa el resultado",
+  consigna:"Querés guardar varias tablas en disco recorriendo una lista. No te interesa el valor devuelto, solo el efecto de escribir los archivos. ¿Qué usás?",
+  opciones:[
+    "walk2(tablas, rutas, write_csv)",
+    "map2(tablas, rutas, write_csv)",
+    "map_dbl(tablas, write_csv)",
+    "pmap_chr(tablas, write_csv)"
+  ],
+  correcta:0,
+  pistas:["Hay una familia de purrr pensada para efectos colaterales.","Se llama como la palabra inglesa para caminar."],
+  explicacion:"<code>walk()</code> y <code>walk2()</code> recorren igual que <code>map()</code> pero devuelven la entrada de forma invisible, sin llenar la consola con resultados. Se usan para escribir archivos, imprimir o guardar gráficos.",
+  fallo:"Esas opciones funcionan, pero devuelven un objeto que no vas a usar. Existe una familia específica para efectos colaterales."
+},
+
+/* ---------------- MÓDULO 11 — ggplot2 ---------------- */
+{
+  modulo:11, dificultad:"facil", tipo:"codigo", concepto:"ggplot() + aes()",
+  titulo:"El esqueleto de un gráfico",
+  consigna:"Armá un gráfico de dispersión del largo de aleta contra el peso corporal de los pingüinos.",
+  datos:"penguins",
+  codigo:[
+    "ggplot(penguins, ___1___(x = flipper_length_mm, y = body_mass_g)) +",
+    "  ___2___()"
+  ],
+  huecos:[{respuestas:["aes"], ancho:6},{respuestas:["geom_point"], ancho:13}],
+  pistas:["La función que vincula variables con propiedades visuales tiene tres letras.","Un gráfico de dispersión se dibuja con puntos."],
+  explicacion:"<code>aes()</code> define el mapeo entre variables y propiedades visuales; la capa <code>geom_point()</code> es la que efectivamente dibuja. Las capas se suman con <code>+</code>, no con el pipe.",
+  fallo:"Revisá cuál es la función de mapeo estético y qué geometría corresponde a un gráfico de dispersión."
+},
+{
+  modulo:11, dificultad:"facil", tipo:"codigo", concepto:"+ contra |>",
+  titulo:"El operador de ggplot",
+  consigna:"Completá el operador que encadena las capas de un gráfico.",
+  datos:"penguins",
+  codigo:[
+    "ggplot(penguins, aes(x = species, y = body_mass_g)) ___1___",
+    "  geom_boxplot()"
+  ],
+  huecos:[{respuestas:["+"], ancho:4, estricto:true}],
+  pistas:["ggplot2 es anterior al pipe y usa su propio operador.","Es un solo carácter, el mismo que se usa para sumar."],
+  explicacion:"En ggplot2 las capas se suman con <code>+</code>. El pipe se usa para llegar hasta los datos; una vez que empezás el gráfico, todo se encadena con <code>+</code>.",
+  fallo:"El pipe pasa el objeto como primer argumento de una función, que no es lo que hace falta para agregar capas a un gráfico."
+},
+{
+  modulo:11, dificultad:"media", tipo:"codigo", concepto:"geom_col() contra geom_bar()",
+  titulo:"Barras con valores ya calculados",
+  consigna:"Ya tenés la tabla <code>resumen</code> con las columnas <code>sucursal</code> y <code>total</code>. Dibujá un gráfico de barras con esos totales, sin que ggplot cuente nada.",
+  codigo:[
+    "ggplot(resumen, aes(x = sucursal, y = total)) +",
+    "  ___1___()"
+  ],
+  huecos:[{respuestas:["geom_col"], ancho:11}],
+  pistas:["Hay dos geometrías de barras: una cuenta filas y la otra usa el valor de una variable.","La que usa el valor ya calculado se llama como la palabra inglesa para columna."],
+  explicacion:"<code>geom_col()</code> usa la altura que le pasás en <code>y</code>. <code>geom_bar()</code> cuenta las filas de cada categoría y por eso no lleva <code>y</code>.",
+  fallo:"Esa geometría cuenta filas por su cuenta y no acepta un <code>y</code> ya calculado."
+},
+{
+  modulo:11, dificultad:"media", tipo:"codigo", concepto:"geom_histogram()",
+  titulo:"Distribución de una variable",
+  consigna:"Graficá la distribución del peso de los pingüinos con intervalos de 250 gramos.",
+  datos:"penguins",
+  codigo:[
+    "ggplot(penguins, aes(x = body_mass_g)) +",
+    "  ___1___(binwidth = ___2___)"
+  ],
+  huecos:[{respuestas:["geom_histogram"], ancho:16},{respuestas:["250"], ancho:6}],
+  pistas:["Para una sola variable numérica continua, la geometría clásica es el histograma.","El ancho del intervalo lo dice la consigna."],
+  explicacion:"El histograma solo necesita <code>x</code>: el eje <code>y</code> lo calcula ggplot contando casos por intervalo. Vale la pena fijar <code>binwidth</code> en lugar de aceptar el valor por defecto.",
+  fallo:"Revisá qué geometría corresponde a la distribución de una variable continua y dónde va el ancho del intervalo."
+},
+{
+  modulo:11, dificultad:"media", tipo:"codigo", concepto:"color dentro de aes()",
+  titulo:"Colorear por una variable",
+  consigna:"Al gráfico de dispersión agregale que el color de los puntos dependa de la especie.",
+  datos:"penguins",
+  codigo:[
+    "ggplot(penguins, aes(",
+    "  x = flipper_length_mm,",
+    "  y = body_mass_g,",
+    "  ___1___ = species",
+    ")) +",
+    "  geom_point()"
+  ],
+  huecos:[{respuestas:["color","colour"], ancho:8}],
+  pistas:["Es una propiedad estética más, igual que x e y.","Va adentro de <code>aes()</code> porque depende de una variable."],
+  explicacion:"Cuando el color depende de una variable, el mapeo va dentro de <code>aes()</code>. Si querés un color fijo para todos los puntos, va afuera: <code>geom_point(color = \"steelblue\")</code>.",
+  fallo:"Buscá el nombre de la propiedad estética que controla el color de los puntos."
+},
+{
+  modulo:11, dificultad:"dificil", tipo:"opcion", concepto:"aes() y los colores fijos",
+  titulo:"Adentro o afuera de aes()",
+  consigna:"Querés que todos los puntos del gráfico sean azules, sin que el color represente ninguna variable. ¿Cuál es la forma correcta?",
+  datos:"penguins",
+  opciones:[
+    "geom_point(color = \"blue\")",
+    "geom_point(aes(color = \"blue\"))",
+    "aes(color = blue)",
+    "geom_point(aes(blue))"
+  ],
+  correcta:0,
+  pistas:["Adentro de <code>aes()</code> va lo que depende de una variable de los datos.","Un color fijo no depende de ninguna columna."],
+  explicacion:"Si escribís <code>aes(color = \"blue\")</code>, ggplot interpreta <code>\"blue\"</code> como una variable con un único valor: pinta todo de rojo y dibuja una leyenda inútil. Los valores fijos van fuera de <code>aes()</code>.",
+  fallo:"Al poner un valor fijo dentro de <code>aes()</code>, ggplot lo trata como si fuera una variable más de los datos."
+},
+{
+  modulo:11, dificultad:"media", tipo:"codigo", concepto:"facet_wrap()",
+  titulo:"Un panel por categoría",
+  consigna:"Repetí el gráfico de dispersión en un panel separado para cada isla.",
+  datos:"penguins",
+  codigo:[
+    "ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g)) +",
+    "  geom_point() +",
+    "  ___1___(~ island)"
+  ],
+  huecos:[{respuestas:["facet_wrap"], ancho:12}],
+  pistas:["Los paneles múltiples en ggplot se llaman <em>facets</em>.","Con una sola variable se usa la versión que acomoda los paneles en varias filas."],
+  explicacion:"<code>facet_wrap(~ variable)</code> genera un panel por categoría y los acomoda automáticamente. <code>facet_grid()</code> se usa cuando querés cruzar dos variables en filas y columnas.",
+  fallo:"Con una sola variable de paneleo corresponde la función que los envuelve en varias filas, no la que arma una grilla de dos dimensiones."
+},
+{
+  modulo:11, dificultad:"media", tipo:"codigo", concepto:"labs()",
+  titulo:"Poner títulos",
+  consigna:"Agregale al gráfico el título <code>\"Peso y largo de aleta\"</code> y la etiqueta <code>\"Largo de aleta (mm)\"</code> en el eje horizontal.",
+  datos:"penguins",
+  codigo:[
+    "ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g)) +",
+    "  geom_point() +",
+    "  ___1___(",
+    "    title = \"Peso y largo de aleta\",",
+    "    ___2___ = \"Largo de aleta (mm)\"",
+    "  )"
+  ],
+  huecos:[{respuestas:["labs"], ancho:7},{respuestas:["x"], ancho:4}],
+  pistas:["La función de etiquetas es la abreviatura de <em>labels</em>.","El eje horizontal se nombra igual que en <code>aes()</code>."],
+  explicacion:"<code>labs()</code> concentra título, subtítulo, etiquetas de ejes, leyenda y nota al pie. Las etiquetas de eje se nombran igual que las propiedades estéticas: <code>x</code>, <code>y</code>, <code>color</code>, etc.",
+  fallo:"Revisá el nombre de la función de etiquetas y cómo se identifica el eje horizontal."
+},
+{
+  modulo:11, dificultad:"media", tipo:"codigo", concepto:"geom_smooth()",
+  titulo:"Agregar una recta de ajuste",
+  consigna:"Sumale al gráfico de dispersión una recta de regresión lineal.",
+  datos:"penguins",
+  codigo:[
+    "ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g)) +",
+    "  geom_point() +",
+    "  ___1___(method = \"___2___\")"
+  ],
+  huecos:[{respuestas:["geom_smooth"], ancho:13},{respuestas:["lm"], ancho:5}],
+  pistas:["La geometría que ajusta una curva a los datos se llama como la palabra inglesa para suavizar.","El método de regresión lineal en R se abrevia con dos letras."],
+  explicacion:"<code>geom_smooth(method = \"lm\")</code> ajusta una recta por mínimos cuadrados. Sin especificar el método, ggplot elige loess para muestras chicas, que es una curva y no una recta.",
+  fallo:"La geometría es la que suaviza, y el método lineal se abrevia con las iniciales de <em>linear model</em>."
+},
+{
+  modulo:11, dificultad:"dificil", tipo:"codigo", concepto:"scale_y_continuous()",
+  titulo:"Cambiar la escala del eje",
+  consigna:"Fijá los cortes del eje vertical en 3000, 4000, 5000 y 6000.",
+  datos:"penguins",
+  codigo:[
+    "ggplot(penguins, aes(x = species, y = body_mass_g)) +",
+    "  geom_boxplot() +",
+    "  ___1___(breaks = ___2___)"
+  ],
+  huecos:[{respuestas:["scale_y_continuous"], ancho:20},{respuestas:["c(3000, 4000, 5000, 6000)","seq(3000, 6000, by = 1000)"], ancho:28}],
+  pistas:["Las funciones de escala se nombran <code>scale_</code> + eje + tipo de variable.","El peso es una variable continua y está en el eje vertical."],
+  explicacion:"<code>scale_y_continuous()</code> controla el eje vertical cuando la variable es continua: cortes, límites, formato de las etiquetas. La familia sigue siempre el patrón <code>scale_ESTÉTICA_TIPO()</code>.",
+  fallo:"Fijate qué eje estás tocando y de qué tipo es la variable: el nombre de la función junta esas dos cosas."
+},
+{
+  modulo:11, dificultad:"dificil", tipo:"bug", concepto:"errores frecuentes",
+  titulo:"El pipe que se coló en el gráfico",
+  consigna:"Este código da error. Tocá la línea donde está el problema.",
+  datos:"penguins",
+  codigo:[
+    "penguins |>",
+    "  ggplot(aes(x = species, y = body_mass_g)) |>",
+    "  geom_boxplot()"
+  ],
+  linea_bug:2,
+  pistas:["Fijate qué operador conecta cada paso.","Los datos llegan por pipe, pero las capas del gráfico no se encadenan así."],
+  explicacion:"Las capas de ggplot se suman con <code>+</code>. El pipe sirve para llegar hasta <code>ggplot()</code>, pero de ahí en adelante hay que usar <code>+</code>.",
+  fallo:"Esa línea está bien. El problema es el operador que conecta el gráfico con su capa geométrica."
+},
+
+/* ---------------- MÓDULO 12 — Integradores ---------------- */
+{
+  modulo:12, dificultad:"dificil", tipo:"codigo", concepto:"pipeline completo",
+  titulo:"Top 5 de sucursales",
+  consigna:"Partiendo de <code>ventas</code>, quedate solo con las operaciones de la categoría <code>\"Bebidas\"</code>, calculá la facturación total por sucursal (unidades por precio unitario), ordenala de mayor a menor y conservá las cinco primeras.",
+  datos:"ventas",
+  codigo:[
+    "ventas |>",
+    "  filter(___1___) |>",
+    "  mutate(monto = ___2___) |>",
+    "  group_by(___3___) |>",
+    "  summarise(facturacion = ___4___) |>",
+    "  arrange(___5___) |>",
+    "  slice_head(n = ___6___)"
+  ],
+  huecos:[
+    {respuestas:["categoria == \"Bebidas\""], ancho:24},
+    {respuestas:["unidades * precio_unit","precio_unit * unidades"], ancho:24},
+    {respuestas:["sucursal"], ancho:11},
+    {respuestas:["sum(monto)","sum(monto, na.rm = TRUE)"], ancho:22},
+    {respuestas:["desc(facturacion)","-facturacion"], ancho:20},
+    {respuestas:["5"], ancho:4}
+  ],
+  pistas:["Seguí el orden del pipeline: filtro, columna nueva, agrupamiento, resumen, orden y recorte.","La facturación de la sucursal es la suma de los montos de sus ventas, y el recorte final va sobre la tabla ya ordenada."],
+  explicacion:"El monto se calcula fila por fila con <code>mutate()</code> y recién después se suma por grupo. Ordenar por <code>desc()</code> y recortar con <code>slice_head()</code> equivale a usar <code>slice_max(facturacion, n = 5)</code>.",
+  fallo:"Revisá qué columna existe en cada paso: no podés resumir una variable que todavía no creaste ni ordenar por una que no está en la tabla resumida."
+},
+{
+  modulo:12, dificultad:"dificil", tipo:"codigo", concepto:"join + agrupamiento",
+  titulo:"Facturación por provincia",
+  consigna:"Cruzá <code>pedidos</code> con <code>clientes</code> para calcular el monto total pedido por provincia, conservando todos los pedidos y ordenando el resultado de mayor a menor.",
+  datos:"pedidos",
+  codigo:[
+    "pedidos |>",
+    "  ___1___(clientes, by = \"id_cliente\") |>",
+    "  group_by(___2___) |>",
+    "  summarise(monto_total = ___3___) |>",
+    "  arrange(___4___)"
+  ],
+  huecos:[
+    {respuestas:["left_join"], ancho:12},
+    {respuestas:["provincia"], ancho:12},
+    {respuestas:["sum(monto, na.rm = TRUE)","sum(monto)"], ancho:26},
+    {respuestas:["desc(monto_total)","-monto_total"], ancho:20}
+  ],
+  pistas:["La provincia está en la tabla de clientes: primero hay que traerla.","Conservar todos los pedidos define qué tipo de join corresponde."],
+  explicacion:"Sin el join la columna <code>provincia</code> no existe en <code>pedidos</code>. Se usa <code>left_join()</code> porque hay que conservar todos los pedidos, incluso los de clientes sin ficha.",
+  fallo:"Revisá de qué tabla viene cada columna que estás usando y si el join que elegiste conserva todos los pedidos."
+},
+{
+  modulo:12, dificultad:"dificil", tipo:"codigo", concepto:"pivot + resumen",
+  titulo:"De formato ancho a una comparación",
+  consigna:"Partiendo de <code>censo</code> en formato ancho, pasá a formato largo y calculá la población total del país en cada año.",
+  datos:"censo",
+  codigo:[
+    "censo |>",
+    "  ___1___(",
+    "    cols = starts_with(\"pob_\"),",
+    "    names_to = \"anio\",",
+    "    values_to = \"poblacion\"",
+    "  ) |>",
+    "  group_by(___2___) |>",
+    "  summarise(total = ___3___)"
+  ],
+  huecos:[
+    {respuestas:["pivot_longer"], ancho:14},
+    {respuestas:["anio"], ancho:7},
+    {respuestas:["sum(poblacion, na.rm = TRUE)","sum(poblacion)"], ancho:30}
+  ],
+  pistas:["Para poder agrupar por año, el año tiene que ser una columna y no un nombre de columna.","Después de pivotear, las columnas disponibles son provincia, anio y poblacion."],
+  explicacion:"El año está escondido en los nombres de columna, así que hay que llevarlo a una variable antes de poder agrupar. Ese es el problema que resuelve el formato largo.",
+  fallo:"Fijate qué columnas existen después del pivoteo: son las que podés usar en el agrupamiento y el resumen."
+},
+{
+  modulo:12, dificultad:"dificil", tipo:"codigo", concepto:"case_when + group_by",
+  titulo:"Clasificar y resumir",
+  consigna:"En <code>empleados</code>, clasificá los salarios en <code>\"bajo\"</code> (menos de 500000), <code>\"medio\"</code> (menos de 900000) y <code>\"alto\"</code>, y contá cuántos empleados hay en cada tramo.",
+  datos:"empleados",
+  codigo:[
+    "empleados |>",
+    "  mutate(tramo = ___1___(",
+    "    salario < 500000 ~ \"bajo\",",
+    "    ___2___ ~ \"medio\",",
+    "    .default = \"alto\"",
+    "  )) |>",
+    "  ___3___(tramo)"
+  ],
+  huecos:[
+    {respuestas:["case_when"], ancho:12},
+    {respuestas:["salario < 900000","salario <= 899999"], ancho:20},
+    {respuestas:["count"], ancho:8}
+  ],
+  pistas:["Las condiciones se evalúan en orden, así que la segunda no necesita repetir la primera.","Para la tabla de frecuencias hay un verbo que hace el trabajo de un solo paso."],
+  explicacion:"Como <code>case_when()</code> se queda con la primera condición verdadera, la segunda no necesita decir <code>salario &gt;= 500000</code>. <code>count(tramo)</code> arma la tabla de frecuencias de una sola vez.",
+  fallo:"Revisá si la segunda condición está sobre-especificada o mal cortada, y qué verbo devuelve una tabla de frecuencias."
+},
+{
+  modulo:12, dificultad:"dificil", tipo:"orden", concepto:"pipeline completo",
+  titulo:"Limpieza y resumen de una encuesta",
+  consigna:"Ordená el pipeline que se queda con los adultos de la encuesta, descarta los ingresos faltantes, calcula el ingreso promedio por provincia y devuelve las provincias ordenadas de mayor a menor ingreso.",
+  datos:"encuesta",
+  lineas:[
+    {t:"encuesta |>", s:0},
+    {t:"  filter(edad >= 18) |>", s:0},
+    {t:"  drop_na(ingreso) |>", s:0},
+    {t:"  group_by(provincia) |>", s:0},
+    {t:"  summarise(ingreso_medio = mean(ingreso)) |>", s:0},
+    {t:"  arrange(desc(ingreso_medio))", s:0}
+  ],
+  pistas:["Primero se limpian las filas y después se resume.","No se puede ordenar por una variable que todavía no fue creada."],
+  explicacion:"Los pasos de limpieza de filas van antes del agrupamiento. Como los NA ya se descartaron con <code>drop_na()</code>, <code>mean()</code> no necesita <code>na.rm = TRUE</code>.",
+  fallo:"Fijate qué columnas existen en cada paso y en qué momento la tabla deja de tener una fila por hogar."
+},
+{
+  modulo:12, dificultad:"dificil", tipo:"bug", concepto:"errores frecuentes",
+  titulo:"El group_by que quedó colgado",
+  consigna:"Este pipeline calcula bien los promedios por sucursal, pero después el porcentaje sale mal: todos dan 100. Tocá la línea que causa el problema.",
+  datos:"ventas",
+  codigo:[
+    "ventas |>",
+    "  group_by(sucursal) |>",
+    "  summarise(total = sum(unidades)) |>",
+    "  group_by(sucursal) |>",
+    "  mutate(porcentaje = total / sum(total) * 100)"
+  ],
+  linea_bug:4,
+  pistas:["¿Sobre qué conjunto se calcula el denominador en la última línea?","Si la tabla queda agrupada por sucursal, cada grupo tiene una sola fila."],
+  explicacion:"Al reagrupar por sucursal, cada grupo queda con una sola fila, así que <code>sum(total)</code> es el propio total y el porcentaje siempre da 100. Esa línea sobra: el denominador tiene que ser el total general.",
+  fallo:"Esa línea está bien. Buscá el paso que hace que el denominador se calcule dentro de un grupo de una sola fila."
+},
+{
+  modulo:12, dificultad:"dificil", tipo:"codigo", concepto:"proporción por grupo",
+  titulo:"Participación de cada categoría",
+  consigna:"Calculá cuántas unidades se vendieron por sucursal y categoría, y agregá el porcentaje que representa cada categoría dentro de su sucursal.",
+  datos:"ventas",
+  codigo:[
+    "ventas |>",
+    "  group_by(sucursal, categoria) |>",
+    "  summarise(unidades = sum(unidades), .groups = \"drop\") |>",
+    "  group_by(___1___) |>",
+    "  ___2___(participacion = ___3___) |>",
+    "  ungroup()"
+  ],
+  huecos:[
+    {respuestas:["sucursal"], ancho:11},
+    {respuestas:["mutate"], ancho:9},
+    {respuestas:["unidades / sum(unidades) * 100","100 * unidades / sum(unidades)","unidades / sum(unidades)"], ancho:32}
+  ],
+  pistas:["El denominador tiene que ser el total de la sucursal, así que el agrupamiento del segundo tramo es por sucursal sola.","Como hay que conservar una fila por categoría, el verbo no puede ser el que colapsa la tabla."],
+  explicacion:"Después de resumir por sucursal y categoría, se reagrupa solo por sucursal para que <code>sum(unidades)</code> dé el total de esa sucursal. <code>mutate()</code> conserva la fila de cada categoría y le pega el porcentaje.",
+  fallo:"Revisá dos cosas: por qué variable conviene reagrupar para que el denominador sea el total de la sucursal, y si el verbo que elegiste conserva una fila por categoría."
+},
+{
+  modulo:12, dificultad:"dificil", tipo:"codigo", concepto:"pipeline con fechas",
+  titulo:"Serie mensual",
+  consigna:"Armá la serie mensual de facturación de 2024: quedate con las ventas de ese año, llevá cada fecha al primer día de su mes, sumá el monto por mes y ordená cronológicamente.",
+  datos:"ventas",
+  codigo:[
+    "ventas |>",
+    "  mutate(fecha = ymd(fecha)) |>",
+    "  filter(___1___ == 2024) |>",
+    "  mutate(mes = ___2___(fecha, unit = \"month\")) |>",
+    "  group_by(mes) |>",
+    "  summarise(facturacion = sum(unidades * precio_unit)) |>",
+    "  arrange(___3___)"
+  ],
+  huecos:[
+    {respuestas:["year(fecha)"], ancho:14},
+    {respuestas:["floor_date"], ancho:12},
+    {respuestas:["mes"], ancho:6}
+  ],
+  pistas:["Para filtrar por año hay que extraerlo de la fecha.","Para agrupar por mes conviene llevar la fecha al primer día del mes, no quedarse solo con el número de mes."],
+  explicacion:"<code>year()</code> extrae el año para el filtro y <code>floor_date()</code> arma una fecha por mes, que se ordena cronológicamente sin ambigüedad. Usar solo <code>month()</code> mezclaría meses de años distintos si el filtro no estuviera.",
+  fallo:"Revisá cómo se obtiene el año de una fecha y qué función devuelve una fecha redondeada al inicio del mes."
+},
+{
+  modulo:12, dificultad:"dificil", tipo:"codigo", concepto:"stringr + dplyr",
+  titulo:"Limpiar y contar",
+  consigna:"En <code>ventas</code>, normalizá la columna <code>sucursal</code> (sacando espacios de los bordes y pasando todo a minúsculas) y después contá cuántas ventas hay por sucursal, de la más frecuente a la menos frecuente.",
+  datos:"ventas",
+  codigo:[
+    "ventas |>",
+    "  mutate(sucursal = ___1___(___2___(sucursal))) |>",
+    "  count(sucursal, sort = ___3___)"
+  ],
+  huecos:[
+    {respuestas:["str_to_lower"], ancho:14},
+    {respuestas:["str_trim","str_squish"], ancho:11},
+    {respuestas:["TRUE"], ancho:6}
+  ],
+  pistas:["Las funciones anidadas se ejecutan de adentro hacia afuera.","<code>count()</code> tiene un argumento que ordena el resultado por frecuencia."],
+  explicacion:"Primero se recortan los espacios y después se pasa a minúsculas (el orden acá da lo mismo, pero conviene limpiar antes de comparar). <code>count(x, sort = TRUE)</code> devuelve la tabla ya ordenada de mayor a menor.",
+  fallo:"Fijate cuál de las dos funciones queda adentro y cuál afuera, y cómo se le pide a <code>count()</code> que ordene el resultado."
+},
+{
+  modulo:12, dificultad:"dificil", tipo:"orden", concepto:"pipeline con gráfico",
+  titulo:"Del dato al gráfico",
+  consigna:"Ordená el código que calcula el peso promedio por especie, reordena las especies según ese promedio y dibuja un gráfico de barras horizontal. Prestá atención a qué operador conecta cada paso.",
+  datos:"penguins",
+  lineas:[
+    {t:"penguins |>", s:0},
+    {t:"  group_by(species) |>", s:0},
+    {t:"  summarise(peso = mean(body_mass_g, na.rm = TRUE)) |>", s:0},
+    {t:"  mutate(species = fct_reorder(species, peso)) |>", s:0},
+    {t:"  ggplot(aes(x = peso, y = species)) +", s:0},
+    {t:"  geom_col()", s:0}
+  ],
+  pistas:["El reordenamiento del factor necesita que el peso promedio ya esté calculado.","El pipe llega hasta ggplot; a partir de ahí las capas se suman."],
+  explicacion:"El pipeline de datos termina en <code>ggplot()</code> y ahí cambia el operador: las capas se agregan con <code>+</code>. <code>fct_reorder()</code> tiene que ir después del resumen, porque necesita la variable <code>peso</code>.",
+  fallo:"Revisá en qué momento existe cada variable y con qué operador se conecta cada paso."
+}
+];
+
+/* ================================================================
+   MOTOR
+   ================================================================ */
+
+/* --- estado persistente --- */
+const CLAVE = "practica-r-v1";
+var _ls = true;
+try { localStorage.getItem("_test"); } catch(e){ _ls = false; }
+var estado = {};
+try { estado = _ls ? JSON.parse(localStorage.getItem(CLAVE) || "{}") : {}; } catch(e){ estado = {}; }
+if(typeof estado.ejercicios !== "object" || estado.ejercicios === null) estado.ejercicios = {};
+if(typeof estado.puntos !== "number") estado.puntos = 0;
+if(typeof estado.actual !== "number") estado.actual = 0;
+
+function fichaDe(i){
+  if(!estado.ejercicios[i]) estado.ejercicios[i] = {ok:false, intentos:0, pistas:0, respuestas:null, revelado:false};
+  return estado.ejercicios[i];
+}
+function persistir(){
+  if(_ls){ try { localStorage.setItem(CLAVE, JSON.stringify(estado)); } catch(e){} }
+}
+
+/* --- validación --- */
+/* Normaliza una respuesta para poder compararla sin castigar diferencias
+   irrelevantes de escritura. En modo estricto solo se limpian los espacios,
+   para no borrar distinciones que el propio ejercicio está evaluando. */
+function normalizar(txt, estricto){
+  var t = String(txt == null ? "" : txt);
+  t = t.replace(/[‘’]/g, "'").replace(/[“”]/g, '"');
+  t = t.replace(/\s+/g, " ").trim();
+  if(estricto) return t;
+  t = t.replace(/'/g, '"');                    /* comillas simples = dobles */
+  t = t.replace(/\|>/g, "%>%");                /* los dos pipes son equivalentes */
+  t = t.replace(/\bsummarize\b/g, "summarise");/* alias de dplyr */
+  t = t.replace(/\s*([=<>!+\-*\/,()\[\]&|~^:$@])\s*/g, "$1"); /* espacios alrededor de operadores */
+  return t;
+}
+function esCorrecta(valor, hueco){
+  var dado = normalizar(valor, hueco.estricto);
+  if(dado === "") return false;
+  for(var i=0;i<hueco.respuestas.length;i++){
+    if(dado === normalizar(hueco.respuestas[i], hueco.estricto)) return true;
+  }
+  return false;
+}
+
+/* --- utilidades --- */
+function esc(s){
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+function nombreModulo(n){
+  for(var i=0;i<MODULOS.length;i++){ if(MODULOS[i].n === n) return MODULOS[i].nombre; }
+  return "Módulo " + n;
+}
+function indicesDeModulo(n){
+  var r = [];
+  EJERCICIOS.forEach(function(ej, i){ if(ej.modulo === n) r.push(i); });
+  return r;
+}
+const ETIQUETA_TIPO = {codigo:"Completar código", opcion:"Selección múltiple", bug:"Encontrar el error", orden:"Ordenar el código"};
+const ETIQUETA_DIF = {facil:"Básico", media:"Intermedio", dificil:"Avanzado"};
+
+/* --- puntaje --- */
+function puntosDe(intento, uso_pistas){
+  var base = PUNTOS_POR_INTENTO[Math.min(intento - 1, PUNTOS_POR_INTENTO.length - 1)];
+  return Math.round(uso_pistas > 0 ? base * PENALIZA_PISTA : base);
+}
+function festejar(puntos){
+  var globo = document.createElement("div");
+  globo.className = "puntos-flotante";
+  globo.textContent = "+" + puntos + " puntos";
+  document.body.appendChild(globo);
+  setTimeout(function(){ globo.remove(); }, 1500);
+  var t = document.getElementById("tarjeta");
+  t.classList.add("festejo");
+  setTimeout(function(){ t.classList.remove("festejo"); }, 600);
+}
+
+/* --- encabezado y progreso --- */
+function pintarTope(){
+  var ej = EJERCICIOS[estado.actual];
+  var delModulo = indicesDeModulo(ej.modulo);
+  var posicion = delModulo.indexOf(estado.actual) + 1;
+  document.getElementById("ubicacion").innerHTML =
+    "Módulo " + ej.modulo + ": <b>" + esc(nombreModulo(ej.modulo)) + "</b> &rarr; Ejercicio " +
+    posicion + " de " + delModulo.length;
+
+  var resueltos = 0;
+  EJERCICIOS.forEach(function(_, i){ if(estado.ejercicios[i] && estado.ejercicios[i].ok) resueltos++; });
+  var pct = Math.round(resueltos / EJERCICIOS.length * 100);
+  document.getElementById("tanteo").innerHTML =
+    "<b>" + resueltos + "/" + EJERCICIOS.length + "</b> resueltos · " + pct + "% · <b>" + estado.puntos + "</b> pts";
+  document.getElementById("barraProg").style.width = pct + "%";
+
+  var cont = document.getElementById("modulos");
+  cont.innerHTML = MODULOS.map(function(m){
+    var idx = indicesDeModulo(m.n);
+    var hechos = idx.filter(function(i){ return estado.ejercicios[i] && estado.ejercicios[i].ok; }).length;
+    var clases = "mod";
+    if(m.n === EJERCICIOS[estado.actual].modulo) clases += " activo";
+    if(idx.length > 0 && hechos === idx.length) clases += " completo";
+    return '<button class="' + clases + '" data-m="' + m.n + '">' + esc(m.corto) +
+      '<span class="cuenta">' + hechos + "/" + idx.length + "</span></button>";
+  }).join("");
+}
+
+/* --- render de la tarjeta --- */
+function panelDatos(clave){
+  if(!clave || !DATASETS[clave]) return "";
+  var d = DATASETS[clave];
+  return '<details class="datos"><summary>Columnas de <code>' + esc(clave) + "</code></summary>" +
+    '<div class="cuerpo-datos">' + esc(d.desc) + '<div class="cols">' + esc(d.cols) + "</div></div></details>";
+}
+
+/* Convierte una línea de código con marcas ___n___ en HTML con inputs. */
+function lineaConHuecos(linea, ej, guardadas){
+  var partes = String(linea).split(/___(\d+)___/);
+  var html = "";
+  for(var k=0;k<partes.length;k++){
+    if(k % 2 === 0){
+      html += esc(partes[k]);
+    } else {
+      var n = Number(partes[k]) - 1;
+      var h = ej.huecos[n] || {respuestas:[""]};
+      var largo = h.ancho || Math.max(6, h.respuestas[0].length + 2);
+      var val = guardadas && guardadas[n] ? guardadas[n] : "";
+      html += '<input class="hueco" type="text" spellcheck="false" autocomplete="off" autocapitalize="off" ' +
+        'aria-label="Hueco ' + (n+1) + '" data-h="' + n + '" size="' + largo + '" value="' + esc(val) + '">';
+    }
+  }
+  return html;
+}
+
+function render(){
+  var i = estado.actual;
+  var ej = EJERCICIOS[i];
+  var ficha = fichaDe(i);
+  var cont = document.getElementById("tarjeta");
+
+  var cab = '<div class="ej-cab">' +
+    '<span class="ej-n">' + String(i+1).padStart(3,"0") + "</span>" +
+    '<span class="chip dif-' + ej.dificultad + '">' + ETIQUETA_DIF[ej.dificultad] + "</span>" +
+    '<span class="chip">' + esc(ETIQUETA_TIPO[ej.tipo] || ej.tipo) + "</span>" +
+    (ej.concepto ? '<span class="chip">' + esc(ej.concepto) + "</span>" : "") +
+    (ficha.ok ? '<span class="chip hecho">resuelto</span>' : "") +
+    "</div>";
+
+  cont.innerHTML = cab +
+    "<h2>" + ej.titulo + "</h2>" +
+    '<p class="consigna">' + ej.consigna + "</p>" +
+    panelDatos(ej.datos) +
+    '<div class="cuerpo"></div>' +
+    '<div class="barra">' +
+      '<button class="accion verificar">Comprobar</button>' +
+      '<button class="accion fantasma pista">💡 Pista</button>' +
+      '<button class="accion fantasma solucion-btn" disabled>Ver solución</button>' +
+      '<span class="espacio"></span>' +
+      '<button class="accion fantasma anterior">← Anterior</button>' +
+      '<button class="accion siguiente">Siguiente →</button>' +
+    "</div>" +
+    '<div class="pistas-cont"></div>' +
+    '<div class="solucion-cont"></div>' +
+    '<p class="feedback" role="status" aria-live="polite"></p>';
+
+  ({codigo:montarCodigo, opcion:montarOpcion, bug:montarBug, orden:montarOrden})[ej.tipo](ej, cont, i);
+
+  /* pistas ya reveladas en visitas anteriores */
+  for(var p=0;p<ficha.pistas;p++) mostrarPista(cont, ej, p);
+  if(ficha.revelado) mostrarSolucion(cont, ej);
+  actualizarBotonSolucion(cont, ej, ficha);
+
+  /* si ya estaba resuelto, se muestra así al volver */
+  if(ficha.ok){
+    var editor = cont.querySelector(".editor");
+    if(editor) editor.classList.add("ok");
+    var piezas = cont.querySelector(".piezas");
+    if(piezas) piezas.classList.add("ok");
+    var fb = cont.querySelector(".feedback");
+    fb.className = "feedback bien";
+    fb.innerHTML = "<b>✓ Ya lo resolviste.</b> " + (ej.explicacion || "");
+    cont.querySelector(".solucion-btn").disabled = true;
+  }
+
+  cont.querySelector(".pista").onclick = function(){
+    var f = fichaDe(estado.actual);
+    if(f.pistas >= (ej.pistas || []).length) return;
+    mostrarPista(cont, ej, f.pistas);
+    f.pistas++;
+    persistir();
+    actualizarBotonSolucion(cont, ej, f);
+  };
+  cont.querySelector(".solucion-btn").onclick = function(){
+    var f = fichaDe(estado.actual);
+    f.revelado = true; persistir();
+    mostrarSolucion(cont, ej);
+    this.disabled = true;
+  };
+  cont.querySelector(".anterior").onclick = function(){ ir(estado.actual - 1); };
+  cont.querySelector(".siguiente").onclick = function(){ ir(estado.actual + 1); };
+  cont.querySelector(".anterior").disabled = (i === 0);
+  cont.querySelector(".siguiente").disabled = (i === EJERCICIOS.length - 1);
+
+  cont.addEventListener("keydown", function(e){
+    if(e.key === "Enter" && e.target.classList.contains("hueco")){
+      e.preventDefault();
+      cont.querySelector(".verificar").click();
+    }
+  });
+
+  pintarTope();
+}
+
+function mostrarPista(cont, ej, indice){
+  var lista = ej.pistas || [];
+  if(indice >= lista.length) return;
+  var p = document.createElement("p");
+  p.className = "pista";
+  p.innerHTML = "<b>Pista " + (indice+1) + ".</b> " + lista[indice];
+  cont.querySelector(".pistas-cont").appendChild(p);
+  var btn = cont.querySelector(".pista");
+  if(indice + 1 >= lista.length){ btn.disabled = true; btn.textContent = "Sin más pistas"; }
+}
+
+function textoSolucion(ej){
+  if(ej.tipo === "codigo"){
+    return ej.codigo.map(function(l){
+      return l.replace(/___(\d+)___/g, function(_, n){ return ej.huecos[Number(n)-1].respuestas[0]; });
+    }).join("\n");
+  }
+  if(ej.tipo === "opcion") return ej.opciones[ej.correcta];
+  if(ej.tipo === "bug") return "El error está en la línea " + ej.linea_bug + ".";
+  if(ej.tipo === "orden") return ej.lineas.map(function(l){ return l.t; }).join("\n");
+  return "";
+}
+function mostrarSolucion(cont, ej){
+  var caja = cont.querySelector(".solucion-cont");
+  if(caja.querySelector(".solucion")) return;
+  var d = document.createElement("div");
+  d.className = "solucion";
+  d.innerHTML = "<b>Solución</b><br><code>" + esc(textoSolucion(ej)).replace(/\n/g, "<br>") + "</code>" +
+    (ej.explicacion ? '<div style="margin-top:8px;font-family:\'IBM Plex Sans\',sans-serif">' + ej.explicacion + "</div>" : "");
+  caja.appendChild(d);
+}
+function actualizarBotonSolucion(cont, ej, ficha){
+  var btn = cont.querySelector(".solucion-btn");
+  var agotadas = ficha.pistas >= (ej.pistas || []).length;
+  btn.disabled = ficha.revelado || (ficha.intentos < INTENTOS_PARA_SOLUCION && !agotadas);
+}
+
+/* Marca el ejercicio como resuelto, otorga puntos y muestra el festejo. */
+function acertar(cont, ej, i){
+  var ficha = fichaDe(i);
+  var f = cont.querySelector(".feedback");
+  if(!ficha.ok){
+    var suma = puntosDe(ficha.intentos, ficha.pistas);
+    ficha.ok = true;
+    estado.puntos += suma;
+    persistir();
+    festejar(suma);
+  }
+  f.className = "feedback bien";
+  f.innerHTML = "<b>✓ ¡Correcto!</b> " + (ej.explicacion || "");
+  cont.querySelector(".solucion-btn").disabled = true;
+  if(!cont.querySelector(".chip.hecho")){
+    var chip = document.createElement("span");
+    chip.className = "chip hecho";
+    chip.textContent = "resuelto";
+    cont.querySelector(".ej-cab").appendChild(chip);
+  }
+  pintarTope();
+}
+function errar(cont, ej, extra){
+  var f = cont.querySelector(".feedback");
+  f.className = "feedback mal";
+  f.innerHTML = "<b>✗ Todavía no.</b> " + (extra ? extra + " " : "") +
+    '<span class="explica">' + (ej.fallo || "Revisá la consigna con calma: la respuesta esperada es otra.") + "</span>";
+  actualizarBotonSolucion(cont, ej, fichaDe(estado.actual));
+}
+
+/* ---------- tipo: codigo ---------- */
+function montarCodigo(ej, cont, i){
+  var ficha = fichaDe(i);
+  var cuerpo = cont.querySelector(".cuerpo");
+  cuerpo.innerHTML = '<div class="editor">' + ej.codigo.map(function(l, k){
+    return '<div class="linea"><span class="num">' + (k+1) + '</span><span class="cod">' +
+      lineaConHuecos(l, ej, ficha.respuestas) + "</span></div>";
+  }).join("") + "</div>";
+
+  cont.querySelector(".verificar").onclick = function(){
+    var inputs = cuerpo.querySelectorAll(".hueco");
+    var guardadas = [], bien = 0, vacios = 0;
+    inputs.forEach(function(inp){
+      var n = Number(inp.dataset.h);
+      guardadas[n] = inp.value;
+      inp.classList.remove("bien","mal");
+      if(inp.value.trim() === ""){ vacios++; return; }
+      if(esCorrecta(inp.value, ej.huecos[n])){ inp.classList.add("bien"); bien++; }
+      else { inp.classList.add("mal"); }
+    });
+    ficha.respuestas = guardadas;
+    if(vacios === inputs.length){
+      persistir();
+      cont.querySelector(".feedback").className = "feedback mal";
+      cont.querySelector(".feedback").textContent = "Completá los huecos antes de comprobar.";
+      return;
+    }
+    ficha.intentos++;
+    persistir();
+    if(bien === ej.huecos.length){
+      cuerpo.querySelector(".editor").classList.add("ok");
+      acertar(cont, ej, i);
+    } else {
+      errar(cont, ej, bien + " de " + ej.huecos.length + " huecos correctos.");
+    }
+  };
+}
+
+/* ---------- tipo: opcion ---------- */
+function montarOpcion(ej, cont, i){
+  var ficha = fichaDe(i);
+  var cuerpo = cont.querySelector(".cuerpo");
+  var letras = "ABCDEFGH";
+  cuerpo.innerHTML = '<ul class="opciones">' + ej.opciones.map(function(op, k){
+    var marcada = (ficha.respuestas && ficha.respuestas[0] === k) ? " elegida" : "";
+    return '<li><label class="opcion' + marcada + '" data-o="' + k + '">' +
+      '<input type="radio" name="op-' + i + '" value="' + k + '"' + (marcada ? " checked" : "") + ">" +
+      '<span class="letra">' + letras[k] + ".</span>" +
+      '<span class="txt">' + esc(op) + "</span></label></li>";
+  }).join("") + "</ul>";
+
+  cuerpo.addEventListener("change", function(e){
+    if(!e.target.matches("input[type=radio]")) return;
+    cuerpo.querySelectorAll(".opcion").forEach(function(l){ l.classList.remove("elegida","bien","mal"); });
+    e.target.closest(".opcion").classList.add("elegida");
+  });
+
+  cont.querySelector(".verificar").onclick = function(){
+    var sel = cuerpo.querySelector("input[type=radio]:checked");
+    if(!sel){
+      cont.querySelector(".feedback").className = "feedback mal";
+      cont.querySelector(".feedback").textContent = "Elegí una opción antes de comprobar.";
+      return;
+    }
+    var elegida = Number(sel.value);
+    ficha.respuestas = [elegida];
+    ficha.intentos++;
+    persistir();
+    var label = cuerpo.querySelector('.opcion[data-o="' + elegida + '"]');
+    label.classList.remove("elegida");
+    if(elegida === ej.correcta){
+      label.classList.add("bien");
+      acertar(cont, ej, i);
+    } else {
+      label.classList.add("mal");
+      errar(cont, ej, "");
+    }
+  };
+}
+
+/* ---------- tipo: bug ---------- */
+function montarBug(ej, cont, i){
+  var ficha = fichaDe(i);
+  var cuerpo = cont.querySelector(".cuerpo");
+  cuerpo.innerHTML = '<div class="editor cazable">' + ej.codigo.map(function(l, k){
+    return '<div class="linea" data-l="' + (k+1) + '" tabindex="0"><span class="num">' + (k+1) +
+      '</span><span class="cod">' + esc(l) + "</span></div>";
+  }).join("") + "</div>";
+
+  var elegida = (ficha.respuestas && ficha.respuestas[0]) || null;
+  function marcar(l){
+    cuerpo.querySelectorAll(".linea").forEach(function(x){ x.classList.remove("elegida","acierto","error"); });
+    l.classList.add("elegida");
+    elegida = Number(l.dataset.l);
+  }
+  cuerpo.querySelectorAll(".linea").forEach(function(l){
+    if(Number(l.dataset.l) === elegida) l.classList.add("elegida");
+    l.onclick = function(){ marcar(l); };
+    l.onkeydown = function(e){ if(e.key === "Enter" || e.key === " "){ e.preventDefault(); marcar(l); } };
+  });
+
+  cont.querySelector(".verificar").onclick = function(){
+    if(!elegida){
+      cont.querySelector(".feedback").className = "feedback mal";
+      cont.querySelector(".feedback").textContent = "Tocá la línea donde creés que está el error.";
+      return;
+    }
+    ficha.respuestas = [elegida];
+    ficha.intentos++;
+    persistir();
+    var sel = cuerpo.querySelector('.linea[data-l="' + elegida + '"]');
+    sel.classList.remove("elegida");
+    if(elegida === ej.linea_bug){
+      sel.classList.add("acierto");
+      acertar(cont, ej, i);
+    } else {
+      sel.classList.add("error");
+      errar(cont, ej, "");
+    }
+  };
+}
+
+/* ---------- tipo: orden (Parsons) ---------- */
+function montarOrden(ej, cont, i){
+  var ficha = fichaDe(i);
+  var cuerpo = cont.querySelector(".cuerpo");
+  var ul = document.createElement("ul");
+  ul.className = "piezas";
+
+  var orden;
+  if(ficha.respuestas && ficha.respuestas.length === ej.lineas.length){
+    orden = ficha.respuestas.slice();
+  } else {
+    orden = ej.lineas.map(function(_, k){ return k; });
+    do { orden.sort(function(){ return Math.random() - .5; }); }
+    while(ej.lineas.length > 1 && orden.every(function(id, k){ return id === k; }));
+  }
+
+  orden.forEach(function(id){
+    var li = document.createElement("li");
+    li.className = "pieza"; li.draggable = true; li.dataset.id = id;
+    li.innerHTML = '<span class="mover"><button type="button" aria-label="Subir">▲</button>' +
+      '<button type="button" aria-label="Bajar">▼</button></span>' +
+      '<span class="pieza-txt">' + esc(ej.lineas[id].t) + "</span>";
+    var btns = li.querySelectorAll(".mover button");
+    btns[0].onclick = function(){ var p = li.previousElementSibling; if(p) ul.insertBefore(li, p); recordar(); };
+    btns[1].onclick = function(){ var n = li.nextElementSibling; if(n) ul.insertBefore(n, li); recordar(); };
+    ul.appendChild(li);
+  });
+
+  function recordar(){
+    ficha.respuestas = Array.from(ul.children).map(function(li){ return Number(li.dataset.id); });
+    persistir();
+  }
+
+  var tomada = null;
+  ul.addEventListener("dragstart", function(e){
+    tomada = e.target.closest(".pieza"); tomada.classList.add("arrastrando");
+  });
+  ul.addEventListener("dragend", function(){
+    if(tomada) tomada.classList.remove("arrastrando");
+    ul.querySelectorAll(".sobre").forEach(function(n){ n.classList.remove("sobre"); });
+    tomada = null; recordar();
+  });
+  ul.addEventListener("dragover", function(e){
+    e.preventDefault();
+    var sobre = e.target.closest(".pieza");
+    if(!sobre || sobre === tomada) return;
+    ul.querySelectorAll(".sobre").forEach(function(n){ n.classList.remove("sobre"); });
+    sobre.classList.add("sobre");
+    var r = sobre.getBoundingClientRect();
+    ul.insertBefore(tomada, (e.clientY - r.top) / r.height < .5 ? sobre : sobre.nextElementSibling);
+  });
+  cuerpo.appendChild(ul);
+
+  cont.querySelector(".verificar").onclick = function(){
+    recordar();
+    ficha.intentos++;
+    persistir();
+    var piezas = Array.from(ul.children);
+    var primerError = -1;
+    for(var k=0;k<piezas.length;k++){
+      if(Number(piezas[k].dataset.id) !== k){ primerError = k; break; }
+    }
+    if(primerError === -1){
+      ul.classList.add("ok");
+      acertar(cont, ej, i);
+    } else {
+      errar(cont, ej, primerError === 0 ? "La primera línea todavía no es la correcta." :
+        "Las primeras " + primerError + " líneas están bien; revisá qué va en el lugar " + (primerError+1) + ".");
+    }
+  };
+}
+
+/* --- navegación --- */
+function ir(i){
+  if(i < 0 || i >= EJERCICIOS.length) return;
+  estado.actual = i;
+  persistir();
+  render();
+  var y = document.getElementById("tarjeta").getBoundingClientRect().top + window.scrollY - 150;
+  window.scrollTo({top: Math.max(0, y), behavior: "smooth"});
+}
+
+document.getElementById("modulos").addEventListener("click", function(e){
+  var b = e.target.closest(".mod");
+  if(!b) return;
+  var idx = indicesDeModulo(Number(b.dataset.m));
+  if(!idx.length) return;
+  var pendiente = idx.find(function(i){ return !(estado.ejercicios[i] && estado.ejercicios[i].ok); });
+  ir(pendiente === undefined ? idx[0] : pendiente);
+});
+
+document.getElementById("reset").onclick = function(){
+  if(_ls) localStorage.removeItem(CLAVE);
+  location.reload();
+};
+
+/* --- arranque --- */
+if(estado.actual >= EJERCICIOS.length) estado.actual = 0;
+render();
+</script>
+</body>
+</html>
