@@ -1,0 +1,1677 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Qué esconde un promedio — Laboratorio de distribuciones</title>
+<style>
+:root{
+  --bg:#F7F5F0;--bg-alt:#EDEAE3;--bg-canvas:#FFFFFF;
+  --text:#2C2C2E;--text-sec:#636366;--heading:#1A2744;
+  --accent:#3170A2;--accent-light:#E3EEF6;
+  --green:#2D8659;--green-light:#D4EDDF;
+  --red:#D45A3A;--red-light:#FBEAE5;
+  --orange:#C87A1A;--orange-light:#FDF0DB;
+  --purple:#7B5EA7;--purple-light:#EDE7F6;
+  --blue:#5B9BD5;--teal:#2A8C8C;
+  --border:#DCDAD4;--shadow:rgba(28,28,30,.07);
+  --grid:#E4E1DA;
+  --font-d:Georgia,"Palatino Linotype","Book Antiqua",Palatino,serif;
+  --font-b:"Segoe UI",system-ui,-apple-system,sans-serif;
+  --font-m:"Cascadia Code","Fira Code",Consolas,monospace;
+  --cw:960px;
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#151820;--bg-alt:#1C2028;--bg-canvas:#1E2430;
+  --text:#D4D2CC;--text-sec:#8E8E93;--heading:#B8C8E0;
+  --accent:#6AADE8;--accent-light:#1A2A3A;
+  --green:#4DBB7F;--green-light:#1A3329;
+  --red:#F07A5A;--red-light:#3D2219;
+  --orange:#E8A84C;--orange-light:#3D2E14;
+  --purple:#A78BDB;--purple-light:#2A2040;
+  --blue:#7FC4F5;--teal:#4FC0C0;
+  --border:#2A2E36;--shadow:rgba(0,0,0,.25);--grid:#262B34;
+}}
+:root[data-theme="dark"]{
+  --bg:#151820;--bg-alt:#1C2028;--bg-canvas:#1E2430;
+  --text:#D4D2CC;--text-sec:#8E8E93;--heading:#B8C8E0;
+  --accent:#6AADE8;--accent-light:#1A2A3A;
+  --green:#4DBB7F;--green-light:#1A3329;
+  --red:#F07A5A;--red-light:#3D2219;
+  --orange:#E8A84C;--orange-light:#3D2E14;
+  --purple:#A78BDB;--purple-light:#2A2040;
+  --blue:#7FC4F5;--teal:#4FC0C0;
+  --border:#2A2E36;--shadow:rgba(0,0,0,.25);--grid:#262B34;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:110px}
+body{background:var(--bg);color:var(--text);font-family:var(--font-b);font-size:17px;line-height:1.7}
+.wrap{max-width:var(--cw);margin:0 auto;padding:0 1.25rem}
+
+/* ---------- barra superior ---------- */
+.tope{position:sticky;top:0;z-index:50;background:var(--bg);border-bottom:1px solid var(--border);backdrop-filter:blur(6px)}
+.tope-fila{display:flex;align-items:center;gap:1rem;padding:.6rem 0;flex-wrap:wrap}
+.marca{font-family:var(--font-d);font-weight:700;color:var(--heading);font-size:1rem;white-space:nowrap}
+.tope-sp{flex:1}
+.prog-txt{font-size:.78rem;color:var(--text-sec);font-family:var(--font-m);white-space:nowrap}
+.barra-prog{height:3px;background:var(--bg-alt)}
+.barra-prog i{display:block;height:100%;width:0;background:var(--accent);transition:width .5s cubic-bezier(.4,0,.2,1)}
+.modulos{display:flex;gap:.3rem;overflow-x:auto;padding:.45rem 0 .55rem;scrollbar-width:thin}
+.modulos a{font-size:.76rem;padding:.28rem .6rem;border:1px solid var(--border);border-radius:20px;color:var(--text-sec);text-decoration:none;white-space:nowrap;transition:all .15s}
+.modulos a:hover{border-color:var(--accent);color:var(--accent)}
+.modulos a.visto{background:var(--green-light);border-color:var(--green);color:var(--green)}
+
+/* ---------- tipografía ---------- */
+h1{font-family:var(--font-d);font-size:clamp(2rem,5vw,2.7rem);color:var(--heading);line-height:1.12;letter-spacing:-.025em;margin-bottom:.5rem}
+h2{font-family:var(--font-d);font-size:1.6rem;color:var(--heading);line-height:1.25;margin-bottom:.3rem}
+h3{font-family:var(--font-d);font-size:1.1rem;color:var(--heading);margin:1.6rem 0 .5rem}
+h4{font-family:var(--font-b);font-size:.78rem;text-transform:uppercase;letter-spacing:.09em;color:var(--text-sec);font-weight:600;margin-bottom:.5rem}
+p{margin-bottom:1rem;max-width:68ch}
+strong{color:var(--heading);font-weight:600}
+.eyebrow{font-size:.74rem;text-transform:uppercase;letter-spacing:.13em;color:var(--accent);font-weight:600;margin-bottom:.35rem}
+.subtitle{font-family:var(--font-d);font-size:1.1rem;color:var(--text-sec);font-style:italic;margin-bottom:1.5rem;max-width:60ch}
+.motiva{font-family:var(--font-d);font-size:1.12rem;color:var(--text-sec);font-style:italic;margin:.4rem 0 1.2rem;max-width:60ch}
+small,.chico{font-size:.82rem;color:var(--text-sec)}
+
+section.mod{padding:3rem 0 1rem;border-top:1px solid var(--border);margin-top:2rem}
+section.mod:first-of-type{border-top:none}
+
+/* ---------- tarjetas / paneles ---------- */
+.panel{background:var(--bg-canvas);border:1px solid var(--border);border-radius:10px;padding:1.1rem;margin:1.1rem 0;box-shadow:0 2px 12px var(--shadow)}
+.panel-t{font-family:var(--font-d);font-size:1rem;color:var(--heading);font-weight:700;margin-bottom:.7rem}
+figure{margin:0}
+svg.graf{width:100%;height:auto;display:block;overflow:visible}
+.leyenda{display:flex;flex-wrap:wrap;gap:.9rem;font-size:.8rem;color:var(--text-sec);margin-top:.5rem}
+.leyenda span{display:flex;align-items:center;gap:.35rem}
+.sw{width:14px;height:3px;border-radius:2px;display:inline-block}
+.sw.pt{height:10px;width:10px;border-radius:50%}
+
+/* ---------- controles ---------- */
+.btns{display:flex;flex-wrap:wrap;gap:.35rem;margin:.6rem 0}
+.btn{font-family:var(--font-b);font-size:.82rem;padding:.38rem .8rem;border:1px solid var(--border);border-radius:5px;background:var(--bg);color:var(--text);cursor:pointer;transition:all .15s;font-weight:500}
+.btn:hover{background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
+.btn.act{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn.act:hover{color:#fff}
+.sliders{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:.5rem .9rem;margin:.7rem 0}
+.sl{display:flex;flex-direction:column;gap:.1rem}
+.sl.oculto{display:none}
+.sl-cab{display:flex;justify-content:space-between;align-items:baseline;font-size:.79rem;color:var(--text-sec)}
+.sl-cab b{font-family:var(--font-m);font-size:.79rem;color:var(--accent);font-weight:600}
+.sl input[type=range]{width:100%;accent-color:var(--accent);cursor:pointer}
+label.chk{display:inline-flex;align-items:center;gap:.35rem;font-size:.82rem;color:var(--text-sec);cursor:pointer;margin-right:.9rem}
+label.chk input{accent-color:var(--accent);cursor:pointer}
+
+/* ---------- tarjetas de estadísticos ---------- */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.55rem;margin:.8rem 0}
+.stat{background:var(--bg-alt);border-radius:8px;padding:.6rem .7rem;border-left:3px solid var(--border)}
+.stat .k{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-sec);font-weight:600}
+.stat .v{font-family:var(--font-m);font-size:1.12rem;font-weight:600;color:var(--heading);transition:color .3s}
+.stat .d{font-size:.72rem;color:var(--text-sec)}
+.stat.media{border-left-color:var(--accent)}.stat.media .v{color:var(--accent)}
+.stat.mediana{border-left-color:var(--green)}.stat.mediana .v{color:var(--green)}
+.stat.moda{border-left-color:var(--purple)}.stat.moda .v{color:var(--purple)}
+.stat.disp{border-left-color:var(--orange)}
+.stat.ratio{border-left-color:var(--teal)}
+.flash{animation:flash .5s ease}
+@keyframes flash{0%{background:var(--accent-light)}100%{background:var(--bg-alt)}}
+
+/* ---------- cajas pedagógicas ---------- */
+.observa{background:var(--accent-light);border-left:3px solid var(--accent);padding:.8rem 1rem;border-radius:0 8px 8px 0;margin:1.1rem 0;font-size:.92rem}
+.observa b{display:block;font-family:var(--font-d);color:var(--heading);margin-bottom:.3rem}
+.observa ul{margin:.2rem 0 0 1.1rem}
+.observa li{margin-bottom:.15rem}
+details.expli{background:var(--bg-alt);border:1px solid var(--border);border-radius:8px;padding:.6rem .9rem;margin:1rem 0;font-size:.93rem}
+details.expli summary{cursor:pointer;font-weight:600;color:var(--accent);font-size:.88rem;list-style:none}
+details.expli summary::-webkit-details-marker{display:none}
+details.expli summary::before{content:"▸ ";transition:.2s}
+details.expli[open] summary::before{content:"▾ "}
+details.expli .cuerpo{padding-top:.6rem}
+details.expli p{margin-bottom:.6rem;max-width:70ch}
+details.expli ul{margin:.3rem 0 .8rem 1.2rem}
+
+.docente{background:var(--purple-light);border:1px dashed var(--purple);border-radius:8px;padding:.85rem 1rem;margin:1rem 0;font-size:.9rem;display:none}
+body.modo-docente .docente{display:block}
+.docente h4{color:var(--purple)}
+.docente ul{margin:.3rem 0 .5rem 1.2rem}
+.formula{font-family:var(--font-m);font-size:.85rem;background:var(--bg-canvas);border:1px solid var(--border);border-radius:5px;padding:.4rem .6rem;display:inline-block;margin:.2rem 0}
+
+/* ---------- tablas ---------- */
+.tabla-wrap{overflow-x:auto;margin:.8rem 0;border:1px solid var(--border);border-radius:8px}
+table.t{width:100%;border-collapse:collapse;font-size:.85rem}
+table.t th{font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text-sec);font-weight:600;padding:.5rem .65rem;text-align:left;border-bottom:2px solid var(--border);background:var(--bg-alt)}
+table.t td{padding:.42rem .65rem;border-bottom:1px solid var(--border);font-family:var(--font-m);font-size:.82rem}
+table.t td.tx{font-family:var(--font-b)}
+table.t .num{text-align:right}
+table.t tbody tr:hover{background:var(--bg-alt)}
+table.t tr.destacada td{background:var(--green-light)}
+
+/* ---------- barras de cuantiles / composición ---------- */
+.segbar{display:flex;height:46px;border-radius:6px;overflow:hidden;border:1px solid var(--border);margin:.7rem 0}
+.segbar div{display:flex;align-items:center;justify-content:center;font-size:.72rem;font-family:var(--font-m);color:#fff;transition:flex-grow .5s cubic-bezier(.4,0,.2,1),background .3s;overflow:hidden;white-space:nowrap}
+.compbar{display:flex;height:30px;border-radius:6px;overflow:hidden;border:1px solid var(--border);margin:.5rem 0}
+.compbar div{display:flex;align-items:center;justify-content:center;font-size:.75rem;color:#fff;font-family:var(--font-m);transition:width .5s cubic-bezier(.4,0,.2,1)}
+.hbar{height:16px;background:var(--accent);border-radius:3px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.hbar.f{background:var(--orange)}
+
+/* ---------- desafíos ---------- */
+.desafio{background:var(--bg-canvas);border:1px solid var(--border);border-radius:10px;padding:1.1rem;margin:1rem 0;box-shadow:0 2px 12px var(--shadow)}
+.desafio .num{font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--accent);font-weight:600}
+.desafio .preg{font-family:var(--font-d);font-size:1.05rem;color:var(--heading);margin:.25rem 0 .8rem}
+.opciones{display:flex;flex-direction:column;gap:.35rem;margin-bottom:.7rem}
+.op{display:flex;gap:.55rem;align-items:flex-start;padding:.5rem .7rem;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:.9rem;transition:all .15s;background:var(--bg)}
+.op:hover{border-color:var(--accent)}
+.op input{margin-top:.35rem;accent-color:var(--accent)}
+.op.sel{border-color:var(--accent);background:var(--accent-light)}
+.op.bien{border-color:var(--green);background:var(--green-light)}
+.op.mal{border-color:var(--red);background:var(--red-light)}
+.feedback{font-size:.9rem;padding:.7rem .9rem;border-radius:6px;margin-top:.6rem;display:none}
+.feedback.on{display:block}
+.feedback.ok{background:var(--green-light);border-left:3px solid var(--green)}
+.feedback.no{background:var(--red-light);border-left:3px solid var(--red)}
+
+/* ---------- cierre ---------- */
+.cierre{background:var(--bg-canvas);border:1px solid var(--border);border-radius:12px;padding:1.6rem;margin:1.5rem 0;box-shadow:0 2px 16px var(--shadow)}
+.preguntas-cierre{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.7rem;margin:1.2rem 0}
+.pc{background:var(--bg-alt);border-radius:8px;padding:.9rem;font-family:var(--font-d);font-size:1rem;color:var(--heading);line-height:1.4}
+.pc i{display:block;font-family:var(--font-m);font-style:normal;font-size:.75rem;color:var(--accent);margin-bottom:.3rem}
+.frase-final{font-family:var(--font-d);font-size:1.25rem;color:var(--heading);text-align:center;line-height:1.45;margin:1.5rem auto;max-width:38ch}
+
+.dos-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:720px){.dos-col{grid-template-columns:1fr}}
+footer{border-top:1px solid var(--border);margin-top:3rem;padding:1.5rem 0 3rem;font-size:.85rem;color:var(--text-sec)}
+footer a{color:var(--accent)}
+</style>
+</head>
+<body>
+
+<div class="tope">
+  <div class="wrap">
+    <div class="tope-fila">
+      <p class="marca">Qué esconde un promedio</p>
+      <span class="tope-sp"></span>
+      <p class="prog-txt" id="progTxt">Conceptos explorados: 0/10</p>
+      <button class="btn" id="btnDocente" type="button">Modo docente</button>
+    </div>
+  </div>
+  <div class="barra-prog"><i id="barraProg"></i></div>
+  <div class="wrap"><nav class="modulos" id="navMod" aria-label="Módulos"></nav></div>
+</div>
+
+<div class="wrap">
+
+<header style="padding:2.5rem 0 1rem">
+  <p class="eyebrow">Clase 5 · Estadística para Economía · FCE-UBA</p>
+  <h1>Qué esconde un promedio</h1>
+  <p class="subtitle">Ponderación, agregación y distribuciones. Un laboratorio para mover parámetros y mirar qué le pasa a los números.</p>
+  <p>Todo lo que ves acá se calcula sobre datos simulados en tu navegador. No hay resultados escritos a mano: si movés un control, los estadísticos se recalculan sobre las observaciones que estás viendo. <strong>Primero jugá, después leé la explicación.</strong></p>
+</header>
+
+<!-- ============================================================ M1 -->
+<section class="mod" id="m1" data-mod="m1">
+  <p class="eyebrow">Módulo A · Una distribución, muchas historias</p>
+  <h2>Media, mediana y moda</h2>
+  <p class="motiva">Tres números que resumen "el centro". ¿Cuándo dicen lo mismo y cuándo dicen cosas distintas?</p>
+
+  <div class="panel">
+    <div class="btns" id="m1Formas"></div>
+    <div class="sliders" id="m1Sliders"></div>
+    <figure><svg class="graf" id="m1Graf" role="img" aria-label="Distribución con media, mediana y moda"></svg></figure>
+    <div class="leyenda">
+      <span><i class="sw" style="background:var(--accent)"></i> media</span>
+      <span><i class="sw" style="background:var(--green)"></i> mediana</span>
+      <span><i class="sw" style="background:var(--purple)"></i> moda</span>
+      <span class="chico" id="m1N"></span>
+    </div>
+    <div class="stats" id="m1Stats"></div>
+  </div>
+
+  <div class="observa">
+    <b>¿Qué observás?</b>
+    <ul>
+      <li>¿La media y la mediana coinciden? ¿En qué formas dejan de coincidir?</li>
+      <li>Si movés el sesgo hacia la derecha, ¿cuál de las dos se corre más?</li>
+      <li>¿Dónde queda la moda respecto de las otras dos?</li>
+      <li>¿Hay alguna forma donde la moda no sea un buen resumen?</li>
+    </ul>
+  </div>
+
+  <details class="expli"><summary>Ver explicación</summary><div class="cuerpo">
+    <p>Los tres estadísticos responden preguntas diferentes:</p>
+    <ul>
+      <li><strong>Media:</strong> el promedio aritmético. Usa el valor de <em>todas</em> las observaciones, así que cada dato la empuja en proporción a su magnitud.</li>
+      <li><strong>Mediana:</strong> el valor que deja 50% de las observaciones a cada lado. Solo le importa el <em>orden</em>, no cuán lejos está cada dato.</li>
+      <li><strong>Moda:</strong> el valor o la región más frecuente. Es la única que responde "¿qué es lo más común?".</li>
+    </ul>
+    <p>En una distribución simétrica y unimodal las tres tienden a coincidir. Cuando aparece asimetría, la media se corre hacia la cola: con <strong>cola derecha</strong> (asimetría positiva, típica de ingresos) queda por encima de la mediana. Con cola izquierda, por debajo.</p>
+    <p>La distancia entre media y mediana es, entonces, un indicio rápido de asimetría.</p>
+  </div></details>
+
+  <div class="docente">
+    <h4>Modo docente</h4>
+    <p><span class="formula">media = (1/n) Σ xᵢ</span> &nbsp; <span class="formula">mediana = Q(0,5)</span></p>
+    <ul>
+      <li><strong>Qué debería observar el estudiante:</strong> que con sesgo positivo media &gt; mediana, y que la brecha crece con el sesgo.</li>
+      <li><strong>Moda:</strong> acá se estima como el centro del intervalo (bin) más frecuente del histograma. En variables continuas la moda siempre es una estimación que depende del ancho del bin. Vale la pena decirlo explícitamente.</li>
+      <li><strong>Error conceptual frecuente:</strong> creer que "la media está mal" con asimetría. No está mal: responde otra pregunta. Si el interés es el total repartido (masa salarial, recaudación), la media es la correcta.</li>
+      <li><strong>Convención de cuantiles:</strong> toda la página usa interpolación lineal entre órdenes (tipo 7 de R, el default de <code>quantile()</code>).</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================ M2 -->
+<section class="mod" id="m2" data-mod="m2">
+  <p class="eyebrow">Módulo B · Cuando la distribución se deforma</p>
+  <h2>Inflá la cola</h2>
+  <p class="motiva">Partimos de una distribución de ingresos con cola larga. Multiplicá los ingresos del 1% más alto y mirá qué se mueve.</p>
+
+  <div class="panel">
+    <div class="sliders" id="m2Sliders"></div>
+    <figure><svg class="graf" id="m2Graf" role="img" aria-label="Distribución de ingresos con cola inflada"></svg></figure>
+    <div class="leyenda">
+      <span><i class="sw" style="background:var(--accent)"></i> media</span>
+      <span><i class="sw" style="background:var(--green)"></i> mediana</span>
+      <span class="chico">solo cambian las observaciones del 1% superior</span>
+    </div>
+  </div>
+
+  <div class="dos-col">
+    <div class="panel"><div class="panel-t">Antes (multiplicador 1×)</div><div class="stats" id="m2Antes"></div></div>
+    <div class="panel"><div class="panel-t">Después</div><div class="stats" id="m2Despues"></div></div>
+  </div>
+  <div class="panel"><div class="panel-t">Cambio porcentual</div><div class="stats" id="m2Delta"></div></div>
+
+  <div class="observa">
+    <b>¿Qué observás?</b>
+    <ul>
+      <li>¿Qué estadístico parece más sensible a lo que pasa en la cola?</li>
+      <li>¿Cuántas observaciones cambiaron realmente? (1% de la muestra)</li>
+      <li>¿Por qué una media puede cambiar mucho aunque la mayoría de las observaciones no cambie?</li>
+    </ul>
+  </div>
+
+  <details class="expli"><summary>Ver explicación</summary><div class="cuerpo">
+    <p>La media usa el <em>valor</em> de cada observación: si 1% de los datos se multiplica por 10, ese 1% aporta diez veces más a la suma total, y la media se mueve aunque el 99% restante siga idéntico.</p>
+    <p>La mediana, en cambio, solo depende del <em>orden</em>. Multiplicar el 1% más alto no cambia quién está en el medio, así que se queda prácticamente donde estaba.</p>
+    <p>El desvío estándar y el coeficiente de variación son todavía más sensibles que la media, porque elevan al cuadrado las distancias al centro: un dato lejano pesa muchísimo.</p>
+    <p>Moraleja operativa: cuando una serie de ingresos muestra un salto en la media sin salto en la mediana, la primera hipótesis a chequear es qué pasó en la cola.</p>
+  </div></details>
+
+  <div class="docente">
+    <h4>Modo docente</h4>
+    <ul>
+      <li>Sirve para introducir la idea de <strong>robustez</strong>: la mediana tiene punto de ruptura 50%, la media 0%.</li>
+      <li>Preguntar: si el objetivo es estimar la masa salarial total, ¿conviene la media o la mediana? (La media: masa = media × n.)</li>
+      <li>El gráfico recorta el eje X en el p99,5 para que siga siendo legible; conviene aclararlo, porque parte de la cola queda fuera de la vista aunque sí entra en los cálculos.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================ M3 -->
+<section class="mod" id="m3" data-mod="m3">
+  <p class="eyebrow">Módulo B · Bimodalidad</p>
+  <h2>Una sola media puede esconder dos poblaciones</h2>
+  <p class="motiva">Armá dos grupos distintos, mezclalos y fijate dónde cae la media del conjunto.</p>
+
+  <div class="panel">
+    <div class="btns" id="m3Vista"></div>
+    <div class="sliders" id="m3Sliders"></div>
+    <figure><svg class="graf" id="m3Graf" role="img" aria-label="Mezcla de dos poblaciones"></svg></figure>
+    <div class="leyenda">
+      <span><i class="sw" style="background:var(--accent)"></i> media total</span>
+      <span><i class="sw" style="background:var(--green)"></i> mediana total</span>
+      <span><i class="sw" style="background:var(--orange)"></i> grupo A</span>
+      <span><i class="sw" style="background:var(--teal)"></i> grupo B</span>
+    </div>
+    <div class="stats" id="m3Stats"></div>
+    <div id="m3Vecindad" class="observa" style="margin-bottom:0"></div>
+  </div>
+
+  <div class="observa">
+    <b>¿Qué observás?</b>
+    <ul>
+      <li>Separá bien los dos grupos: ¿cuánta gente hay <em>cerca</em> del ingreso promedio?</li>
+      <li>Si nadie gana aproximadamente el ingreso promedio, ¿qué significa realmente ese promedio?</li>
+      <li>¿La mediana resuelve el problema, o también esconde la estructura?</li>
+    </ul>
+  </div>
+
+  <details class="expli"><summary>Ver explicación</summary><div class="cuerpo">
+    <p>La media sigue siendo aritméticamente correcta: es el promedio ponderado de las medias de los dos grupos. El problema no es la media, es que <strong>un único estadístico no puede describir la forma de una distribución con dos poblaciones adentro</strong>.</p>
+    <p>Con dos grupos bien separados, la media cae en la zona intermedia, que es justamente donde hay pocas observaciones. La mediana tampoco arregla nada: si los grupos tienen tamaños parecidos, cae cerca del hueco.</p>
+    <p>La respuesta razonable no es cambiar de estadístico sino <strong>desagregar</strong>: informar la media de cada grupo y el peso de cada uno.</p>
+  </div></details>
+
+  <div class="docente">
+    <h4>Modo docente</h4>
+    <p><span class="formula">media total = w<sub>A</sub>·media<sub>A</sub> + w<sub>B</sub>·media<sub>B</sub></span></p>
+    <ul>
+      <li>Este es el mismo mecanismo que reaparece en Simpson: composición × resultado dentro de cada grupo.</li>
+      <li>La "vecindad de la media" está definida como ±5% alrededor de la media. Es arbitraria pero hace visible el punto.</li>
+      <li><strong>Error conceptual:</strong> pensar que la bimodalidad se detecta mirando media y desvío. No se detecta: hay que mirar la distribución.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================ M4 -->
+<section class="mod" id="m4" data-mod="m4">
+  <p class="eyebrow">Módulo B · Dispersión</p>
+  <h2>Mismo centro, distinta dispersión</h2>
+  <p class="motiva">Dos distribuciones con la misma media. ¿Alcanza con la media para compararlas?</p>
+
+  <div class="panel">
+    <div class="sliders" id="m4Sliders"></div>
+    <div class="btns" id="m4Escala"></div>
+    <figure><svg class="graf" id="m4Graf" role="img" aria-label="Dos distribuciones con distinta dispersión"></svg></figure>
+    <div class="leyenda">
+      <span><i class="sw" style="background:var(--accent)"></i> distribución 1</span>
+      <span><i class="sw" style="background:var(--orange)"></i> distribución 2</span>
+    </div>
+    <div class="tabla-wrap"><table class="t" id="m4Tabla"></table></div>
+  </div>
+
+  <div class="observa">
+    <b>¿Qué observás?</b>
+    <ul>
+      <li>Cambiá la escala (de pesos a miles de pesos). ¿Qué estadísticos cambian y cuáles no?</li>
+      <li>¿Por qué el desvío estándar no siempre sirve para comparar variables con escalas diferentes?</li>
+      <li>¿Qué le pasa al IQR cuando la distribución tiene cola larga, comparado con el desvío?</li>
+    </ul>
+  </div>
+
+  <details class="expli"><summary>Ver explicación</summary><div class="cuerpo">
+    <p>El desvío estándar está expresado en las <em>mismas unidades</em> que la variable. Si multiplicás todo por 1.000, el desvío se multiplica por 1.000. Eso lo vuelve inútil para comparar variables medidas en unidades distintas (ingresos en pesos vs. años de educación).</p>
+    <p>El <strong>coeficiente de variación</strong> (CV = desvío / media) es adimensional: al cambiar la escala, numerador y denominador se multiplican por lo mismo y el cociente no se mueve. Por eso permite comparar dispersión relativa entre variables distintas.</p>
+    <p>El <strong>IQR</strong> (p75 − p25) mide la dispersión del 50% central y es robusto: los valores extremos casi no lo tocan. El desvío, que eleva las distancias al cuadrado, sí los siente.</p>
+    <p>Advertencia: el CV no tiene sentido si la media puede ser cero o negativa (variaciones porcentuales, saldos).</p>
+  </div></details>
+
+  <div class="docente">
+    <h4>Modo docente</h4>
+    <p><span class="formula">s² = Σ(xᵢ − x̄)² / (n−1)</span> &nbsp; <span class="formula">CV = s / x̄</span> &nbsp; <span class="formula">IQR = p75 − p25</span></p>
+    <ul>
+      <li>Se usa el desvío muestral (n−1).</li>
+      <li>Buena pregunta de cierre: ¿el CV es invariante ante cambios de <em>origen</em> (sumar una constante)? No: solo ante cambios de escala.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================ M5 -->
+<section class="mod" id="m5" data-mod="m5">
+  <p class="eyebrow">Módulo C · ¿Dónde estás dentro de la distribución?</p>
+  <h2>Cuantiles: posiciones, no montos</h2>
+  <p class="motiva">Elegí un percentil y fijate qué te dice exactamente ese número.</p>
+
+  <div class="panel">
+    <div class="sliders" id="m5Sliders"></div>
+    <figure><svg class="graf" id="m5Graf" role="img" aria-label="Distribución de ingresos con percentil seleccionado"></svg></figure>
+    <div id="m5Barra"></div>
+    <div class="stats" id="m5Stats"></div>
+    <p id="m5Frase" class="observa" style="margin-bottom:0"></p>
+  </div>
+
+  <h3>Quintiles, deciles y percentiles</h3>
+  <div class="panel">
+    <div class="btns" id="m5Grupos"></div>
+    <div class="segbar" id="m5Seg"></div>
+    <div class="tabla-wrap"><table class="t" id="m5Tabla"></table></div>
+    <p class="chico" id="m5NotaTabla"></p>
+  </div>
+
+  <div class="desafio" id="m5Preg">
+    <p class="num">Pregunta</p>
+    <p class="preg">¿El quintil 5 está compuesto por el 20% más rico, o representa el 20% del ingreso?</p>
+    <div class="opciones" data-op>
+      <label class="op"><input type="radio" name="m5p" value="0"><span>Es el 20% de la población con mayores ingresos.</span></label>
+      <label class="op"><input type="radio" name="m5p" value="1"><span>Concentra el 20% del ingreso total.</span></label>
+      <label class="op"><input type="radio" name="m5p" value="2"><span>Las dos cosas: por construcción coinciden.</span></label>
+    </div>
+    <button class="btn" data-check="0">Comprobar</button>
+    <div class="feedback"></div>
+  </div>
+
+  <details class="expli"><summary>Ver explicación</summary><div class="cuerpo">
+    <p>Un cuantil es una <strong>posición</strong> en la distribución ordenada. Los quintiles dividen a la población en cinco grupos de <em>igual cantidad de personas</em>, no de igual ingreso.</p>
+    <p>Cuánto ingreso concentra cada quintil es una pregunta distinta, y la respuesta depende de la desigualdad: en la tabla de arriba mirá la columna "% del ingreso". Si la distribución fuera perfectamente igualitaria, cada quintil se llevaría 20%. Nunca pasa.</p>
+    <p>Decir "estoy en el percentil 75" significa que aproximadamente el 75% de las observaciones están por debajo. No dice cuán lejos está del percentil 74 ni del 99: los cuantiles ordenan, no miden distancias.</p>
+  </div></details>
+
+  <div class="docente">
+    <h4>Modo docente</h4>
+    <ul>
+      <li>Distinguir <em>cuantil</em> (el valor de corte) de <em>grupo cuantílico</em> (el conjunto de observaciones entre dos cortes). En la jerga se usan como sinónimos y genera confusión.</li>
+      <li>La tabla muestra intervalo, cantidad de casos, ingreso medio, ingreso mediano y participación en el ingreso total de cada grupo.</li>
+      <li>Ojo con los deciles de ingreso de la EPH: se calculan sobre individuos con ingreso positivo, y eso cambia el denominador.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================ M6 -->
+<section class="mod" id="m6" data-mod="m6">
+  <p class="eyebrow">Módulo C · Ratios</p>
+  <h2>¿Dónde está la brecha?</h2>
+  <p class="motiva">Un solo número de desigualdad puede esconder en qué parte de la distribución se abrió la brecha.</p>
+
+  <div class="panel">
+    <div class="sliders" id="m6Sliders"></div>
+    <figure><svg class="graf" id="m6Graf" role="img" aria-label="Distribución con p10, p50 y p90"></svg></figure>
+    <div class="stats" id="m6Stats"></div>
+    <div class="stats" id="m6Ratios"></div>
+  </div>
+
+  <h3>Dos distribuciones, la misma brecha global</h3>
+  <div class="panel">
+    <p class="chico">Estas dos distribuciones fueron construidas para tener <strong>el mismo p90/p10</strong>. Mirá los otros dos ratios.</p>
+    <figure><svg class="graf" id="m6Graf2" role="img" aria-label="Comparación de dos distribuciones con igual p90/p10"></svg></figure>
+    <div class="tabla-wrap"><table class="t" id="m6Tabla"></table></div>
+    <p class="observa" style="margin-bottom:0">Ambas tienen una desigualdad global similar, pero la desigualdad está ubicada en partes diferentes de la distribución.</p>
+  </div>
+
+  <div class="observa">
+    <b>¿Qué observás?</b>
+    <ul>
+      <li>Al subir la desigualdad, ¿los tres ratios crecen igual?</li>
+      <li>Si p90/p10 sube pero p90/p50 casi no se mueve, ¿dónde se abrió la brecha?</li>
+      <li>¿Qué política mirarías distinto según cuál de los dos ratios se movió?</li>
+    </ul>
+  </div>
+
+  <details class="expli"><summary>Ver explicación</summary><div class="cuerpo">
+    <p><strong>p90/p10:</strong> distancia entre la parte alta y la parte baja de la distribución. Es la brecha global.</p>
+    <p><strong>p50/p10:</strong> distancia entre el centro y la parte baja. Se mueve cuando lo que cambia es la situación de los que menos tienen.</p>
+    <p><strong>p90/p50:</strong> distancia entre la parte alta y el centro. Se mueve cuando lo que cambia es lo que pasa arriba.</p>
+    <p>Como p90/p10 = (p90/p50) × (p50/p10), el ratio global se descompone exactamente en los otros dos. Dos países pueden tener el mismo p90/p10 con historias opuestas: uno con pobreza profunda y techo bajo, otro con piso alto y despegue de la cúpula.</p>
+  </div></details>
+
+  <div class="docente">
+    <h4>Modo docente</h4>
+    <p><span class="formula">p90/p10 = (p90/p50) × (p50/p10)</span></p>
+    <ul>
+      <li>Ventaja de los ratios sobre el Gini: dicen <em>dónde</em> está la brecha. Desventaja: ignoran todo lo que pasa fuera de esos tres puntos (incluida la cola del 1%).</li>
+      <li>Las dos distribuciones comparadas se construyen transformando la misma muestra base con exponentes calculados en tiempo real para igualar p90/p10.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================ M7 -->
+<section class="mod" id="m7" data-mod="m7">
+  <p class="eyebrow">Módulo C · Distribución completa</p>
+  <h2>La acumulada</h2>
+  <p class="motiva">Movés un umbral de ingreso: ¿qué porcentaje de la población queda por debajo?</p>
+
+  <div class="panel">
+    <div class="btns" id="m7Vista"></div>
+    <div class="sliders" id="m7Sliders"></div>
+    <figure><svg class="graf" id="m7Graf" role="img" aria-label="Densidad o función de distribución acumulada"></svg></figure>
+    <p id="m7Frase" class="observa" style="margin-bottom:0"></p>
+  </div>
+
+  <h3>Dos distribuciones, dos acumuladas</h3>
+  <div class="panel">
+    <figure><svg class="graf" id="m7Graf2" role="img" aria-label="Comparación de dos funciones de distribución acumulada"></svg></figure>
+    <div class="leyenda">
+      <span><i class="sw" style="background:var(--accent)"></i> Región 1</span>
+      <span><i class="sw" style="background:var(--orange)"></i> Región 2</span>
+    </div>
+    <p id="m7Cruce" class="observa" style="margin-bottom:0"></p>
+  </div>
+
+  <div class="observa">
+    <b>¿Qué observás?</b>
+    <ul>
+      <li>Con el umbral bajo, ¿qué región tiene más gente por debajo? ¿Y con el umbral alto?</li>
+      <li>¿Se puede decir que una región "está mejor" en todos los umbrales?</li>
+      <li>¿Dónde se cruzan las curvas y qué significa ese cruce?</li>
+    </ul>
+  </div>
+
+  <details class="expli"><summary>Ver explicación</summary><div class="cuerpo">
+    <p>La función de distribución acumulada responde una sola pregunta, para cualquier umbral: <em>¿qué proporción de las observaciones es menor o igual a X?</em></p>
+    <p>Leída al revés, da los cuantiles: el valor donde la curva cruza 0,5 es la mediana; donde cruza 0,9 es el p90. La acumulada contiene toda la información de la distribución, sin depender de la elección de bins como el histograma.</p>
+    <p>Cuando dos acumuladas <strong>no se cruzan</strong>, una distribución domina a la otra en todos los umbrales y la comparación es clara sin importar qué estadístico elijas. Cuando <strong>se cruzan</strong>, el orden depende del umbral: una región tiene menos gente en la parte baja pero también menos en la parte alta. Ahí, cualquier ranking basado en un solo número esconde una decisión sobre qué parte de la distribución importa.</p>
+  </div></details>
+
+  <div class="docente">
+    <h4>Modo docente</h4>
+    <ul>
+      <li>Es la puerta de entrada intuitiva a la idea de <strong>dominancia estocástica de primer orden</strong>, sin necesidad de formalizarla.</li>
+      <li>Conecta directo con la medición de pobreza: la tasa de pobreza es el valor de la acumulada evaluada en la línea de pobreza. Mover la línea mueve el ranking entre regiones si las acumuladas se cruzan.</li>
+      <li>La CDF empírica se dibuja como F(x) = #{xᵢ ≤ x} / n.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================ M8 -->
+<section class="mod" id="m8" data-mod="m8">
+  <p class="eyebrow">Módulo D · Cuando juntar datos cambia la historia</p>
+  <h2>Qué se pierde al agregar</h2>
+  <p class="motiva">Los mismos datos, mirados como individuos o como promedios de grupo.</p>
+
+  <div class="panel">
+    <div class="btns" id="m8Vista"></div>
+    <figure><svg class="graf" id="m8Graf" role="img" aria-label="Individuos y promedios por grupo"></svg></figure>
+    <div class="leyenda" id="m8Leyenda"></div>
+    <div class="tabla-wrap"><table class="t" id="m8Tabla"></table></div>
+  </div>
+
+  <div class="observa">
+    <b>¿Qué observás?</b>
+    <ul>
+      <li>Con solo tres puntos (los promedios), ¿podrías saber cuánta dispersión hay dentro de cada grupo?</li>
+      <li>¿Podrías saber si los grupos se superponen?</li>
+      <li>¿Cuántas configuraciones de datos individuales distintas darían exactamente esos mismos tres promedios?</li>
+    </ul>
+  </div>
+
+  <details class="expli"><summary>Ver explicación</summary><div class="cuerpo">
+    <p>Agregar es una operación que <strong>destruye información de manera irreversible</strong>. Del promedio de un grupo no se puede recuperar la dispersión, la forma, ni si había subgrupos adentro.</p>
+    <p>Infinitas configuraciones individuales producen los mismos promedios. Por eso, una relación observada entre promedios de grupo no autoriza a concluir nada sobre los individuos: eso es la <em>falacia ecológica</em>.</p>
+    <p>Lo que sí sobrevive a la agregación es el promedio ponderado: la media del total es el promedio de las medias de grupo, ponderado por el tamaño de cada grupo. Ese detalle es el motor de la próxima sección.</p>
+  </div></details>
+
+  <div class="docente">
+    <h4>Modo docente</h4>
+    <ul>
+      <li>Nombre técnico: <strong>falacia ecológica</strong> (inferir sobre individuos a partir de datos agregados) y su inversa, la falacia atomística.</li>
+      <li>Ejemplos para discutir: correlación entre provincias con datos provinciales vs. con datos de hogares; resultados electorales por circuito.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================ M9 -->
+<section class="mod" id="m9" data-mod="m9">
+  <p class="eyebrow">Módulo D · El caso extremo</p>
+  <h2>Paradoja de Simpson</h2>
+  <p class="motiva">Dentro de cada grupo la relación va para un lado. Al juntarlos, va para el otro.</p>
+
+  <div class="panel">
+    <figure><svg class="graf" id="m9Graf" role="img" aria-label="Paradoja de Simpson: dos grupos con pendiente negativa y agregado positivo"></svg></figure>
+    <div class="leyenda">
+      <span><i class="sw pt" style="background:var(--orange)"></i> grupo A</span>
+      <span><i class="sw pt" style="background:var(--teal)"></i> grupo B</span>
+      <span><i class="sw" style="background:var(--red)"></i> tendencia agregada</span>
+    </div>
+    <div class="btns" id="m9Lineas"></div>
+    <div class="sliders" id="m9Sliders"></div>
+    <div class="stats" id="m9Stats"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-t">El mecanismo: composición × resultado dentro de cada grupo</div>
+    <p class="chico">Composición de la muestra</p>
+    <div class="compbar" id="m9Comp"></div>
+    <div id="m9Pond"></div>
+  </div>
+
+  <div class="observa">
+    <b>¿Qué observás?</b>
+    <ul>
+      <li>Acercá las medias de X de los dos grupos: ¿qué le pasa a la pendiente agregada?</li>
+      <li>Cambiá los tamaños de los grupos: ¿cambia la pendiente dentro de cada grupo? ¿Y la agregada?</li>
+      <li>¿Qué hace falta para que la paradoja aparezca: que los grupos difieran en X, en Y, o en las dos?</li>
+    </ul>
+  </div>
+
+  <h3>La versión clásica: admisiones universitarias</h3>
+  <div class="panel">
+    <p class="chico">Datos simplificados inspirados en el caso de Berkeley (1973). Empezá mirando el agregado.</p>
+    <div class="btns" id="m9BerkBtns"></div>
+    <div id="m9BerkAgg"></div>
+    <div id="m9BerkDetalle" style="display:none">
+      <div class="tabla-wrap"><table class="t" id="m9BerkTabla"></table></div>
+      <p class="chico">Composición de postulantes por departamento (ordenados de mayor a menor tasa de admisión general):</p>
+      <div id="m9BerkComp"></div>
+      <div class="leyenda">
+        <span><i class="sw" style="background:var(--accent)"></i> varones</span>
+        <span><i class="sw" style="background:var(--orange)"></i> mujeres</span>
+      </div>
+      <p class="observa" style="margin-bottom:0" id="m9BerkTexto"></p>
+    </div>
+  </div>
+
+  <details class="expli"><summary>Ver explicación</summary><div class="cuerpo">
+    <p>El resultado agregado es un <strong>promedio ponderado</strong> de los resultados de cada grupo, y los pesos son la composición. Si los grupos difieren en nivel y además se distribuyen de manera desigual entre categorías, el agregado puede moverse en dirección contraria a cada grupo por separado.</p>
+    <p>En el ejemplo de admisiones: cada departamento admite a las mujeres en una proporción igual o mayor que a los varones, pero las mujeres se postulan mucho más a los departamentos <em>más competitivos</em>. La tasa agregada mezcla dos cosas: la probabilidad de ser admitido dado el departamento, y la elección de departamento.</p>
+    <p>Simpson no es un error de cálculo ni una rareza estadística: los dos números son correctos. Lo que la paradoja obliga a preguntar es <strong>cuál es la pregunta</strong>. Si preguntás "¿cómo le va a una postulante en el departamento al que se postula?", la respuesta está en la desagregación. Si preguntás "¿qué proporción de mujeres entra a la universidad?", la respuesta está en el agregado. No compiten: responden cosas distintas.</p>
+  </div></details>
+
+  <div class="docente">
+    <h4>Modo docente</h4>
+    <p><span class="formula">tasa global = Σ w_d · tasa_d</span> &nbsp; con w_d = participación del grupo en el departamento d</p>
+    <ul>
+      <li>Las pendientes se calculan por mínimos cuadrados simples: <span class="formula">b = cov(x,y) / var(x)</span>. Se usa solo como indicador de la dirección de la asociación.</li>
+      <li><strong>Qué debería observar el estudiante:</strong> que la paradoja necesita <em>dos</em> ingredientes — diferencia de niveles entre grupos y diferencia de composición. Si iguala las medias de X de A y B, la paradoja desaparece.</li>
+      <li><strong>Error conceptual:</strong> creer que "hay que desagregar siempre". Desagregar por una variable que está en el camino causal (un mediador) también puede llevar a conclusiones erróneas. La elección de qué controlar es un problema causal, no estadístico.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================ M10 -->
+<section class="mod" id="m10" data-mod="m10">
+  <p class="eyebrow">Cierre</p>
+  <h2>No te quedes con el promedio</h2>
+  <p class="motiva">Dos regiones. Elegí qué estadístico querés mirar y fijate si la comparación se sostiene.</p>
+
+  <div class="panel">
+    <div class="btns" id="m10Esc"></div>
+    <figure><svg class="graf" id="m10Graf" role="img" aria-label="Comparación de dos regiones"></svg></figure>
+    <div class="leyenda">
+      <span><i class="sw" style="background:var(--accent)"></i> Región A</span>
+      <span><i class="sw" style="background:var(--orange)"></i> Región B</span>
+    </div>
+    <div class="btns" id="m10Stat"></div>
+    <div class="dos-col">
+      <div class="stat media" id="m10A"></div>
+      <div class="stat disp" id="m10B"></div>
+    </div>
+    <p class="observa" id="m10Veredicto" style="margin-bottom:0"></p>
+  </div>
+
+  <h3>Desafíos</h3>
+  <p class="chico">Ocho situaciones. Elegí una respuesta y comprobá. La explicación aparece recién después.</p>
+  <div id="desafios"></div>
+
+  <div class="cierre">
+    <h2 style="text-align:center">Antes de mirar un promedio, preguntá…</h2>
+    <div class="preguntas-cierre">
+      <div class="pc"><i>01</i>¿Quiénes están incluidos?</div>
+      <div class="pc"><i>02</i>¿Qué distribución hay detrás del promedio?</div>
+      <div class="pc"><i>03</i>¿La media o la mediana responde mejor la pregunta?</div>
+      <div class="pc"><i>04</i>¿Qué ocurre si miro los cuantiles?</div>
+      <div class="pc"><i>05</i>¿Qué pasa si desagrego?</div>
+    </div>
+    <p class="frase-final">Un número resume una distribución. La interacción permite descubrir qué quedó afuera.</p>
+  </div>
+</section>
+
+<footer>
+  <p>Material interactivo de la clase 5 · Ciencia de Datos para Economía · FCE-UBA. No se entrega ni se corrige. Todos los datos son simulados con una semilla fija: los resultados son reproducibles y ninguna observación corresponde a personas reales. El progreso se guarda solo en este navegador. <button class="btn" id="reset" type="button">borrar progreso</button></p>
+</footer>
+
+</div>
+
+<script>
+"use strict";
+/* ============================================================
+   1. Utilidades numéricas y generación de datos
+   ============================================================ */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function makeRng(seed){
+  const u=mulberry32(seed); let spare=null;
+  return {
+    unif:u,
+    norm(){ if(spare!==null){const s=spare;spare=null;return s;}
+      let a=0,b=0; while(a===0)a=u(); b=u();
+      const r=Math.sqrt(-2*Math.log(a)); spare=r*Math.sin(2*Math.PI*b); return r*Math.cos(2*Math.PI*b); },
+    exp(){ let x=0; while(x===0)x=u(); return -Math.log(x); }
+  };
+}
+const sortNum=a=>Float64Array.from(a).sort();
+function mean(a){let s=0;for(let i=0;i<a.length;i++)s+=a[i];return s/a.length;}
+function quantileSorted(s,p){const n=s.length;if(!n)return NaN;if(p<=0)return s[0];if(p>=1)return s[n-1];
+  const h=(n-1)*p,lo=Math.floor(h),hi=Math.ceil(h);return s[lo]+(h-lo)*(s[hi]-s[lo]);}
+function median(a){return quantileSorted(sortNum(a),0.5);}
+function variance(a){const m=mean(a);let s=0;for(let i=0;i<a.length;i++){const d=a[i]-m;s+=d*d;}return s/(a.length-1);}
+const sd=a=>Math.sqrt(variance(a));
+const cv=a=>sd(a)/mean(a);
+function iqr(a){const s=sortNum(a);return quantileSorted(s,0.75)-quantileSorted(s,0.25);}
+function covar(x,y){const mx=mean(x),my=mean(y);let s=0;for(let i=0;i<x.length;i++)s+=(x[i]-mx)*(y[i]-my);return s/(x.length-1);}
+function corr(x,y){return covar(x,y)/(sd(x)*sd(y));}
+function slope(x,y){return covar(x,y)/variance(x);}
+function lm(x,y){const b=slope(x,y);return {b:b,a:mean(y)-b*mean(x)};}
+/* moda estimada: centro del bin más frecuente de un histograma de k bins */
+function modeBin(a,k){
+  const s=sortNum(a),lo=s[0],hi=s[s.length-1];
+  if(hi===lo)return lo;
+  k=k||60; const w=(hi-lo)/k, c=new Array(k).fill(0);
+  for(let i=0;i<a.length;i++){let j=Math.floor((a[i]-lo)/w);if(j>=k)j=k-1;if(j<0)j=0;c[j]++;}
+  let best=0;for(let j=1;j<k;j++)if(c[j]>c[best])best=j;
+  return lo+w*(best+0.5);
+}
+function histCounts(a,lo,hi,k){
+  const w=(hi-lo)/k,c=new Array(k).fill(0);
+  for(let i=0;i<a.length;i++){let j=Math.floor((a[i]-lo)/w);if(j>=k)j=k-1;if(j<0)j=0;c[j]++;}
+  return c;
+}
+/* generadores */
+function rnormArr(rng,n,mu,s){const a=new Float64Array(n);for(let i=0;i<n;i++)a[i]=mu+s*rng.norm();return a;}
+function rskewArr(rng,n,mu,s,delta){ /* skew-normal */
+  const a=new Float64Array(n),d=Math.max(-0.98,Math.min(0.98,delta)),c=Math.sqrt(1-d*d);
+  const mz=d*Math.sqrt(2/Math.PI), sz=Math.sqrt(1-mz*mz);
+  for(let i=0;i<n;i++){const z=d*Math.abs(rng.norm())+c*rng.norm();a[i]=mu+s*(z-mz)/sz;}
+  return a;
+}
+function runifArr(rng,n,lo,hi){const a=new Float64Array(n);for(let i=0;i<n;i++)a[i]=lo+(hi-lo)*rng.unif();return a;}
+function rlnormArr(rng,n,mlog,slog){const a=new Float64Array(n);for(let i=0;i<n;i++)a[i]=Math.exp(mlog+slog*rng.norm());return a;}
+function rmixArr(rng,n,mA,sA,mB,sB,pA){
+  const a=new Float64Array(n);
+  for(let i=0;i<n;i++)a[i]=(rng.unif()<pA)?mA+sA*rng.norm():mB+sB*rng.norm();
+  return a;
+}
+/* formato */
+const nf=(x,d)=>(isFinite(x)?x:0).toLocaleString('es-AR',{minimumFractionDigits:d===undefined?1:d,maximumFractionDigits:d===undefined?1:d});
+const money=x=>'$'+Math.round(x).toLocaleString('es-AR');
+const pct=(x,d)=>nf(x,d===undefined?1:d)+'%';
+
+/* ============================================================
+   2. Dibujo (SVG a mano, sin librerías)
+   ============================================================ */
+const NS='http://www.w3.org/2000/svg';
+function S(tag,at){const e=document.createElementNS(NS,tag);for(const k in at){e.setAttribute(k,at[k]);}return e;}
+function T(x,y,txt,at){const e=S('text',Object.assign({x:x,y:y},at||{}));e.textContent=txt;return e;}
+function cssv(v){return getComputedStyle(document.body).getPropertyValue(v).trim();}
+
+/* Histograma / densidad con líneas verticales */
+function drawDist(svg,cfg){
+  const W=820,H=cfg.h||300,m={t:26,r:16,b:40,l:16};
+  svg.setAttribute('viewBox','0 0 '+W+' '+H); svg.innerHTML='';
+  const g=S('g',{}); svg.appendChild(g);
+  const sets=cfg.sets.filter(s=>s.data&&s.data.length);
+  if(!sets.length)return;
+  let lo=cfg.xmin,hi=cfg.xmax;
+  if(lo===undefined||hi===undefined){
+    lo=Infinity;hi=-Infinity;
+    sets.forEach(s=>{const q=sortNum(s.data);lo=Math.min(lo,q[0]);hi=Math.max(hi,q[q.length-1]);});
+  }
+  if(hi<=lo)hi=lo+1;
+  const k=cfg.bins||46;
+  const X=v=>m.l+(Math.max(lo,Math.min(hi,v))-lo)/(hi-lo)*(W-m.l-m.r);
+  const counts=sets.map(s=>histCounts(s.data,lo,hi,k));
+  let maxc=0; counts.forEach(c=>c.forEach(v=>{if(v>maxc)maxc=v;}));
+  if(!maxc)maxc=1;
+  const Y=c=>H-m.b-(c/maxc)*(H-m.t-m.b);
+  const bw=(W-m.l-m.r)/k;
+  /* barras */
+  sets.forEach((s,si)=>{
+    if(s.type==='line')return;
+    const c=counts[si];
+    for(let j=0;j<k;j++){
+      if(!c[j])continue;
+      g.appendChild(S('rect',{x:m.l+j*bw+0.4,y:Y(c[j]),width:Math.max(0.8,bw-0.8),height:H-m.b-Y(c[j]),
+        fill:s.color,opacity:s.opacity||0.55,rx:1}));
+    }
+  });
+  /* curvas suavizadas */
+  sets.forEach((s,si)=>{
+    if(s.type!=='line')return;
+    const c=counts[si],sm=[];
+    for(let j=0;j<k;j++){let acc=0,w=0;for(let d=-2;d<=2;d++){const jj=j+d;if(jj<0||jj>=k)continue;const ww=3-Math.abs(d);acc+=c[jj]*ww;w+=ww;}sm.push(acc/w);}
+    let d='';
+    for(let j=0;j<k;j++)d+=(j?'L':'M')+(m.l+bw*(j+0.5)).toFixed(1)+' '+Y(sm[j]).toFixed(1)+' ';
+    if(s.fill)g.appendChild(S('path',{d:d+'L'+(m.l+bw*(k-0.5))+' '+(H-m.b)+' L'+(m.l+bw*0.5)+' '+(H-m.b)+' Z',fill:s.color,opacity:0.13}));
+    g.appendChild(S('path',{d:d,fill:'none',stroke:s.color,'stroke-width':s.width||2.2,'stroke-linejoin':'round'}));
+  });
+  /* eje X */
+  g.appendChild(S('line',{x1:m.l,y1:H-m.b,x2:W-m.r,y2:H-m.b,stroke:cssv('--border'),'stroke-width':1}));
+  const nt=cfg.ticks||6, fmt=cfg.fmt||(v=>nf(v,0));
+  for(let i=0;i<=nt;i++){
+    const v=lo+(hi-lo)*i/nt,x=X(v);
+    g.appendChild(S('line',{x1:x,y1:H-m.b,x2:x,y2:H-m.b+4,stroke:cssv('--border')}));
+    g.appendChild(T(x,H-m.b+18,fmt(v),{'text-anchor':'middle','font-size':11,fill:cssv('--text-sec'),'font-family':'var(--font-m)'}));
+  }
+  if(cfg.xlab)g.appendChild(T(W-m.r,H-6,cfg.xlab,{'text-anchor':'end','font-size':11,fill:cssv('--text-sec')}));
+  /* líneas verticales */
+  (cfg.lines||[]).forEach((L,i)=>{
+    if(!isFinite(L.x))return;
+    const x=X(L.x), dentro=L.x>=lo&&L.x<=hi;
+    g.appendChild(S('line',{x1:x,y1:m.t-8,x2:x,y2:H-m.b,stroke:L.color,'stroke-width':2,
+      'stroke-dasharray':L.dash||'none',opacity:dentro?1:0.35}));
+    const ty=m.t-15+(i%3)*11;
+    g.appendChild(T(x,ty,L.label,{'text-anchor':'middle','font-size':11,fill:L.color,'font-weight':600,'font-family':'var(--font-m)'}));
+  });
+  if(cfg.nota)g.appendChild(T(m.l+2,H-6,cfg.nota,{'font-size':10.5,fill:cssv('--text-sec'),'font-style':'italic'}));
+}
+
+/* Serie de líneas x-y genérica (CDF) */
+function drawLines(svg,cfg){
+  const W=820,H=cfg.h||300,m={t:20,r:18,b:40,l:46};
+  svg.setAttribute('viewBox','0 0 '+W+' '+H); svg.innerHTML='';
+  const g=S('g',{});svg.appendChild(g);
+  const lo=cfg.xmin,hi=cfg.xmax,ylo=cfg.ymin||0,yhi=cfg.ymax||1;
+  const X=v=>m.l+(Math.max(lo,Math.min(hi,v))-lo)/(hi-lo)*(W-m.l-m.r);
+  const Y=v=>H-m.b-(v-ylo)/(yhi-ylo)*(H-m.t-m.b);
+  for(let i=0;i<=5;i++){const yv=ylo+(yhi-ylo)*i/5;
+    g.appendChild(S('line',{x1:m.l,y1:Y(yv),x2:W-m.r,y2:Y(yv),stroke:cssv('--grid'),'stroke-width':1}));
+    g.appendChild(T(m.l-8,Y(yv)+4,cfg.yfmt?cfg.yfmt(yv):nf(yv,1),{'text-anchor':'end','font-size':11,fill:cssv('--text-sec'),'font-family':'var(--font-m)'}));}
+  (cfg.series||[]).forEach(s=>{
+    let d='';
+    for(let i=0;i<s.pts.length;i++)d+=(i?'L':'M')+X(s.pts[i][0]).toFixed(1)+' '+Y(s.pts[i][1]).toFixed(1)+' ';
+    g.appendChild(S('path',{d:d,fill:'none',stroke:s.color,'stroke-width':s.width||2.4,'stroke-linejoin':'round','stroke-dasharray':s.dash||'none'}));
+  });
+  g.appendChild(S('line',{x1:m.l,y1:H-m.b,x2:W-m.r,y2:H-m.b,stroke:cssv('--border')}));
+  const nt=cfg.ticks||6,fmt=cfg.fmt||(v=>nf(v,0));
+  for(let i=0;i<=nt;i++){const v=lo+(hi-lo)*i/nt,x=X(v);
+    g.appendChild(T(x,H-m.b+18,fmt(v),{'text-anchor':'middle','font-size':11,fill:cssv('--text-sec'),'font-family':'var(--font-m)'}));}
+  (cfg.marks||[]).forEach(mk=>{
+    const x=X(mk.x);
+    g.appendChild(S('line',{x1:x,y1:m.t,x2:x,y2:H-m.b,stroke:mk.color,'stroke-width':2,'stroke-dasharray':'4 3'}));
+    (mk.pts||[]).forEach(p=>{
+      g.appendChild(S('circle',{cx:x,cy:Y(p.y),r:5,fill:p.color,stroke:cssv('--bg-canvas'),'stroke-width':2}));
+      g.appendChild(T(x+9,Y(p.y)-7,p.label,{'font-size':11,fill:p.color,'font-weight':600,'font-family':'var(--font-m)'}));
+    });
+  });
+  if(cfg.xlab)g.appendChild(T(W-m.r,H-6,cfg.xlab,{'text-anchor':'end','font-size':11,fill:cssv('--text-sec')}));
+  if(cfg.ylab)g.appendChild(T(m.l-38,m.t+2,cfg.ylab,{'font-size':11,fill:cssv('--text-sec')}));
+}
+
+/* Dispersión con rectas */
+function drawScatter(svg,cfg){
+  const W=820,H=cfg.h||360,m={t:18,r:18,b:42,l:48};
+  svg.setAttribute('viewBox','0 0 '+W+' '+H); svg.innerHTML='';
+  const g=S('g',{});svg.appendChild(g);
+  const X=v=>m.l+(v-cfg.xmin)/(cfg.xmax-cfg.xmin)*(W-m.l-m.r);
+  const Y=v=>H-m.b-(v-cfg.ymin)/(cfg.ymax-cfg.ymin)*(H-m.t-m.b);
+  for(let i=0;i<=4;i++){
+    const yv=cfg.ymin+(cfg.ymax-cfg.ymin)*i/4;
+    g.appendChild(S('line',{x1:m.l,y1:Y(yv),x2:W-m.r,y2:Y(yv),stroke:cssv('--grid')}));
+    g.appendChild(T(m.l-8,Y(yv)+4,nf(yv,1),{'text-anchor':'end','font-size':11,fill:cssv('--text-sec'),'font-family':'var(--font-m)'}));
+  }
+  for(let i=0;i<=5;i++){
+    const xv=cfg.xmin+(cfg.xmax-cfg.xmin)*i/5;
+    g.appendChild(T(X(xv),H-m.b+18,nf(xv,1),{'text-anchor':'middle','font-size':11,fill:cssv('--text-sec'),'font-family':'var(--font-m)'}));
+  }
+  (cfg.points||[]).forEach(p=>{
+    g.appendChild(S('circle',{cx:X(p.x),cy:Y(p.y),r:p.r||3.2,fill:p.c,opacity:p.o===undefined?0.55:p.o}));
+  });
+  (cfg.lines||[]).forEach(L=>{
+    const x1=cfg.xmin,x2=cfg.xmax,y1=L.a+L.b*x1,y2=L.a+L.b*x2;
+    g.appendChild(S('line',{x1:X(x1),y1:Y(y1),x2:X(x2),y2:Y(y2),stroke:L.color,'stroke-width':L.width||2.6,
+      'stroke-dasharray':L.dash||'none','stroke-linecap':'round',opacity:0.95}));
+  });
+  (cfg.big||[]).forEach(p=>{
+    g.appendChild(S('circle',{cx:X(p.x),cy:Y(p.y),r:9,fill:p.c,stroke:cssv('--bg-canvas'),'stroke-width':2.5}));
+    if(p.label)g.appendChild(T(X(p.x),Y(p.y)-15,p.label,{'text-anchor':'middle','font-size':11.5,fill:p.c,'font-weight':700,'font-family':'var(--font-m)'}));
+  });
+  g.appendChild(S('line',{x1:m.l,y1:H-m.b,x2:W-m.r,y2:H-m.b,stroke:cssv('--border')}));
+  g.appendChild(S('line',{x1:m.l,y1:m.t,x2:m.l,y2:H-m.b,stroke:cssv('--border')}));
+  if(cfg.xlab)g.appendChild(T(W-m.r,H-6,cfg.xlab,{'text-anchor':'end','font-size':11.5,fill:cssv('--text-sec')}));
+  if(cfg.ylab)g.appendChild(T(m.l-40,m.t+4,cfg.ylab,{'font-size':11.5,fill:cssv('--text-sec')}));
+}
+
+/* ============================================================
+   3. Widgets de UI
+   ============================================================ */
+function botones(cont,opciones,activo,onSel){
+  cont.innerHTML='';
+  opciones.forEach(o=>{
+    const b=document.createElement('button');
+    b.className='btn'+(o.id===activo?' act':''); b.type='button'; b.textContent=o.t;
+    b.addEventListener('click',()=>{onSel(o.id);});
+    cont.appendChild(b);
+  });
+}
+function slider(cont,cfg){
+  const d=document.createElement('div'); d.className='sl'; d.dataset.id=cfg.id;
+  const cab=document.createElement('div'); cab.className='sl-cab';
+  const lab=document.createElement('span'); lab.textContent=cfg.label;
+  const val=document.createElement('b');
+  const inp=document.createElement('input');
+  inp.type='range'; inp.min=cfg.min; inp.max=cfg.max; inp.step=cfg.step; inp.value=cfg.value;
+  const pinta=()=>{val.textContent=cfg.fmt?cfg.fmt(+inp.value):inp.value;};
+  pinta();
+  inp.addEventListener('input',()=>{pinta();cfg.on(+inp.value);});
+  cab.appendChild(lab);cab.appendChild(val);d.appendChild(cab);d.appendChild(inp);cont.appendChild(d);
+  return {el:d,input:inp,set:v=>{inp.value=v;pinta();}};
+}
+function statCard(k,v,d,cls){
+  return '<div class="stat '+(cls||'')+'"><div class="k">'+k+'</div><div class="v">'+v+'</div>'+(d?'<div class="d">'+d+'</div>':'')+'</div>';
+}
+
+/* ============================================================
+   4. Progreso y navegación
+   ============================================================ */
+const MODULOS=[
+  {id:'m1',t:'1. Media y mediana'},{id:'m2',t:'2. Colas'},{id:'m3',t:'3. Bimodalidad'},
+  {id:'m4',t:'4. Dispersión'},{id:'m5',t:'5. Cuantiles'},{id:'m6',t:'6. Ratios'},
+  {id:'m7',t:'7. Acumulada'},{id:'m8',t:'8. Agregación'},{id:'m9',t:'9. Simpson'},
+  {id:'m10',t:'10. Desafíos'}
+];
+const LS='cdd_distribuciones_v1';
+let estado={vistos:[],docente:false};
+try{const raw=localStorage.getItem(LS); if(raw)estado=Object.assign(estado,JSON.parse(raw));}catch(e){}
+function guardar(){try{localStorage.setItem(LS,JSON.stringify(estado));}catch(e){}}
+function pintarProgreso(){
+  const n=estado.vistos.length;
+  document.getElementById('progTxt').textContent='Conceptos explorados: '+n+'/10';
+  document.getElementById('barraProg').style.width=(n/10*100)+'%';
+  document.querySelectorAll('#navMod a').forEach(a=>{
+    a.classList.toggle('visto',estado.vistos.indexOf(a.dataset.id)>=0);
+  });
+}
+function marcar(id){
+  if(estado.vistos.indexOf(id)<0){estado.vistos.push(id);guardar();pintarProgreso();}
+}
+(function navInit(){
+  const nav=document.getElementById('navMod');
+  MODULOS.forEach(m=>{
+    const a=document.createElement('a');a.href='#'+m.id;a.textContent=m.t;a.dataset.id=m.id;nav.appendChild(a);
+  });
+  document.querySelectorAll('section[data-mod]').forEach(s=>{
+    const id=s.dataset.mod;
+    s.addEventListener('input',()=>marcar(id));
+    s.addEventListener('click',e=>{if(e.target.closest('button,label,summary,input'))marcar(id);});
+  });
+  pintarProgreso();
+})();
+document.getElementById('btnDocente').addEventListener('click',function(){
+  estado.docente=!estado.docente; guardar(); aplicarDocente();
+});
+function aplicarDocente(){
+  document.body.classList.toggle('modo-docente',estado.docente);
+  const b=document.getElementById('btnDocente');
+  b.classList.toggle('act',estado.docente);
+  b.textContent=estado.docente?'Modo docente ✓':'Modo docente';
+}
+aplicarDocente();
+document.getElementById('reset').addEventListener('click',function(){
+  estado={vistos:[],docente:false};guardar();aplicarDocente();pintarProgreso();
+});
+
+/* ============================================================
+   MÓDULO 1 — media, mediana y moda
+   ============================================================ */
+(function m1(){
+  const st={forma:'normal',disp:15,sesgo:0.6,sep:35,pA:50};
+  const formas=[
+    {id:'normal',t:'Normal / simétrica'},{id:'pos',t:'Asimétrica positiva'},{id:'neg',t:'Asimétrica negativa'},
+    {id:'unif',t:'Uniforme'},{id:'bimodal',t:'Bimodal'},{id:'lnorm',t:'Lognormal'}
+  ];
+  const usa={normal:['disp'],pos:['disp','sesgo'],neg:['disp','sesgo'],unif:['disp'],bimodal:['disp','sep','pA'],lnorm:['sesgo']};
+  const N=6000;
+  const cont=document.getElementById('m1Sliders');
+  const sl={};
+  sl.disp=slider(cont,{id:'disp',label:'Dispersión',min:4,max:30,step:1,value:st.disp,on:v=>{st.disp=v;render();}});
+  sl.sesgo=slider(cont,{id:'sesgo',label:'Sesgo',min:5,max:95,step:1,value:st.sesgo*100,fmt:v=>nf(v/100,2),on:v=>{st.sesgo=v/100;render();}});
+  sl.sep=slider(cont,{id:'sep',label:'Separación entre grupos',min:0,max:60,step:1,value:st.sep,on:v=>{st.sep=v;render();}});
+  sl.pA=slider(cont,{id:'pA',label:'Tamaño del grupo 1',min:10,max:90,step:1,value:st.pA,fmt:v=>v+'%',on:v=>{st.pA=v/100*100;render();}});
+
+  function generar(){
+    const rng=makeRng(2026);
+    switch(st.forma){
+      case 'normal': return rnormArr(rng,N,100,st.disp);
+      case 'pos': return rskewArr(rng,N,100,st.disp,st.sesgo);
+      case 'neg': return rskewArr(rng,N,100,st.disp,-st.sesgo);
+      case 'unif': return runifArr(rng,N,100-st.disp*1.8,100+st.disp*1.8);
+      case 'bimodal': return rmixArr(rng,N,100-st.sep/2,st.disp*0.55,100+st.sep/2,st.disp*0.55,st.pA/100);
+      case 'lnorm': {const s=0.25+st.sesgo*0.9; return rlnormArr(rng,N,Math.log(100)-s*s/2,s);}
+    }
+  }
+  function render(){
+    botones(document.getElementById('m1Formas'),formas,st.forma,id=>{st.forma=id;render();marcar('m1');});
+    const act=usa[st.forma];
+    for(const k in sl)sl[k].el.classList.toggle('oculto',act.indexOf(k)<0);
+    const d=generar(), s=sortNum(d);
+    const mu=mean(d),me=quantileSorted(s,0.5),mo=modeBin(d,70);
+    const lo=quantileSorted(s,0.002),hi=quantileSorted(s,0.995);
+    drawDist(document.getElementById('m1Graf'),{
+      sets:[{data:d,color:cssv('--blue'),opacity:0.45},{data:d,type:'line',color:cssv('--text-sec'),width:1.6}],
+      lines:[{x:mu,color:cssv('--accent'),label:'media'},{x:me,color:cssv('--green'),label:'mediana'},{x:mo,color:cssv('--purple'),label:'moda',dash:'5 3'}],
+      xmin:lo,xmax:hi,bins:52,xlab:'valor',
+      nota: st.forma==='lnorm'?'eje recortado en el p99,5':''
+    });
+    document.getElementById('m1N').textContent='n = '+N.toLocaleString('es-AR')+' observaciones simuladas';
+    const dif=mu-me;
+    document.getElementById('m1Stats').innerHTML=
+      statCard('Media',nf(mu,1),'promedio aritmético','media')+
+      statCard('Mediana',nf(me,1),'50% a cada lado','mediana')+
+      statCard('Moda',nf(mo,1),'zona más frecuente','moda')+
+      statCard('Media − mediana',(dif>0?'+':'')+nf(dif,2),
+        Math.abs(dif)<0.6?'prácticamente iguales':(dif>0?'cola hacia la derecha':'cola hacia la izquierda'),'disp')+
+      statCard('Desvío',nf(sd(d),1),'CV = '+nf(cv(d)*100,1)+'%','disp');
+    document.querySelectorAll('#m1Stats .stat').forEach(e=>{e.classList.remove('flash');void e.offsetWidth;e.classList.add('flash');});
+  }
+  render();
+})();
+
+/* ============================================================
+   MÓDULO 2 — inflá la cola
+   ============================================================ */
+(function m2(){
+  const N=5000, MULT=[1,2,3,5,10];
+  const rng=makeRng(77), base=rlnormArr(rng,N,Math.log(450000)-0.72*0.72/2,0.72);
+  const baseS=sortNum(base), corte=quantileSorted(baseS,0.99);
+  let mi=0;
+  slider(document.getElementById('m2Sliders'),{id:'mult',label:'Multiplicar el 1% superior',min:0,max:4,step:1,value:0,
+    fmt:v=>MULT[v]+'×',on:v=>{mi=v;render();}});
+  function transformar(){
+    const m=MULT[mi],a=new Float64Array(N);
+    for(let i=0;i<N;i++)a[i]=base[i]>corte?base[i]*m:base[i];
+    return a;
+  }
+  function tarjetas(d){
+    const s=sortNum(d);
+    return {media:mean(d),mediana:quantileSorted(s,0.5),desvio:sd(d),cv:cv(d)*100};
+  }
+  const base0=tarjetas(base);
+  function html(o){
+    return statCard('Media',money(o.media),'','media')+
+           statCard('Mediana',money(o.mediana),'','mediana')+
+           statCard('Desvío',money(o.desvio),'','disp')+
+           statCard('CV',nf(o.cv,1)+'%','adimensional','disp');
+  }
+  function render(){
+    const d=transformar(),o=tarjetas(d),s=sortNum(d);
+    const hi=quantileSorted(baseS,0.995);
+    drawDist(document.getElementById('m2Graf'),{
+      sets:[{data:d,color:cssv('--blue'),opacity:0.5}],
+      lines:[{x:o.media,color:cssv('--accent'),label:'media'},{x:o.mediana,color:cssv('--green'),label:'mediana'}],
+      xmin:0,xmax:hi,bins:50,fmt:v=>'$'+Math.round(v/1000)+'k',xlab:'ingreso mensual',
+      nota:'el eje se recorta en el p99,5 de la distribución original: la cola sigue entrando en los cálculos'
+    });
+    document.getElementById('m2Antes').innerHTML=html(base0);
+    document.getElementById('m2Despues').innerHTML=html(o);
+    const dl=(a,b)=>{const p=(b/a-1)*100;return (p>=0?'+':'')+nf(p,1)+'%';};
+    document.getElementById('m2Delta').innerHTML=
+      statCard('Media',dl(base0.media,o.media),'','media')+
+      statCard('Mediana',dl(base0.mediana,o.mediana),'','mediana')+
+      statCard('Desvío',dl(base0.desvio,o.desvio),'','disp')+
+      statCard('CV',dl(base0.cv,o.cv),'','disp')+
+      statCard('Observaciones modificadas',Math.round(N*0.01)+' de '+N,'el 1% superior','ratio');
+    document.querySelectorAll('#m2Delta .stat').forEach(e=>{e.classList.remove('flash');void e.offsetWidth;e.classList.add('flash');});
+  }
+  render();
+})();
+
+/* ============================================================
+   MÓDULO 3 — bimodalidad
+   ============================================================ */
+(function m3(){
+  const N=6000;
+  const st={mA:250,mB:750,sA:60,sB:110,pA:55,vista:'juntas'};
+  const c=document.getElementById('m3Sliders');
+  slider(c,{label:'Media grupo A',min:100,max:500,step:10,value:st.mA,fmt:v=>'$'+v+'k',on:v=>{st.mA=v;render();}});
+  slider(c,{label:'Media grupo B',min:400,max:1200,step:10,value:st.mB,fmt:v=>'$'+v+'k',on:v=>{st.mB=v;render();}});
+  slider(c,{label:'Dispersión de A',min:20,max:220,step:5,value:st.sA,on:v=>{st.sA=v;render();}});
+  slider(c,{label:'Dispersión de B',min:20,max:260,step:5,value:st.sB,on:v=>{st.sB=v;render();}});
+  slider(c,{label:'Proporción del grupo A',min:10,max:90,step:1,value:st.pA,fmt:v=>v+'% / '+(100-v)+'%',on:v=>{st.pA=v;render();}});
+  function render(){
+    botones(document.getElementById('m3Vista'),
+      [{id:'separadas',t:'Ver los grupos por separado'},{id:'juntas',t:'Mezclar las dos poblaciones'}],
+      st.vista,id=>{st.vista=id;render();marcar('m3');});
+    const rng=makeRng(555);
+    const nA=Math.round(N*st.pA/100), nB=N-nA;
+    const A=rnormArr(rng,nA,st.mA,st.sA), B=rnormArr(rng,nB,st.mB,st.sB);
+    const tot=new Float64Array(N); tot.set(A,0); tot.set(B,nA);
+    const s=sortNum(tot), mu=mean(tot), me=quantileSorted(s,0.5);
+    const lo=Math.max(0,quantileSorted(s,0.002)), hi=quantileSorted(s,0.998);
+    const sets=[];
+    if(st.vista==='juntas')sets.push({data:tot,color:cssv('--blue'),opacity:0.4});
+    sets.push({data:A,type:'line',color:cssv('--orange'),fill:true});
+    sets.push({data:B,type:'line',color:cssv('--teal'),fill:true});
+    drawDist(document.getElementById('m3Graf'),{
+      sets:sets,
+      lines: st.vista==='juntas'?[{x:mu,color:cssv('--accent'),label:'media total'},{x:me,color:cssv('--green'),label:'mediana total'}]:[],
+      xmin:lo,xmax:hi,bins:56,fmt:v=>'$'+Math.round(v)+'k',xlab:'ingreso (miles)',
+      nota: st.vista==='separadas'?'dos poblaciones distintas, todavía sin mezclar':''
+    });
+    const mo=modeBin(tot,70);
+    /* segunda moda: pico del grupo minoritario */
+    document.getElementById('m3Stats').innerHTML=
+      statCard('Media total','$'+nf(mu,0)+'k','','media')+
+      statCard('Mediana total','$'+nf(me,0)+'k','','mediana')+
+      statCard('Moda principal','$'+nf(mo,0)+'k','bin más frecuente','moda')+
+      statCard('Media grupo A','$'+nf(mean(A),0)+'k',pct(st.pA,0)+' de los casos','disp')+
+      statCard('Media grupo B','$'+nf(mean(B),0)+'k',pct(100-st.pA,0)+' de los casos','disp');
+    /* cuánta gente hay cerca de la media */
+    let cerca=0; const r=mu*0.05;
+    for(let i=0;i<N;i++)if(Math.abs(tot[i]-mu)<=r)cerca++;
+    const p=cerca/N*100;
+    document.getElementById('m3Vecindad').innerHTML=
+      '<b>Gente cerca del promedio</b>Solo el <strong>'+pct(p)+'</strong> de las observaciones está a menos de 5% de la media ('+
+      '$'+nf(mu*0.95,0)+'k – $'+nf(mu*1.05,0)+'k). '+
+      (p<8?'La media cae en una zona donde casi no vive nadie.':'Todavía hay bastante gente alrededor del promedio: probá separar más los grupos.');
+  }
+  render();
+})();
+
+/* ============================================================
+   MÓDULO 4 — dispersión
+   ============================================================ */
+(function m4(){
+  const N=4000;
+  const st={s1:12,s2:38,escala:1};
+  const c=document.getElementById('m4Sliders');
+  slider(c,{label:'Dispersión de la distribución 1',min:4,max:60,step:1,value:st.s1,on:v=>{st.s1=v;render();}});
+  slider(c,{label:'Dispersión de la distribución 2',min:4,max:60,step:1,value:st.s2,on:v=>{st.s2=v;render();}});
+  const escalas=[{id:1,t:'En pesos'},{id:1000,t:'× 1.000'},{id:0.001,t:'÷ 1.000'}];
+  function render(){
+    botones(document.getElementById('m4Escala'),escalas,st.escala,id=>{st.escala=id;render();marcar('m4');});
+    const rng=makeRng(31);
+    const k=st.escala;
+    const d1=rnormArr(rng,N,200*k,st.s1*k), d2=rnormArr(rng,N,200*k,st.s2*k);
+    const s1=sortNum(d1),s2=sortNum(d2);
+    const lo=Math.min(s1[0],s2[0]),hi=Math.max(s1[N-1],s2[N-1]);
+    drawDist(document.getElementById('m4Graf'),{
+      sets:[{data:d1,type:'line',color:cssv('--accent'),fill:true},{data:d2,type:'line',color:cssv('--orange'),fill:true}],
+      lines:[{x:mean(d1),color:cssv('--accent'),label:'media 1'},{x:mean(d2),color:cssv('--orange'),label:'media 2'}],
+      xmin:lo,xmax:hi,bins:54,fmt:v=>k===0.001?nf(v,2):nf(v,0),xlab:'valor'
+    });
+    const stats=d=>{const s=sortNum(d);return {media:mean(d),mediana:quantileSorted(s,0.5),desvio:sd(d),
+      iqr:quantileSorted(s,0.75)-quantileSorted(s,0.25),cv:cv(d)*100};};
+    const a=stats(d1),b=stats(d2);
+    const dec=k===0.001?3:1;
+    document.getElementById('m4Tabla').innerHTML=
+      '<thead><tr><th>Distribución</th><th class="num">Media</th><th class="num">Mediana</th><th class="num">Desvío</th><th class="num">IQR</th><th class="num">CV</th></tr></thead>'+
+      '<tbody>'+
+      '<tr><td class="tx">Distribución 1</td><td class="num">'+nf(a.media,dec)+'</td><td class="num">'+nf(a.mediana,dec)+'</td><td class="num">'+nf(a.desvio,dec)+'</td><td class="num">'+nf(a.iqr,dec)+'</td><td class="num">'+nf(a.cv,1)+'%</td></tr>'+
+      '<tr><td class="tx">Distribución 2</td><td class="num">'+nf(b.media,dec)+'</td><td class="num">'+nf(b.mediana,dec)+'</td><td class="num">'+nf(b.desvio,dec)+'</td><td class="num">'+nf(b.iqr,dec)+'</td><td class="num">'+nf(b.cv,1)+'%</td></tr>'+
+      '</tbody>';
+  }
+  render();
+})();
+
+/* ============================================================
+   MÓDULO 5 — cuantiles
+   ============================================================ */
+(function m5(){
+  const N=8000;
+  const rng=makeRng(909);
+  const ing=rlnormArr(rng,N,Math.log(480000)-0.8*0.8/2,0.8);
+  const s=sortNum(ing);
+  let p=75, grupos=5;
+  slider(document.getElementById('m5Sliders'),{label:'Elegí un percentil',min:1,max:99,step:1,value:p,
+    fmt:v=>'p'+v,on:v=>{p=v;renderP();}});
+  const colores=['#3170A2','#4E97C9','#5FB0A0','#C87A1A','#D45A3A','#7B5EA7','#2D8659','#9A6BC4','#C94F7C','#4B6BB5'];
+
+  function renderP(){
+    const val=quantileSorted(s,p/100);
+    const lo=0,hi=quantileSorted(s,0.99);
+    drawDist(document.getElementById('m5Graf'),{
+      sets:[{data:ing,color:cssv('--blue'),opacity:0.45}],
+      lines:[{x:val,color:cssv('--purple'),label:'p'+p},{x:quantileSorted(s,0.5),color:cssv('--green'),label:'mediana'}],
+      xmin:lo,xmax:hi,bins:60,fmt:v=>'$'+Math.round(v/1000)+'k',xlab:'ingreso',h:250,
+      nota:'eje recortado en el p99'
+    });
+    /* barra horizontal de posiciones */
+    const marcas=[10,20,25,50,75,80,90,95,99];
+    let h='<div style="position:relative;margin:1.2rem 0 2.2rem">'+
+      '<div style="height:18px;border-radius:9px;background:linear-gradient(90deg,'+cssv('--accent')+','+cssv('--teal')+','+cssv('--orange')+','+cssv('--red')+')"></div>';
+    marcas.forEach(mk=>{
+      h+='<div style="position:absolute;left:'+mk+'%;top:-4px;width:2px;height:26px;background:'+cssv('--text-sec')+';opacity:.55"></div>'+
+         '<div style="position:absolute;left:'+mk+'%;top:24px;transform:translateX(-50%);font-size:.68rem;font-family:var(--font-m);color:var(--text-sec)">p'+mk+'</div>';
+    });
+    h+='<div style="position:absolute;left:'+p+'%;top:-14px;transform:translateX(-50%);transition:left .2s">'+
+       '<div style="width:3px;height:46px;background:'+cssv('--purple')+';margin:0 auto"></div>'+
+       '<div style="background:'+cssv('--purple')+';color:#fff;font-size:.7rem;font-family:var(--font-m);padding:1px 6px;border-radius:4px;white-space:nowrap;transform:translateX(-50%);margin-left:50%">p'+p+' = '+money(val)+'</div></div>';
+    h+='</div>';
+    document.getElementById('m5Barra').innerHTML=h;
+    document.getElementById('m5Stats').innerHTML=
+      statCard('Percentil seleccionado','p'+p,'','moda')+
+      statCard('Valor',money(val),'ingreso mensual','media')+
+      statCard('Por debajo',pct(p,0),'de la población','mediana')+
+      statCard('Por encima',pct(100-p,0),'de la población','disp')+
+      statCard('Respecto de la mediana',nf(val/quantileSorted(s,0.5),2)+'×','veces el ingreso mediano','ratio');
+    document.getElementById('m5Frase').innerHTML=
+      '<b>Cómo se lee</b>El percentil '+p+' vale <strong>'+money(val)+'</strong>: aproximadamente el <strong>'+p+'%</strong> de las observaciones tiene un ingreso menor o igual a ese valor, y el <strong>'+(100-p)+'%</strong> lo supera.';
+  }
+
+  function renderG(){
+    botones(document.getElementById('m5Grupos'),
+      [{id:5,t:'Quintiles'},{id:10,t:'Deciles'},{id:100,t:'Percentiles'}],grupos,
+      id=>{grupos=id;renderG();marcar('m5');});
+    const k=grupos, total=s.reduce((a,b)=>a+b,0);
+    const seg=document.getElementById('m5Seg'); seg.innerHTML='';
+    const filas=[];
+    for(let i=0;i<k;i++){
+      const lo=quantileSorted(s,i/k), hi=quantileSorted(s,(i+1)/k);
+      const i0=Math.floor(N*i/k), i1=Math.floor(N*(i+1)/k);
+      const sub=s.slice(i0,i1);
+      let suma=0;for(let j=0;j<sub.length;j++)suma+=sub[j];
+      filas.push({i:i+1,lo:lo,hi:hi,n:sub.length,media:suma/sub.length,mediana:quantileSorted(sub,0.5),share:suma/total*100});
+      const d=document.createElement('div');
+      d.style.background=colores[i%colores.length]; d.style.flex='1';
+      d.textContent=k<=10?(k===5?'Q'+(i+1):'D'+(i+1)):'';
+      d.title=(k===5?'Quintil ':k===10?'Decil ':'Percentil ')+(i+1);
+      seg.appendChild(d);
+    }
+    const nom=k===5?'Quintil':k===10?'Decil':'Percentil';
+    const muestra=k===100?filas.filter(f=>[1,10,25,50,75,90,95,99,100].indexOf(f.i)>=0):filas;
+    document.getElementById('m5Tabla').innerHTML=
+      '<thead><tr><th>'+nom+'</th><th>Intervalo de ingresos</th><th class="num">Casos</th><th class="num">% pobl.</th><th class="num">Ingreso medio</th><th class="num">Ingreso mediano</th><th class="num">% del ingreso</th></tr></thead><tbody>'+
+      muestra.map(f=>'<tr'+(k===5&&f.i===5?' class="destacada"':'')+'><td class="tx">'+nom.charAt(0)+f.i+'</td>'+
+        '<td>'+money(f.lo)+' – '+money(f.hi)+'</td>'+
+        '<td class="num">'+f.n.toLocaleString('es-AR')+'</td>'+
+        '<td class="num">'+nf(100/k,k===100?0:0)+'%</td>'+
+        '<td class="num">'+money(f.media)+'</td><td class="num">'+money(f.mediana)+'</td>'+
+        '<td class="num">'+nf(f.share,1)+'%</td></tr>').join('')+'</tbody>';
+    document.getElementById('m5NotaTabla').textContent=
+      k===100?'Se muestran algunos percentiles seleccionados de los 100. Cada uno agrupa al 1% de la población.':
+      'Cada grupo tiene la misma cantidad de personas ('+nf(100/k,0)+'% de la población), pero no la misma porción del ingreso.';
+  }
+  renderP(); renderG();
+})();
+
+/* pregunta de quintiles */
+(function m5preg(){
+  const cont=document.getElementById('m5Preg');
+  cont.querySelectorAll('.op').forEach(o=>o.addEventListener('click',()=>{
+    cont.querySelectorAll('.op').forEach(x=>x.classList.remove('sel'));o.classList.add('sel');}));
+  cont.querySelector('[data-check]').addEventListener('click',()=>{
+    const sel=cont.querySelector('input:checked'); if(!sel)return;
+    const ok=sel.value==='0';
+    cont.querySelectorAll('.op').forEach(o=>{
+      const v=o.querySelector('input').value;
+      o.classList.remove('sel');
+      if(v==='0')o.classList.add('bien'); else if(o.querySelector('input').checked)o.classList.add('mal');
+    });
+    const fb=cont.querySelector('.feedback');
+    fb.className='feedback on '+(ok?'ok':'no');
+    fb.innerHTML='<strong>'+(ok?'Correcto. ':'No exactamente. ')+'</strong>El quintil identifica una posición en la distribución: divide a la población en cinco grupos de igual tamaño. No indica automáticamente qué proporción del ingreso concentra cada grupo. Mirá la columna "% del ingreso" de la tabla: el quinto quintil es el 20% de la población, pero se lleva bastante más del 20% del ingreso.';
+  });
+})();
+
+/* ============================================================
+   MÓDULO 6 — ratios
+   ============================================================ */
+(function m6(){
+  const N=8000;
+  let sig=70;
+  slider(document.getElementById('m6Sliders'),{label:'Desigualdad',min:20,max:130,step:1,value:sig,
+    fmt:v=>nf(v/100,2),on:v=>{sig=v;render();}});
+  function render(){
+    const s0=sig/100, rng=makeRng(4242);
+    const d=rlnormArr(rng,N,Math.log(500000)-s0*s0/2,s0), s=sortNum(d);
+    const p10=quantileSorted(s,0.1),p50=quantileSorted(s,0.5),p90=quantileSorted(s,0.9);
+    drawDist(document.getElementById('m6Graf'),{
+      sets:[{data:d,color:cssv('--blue'),opacity:0.45}],
+      lines:[{x:p10,color:cssv('--teal'),label:'p10'},{x:p50,color:cssv('--green'),label:'p50'},{x:p90,color:cssv('--red'),label:'p90'}],
+      xmin:0,xmax:quantileSorted(s,0.98),bins:56,fmt:v=>'$'+Math.round(v/1000)+'k',xlab:'ingreso',h:260,
+      nota:'eje recortado en el p98'
+    });
+    document.getElementById('m6Stats').innerHTML=
+      statCard('p10',money(p10),'','ratio')+statCard('p50',money(p50),'mediana','mediana')+
+      statCard('p90',money(p90),'','ratio')+statCard('Media',money(mean(d)),'','media');
+    document.getElementById('m6Ratios').innerHTML=
+      statCard('p90 / p10',nf(p90/p10,2)+'×','Distancia entre la parte alta y la parte baja de la distribución.','ratio')+
+      statCard('p50 / p10',nf(p50/p10,2)+'×','Distancia entre el centro y la parte baja.','ratio')+
+      statCard('p90 / p50',nf(p90/p50,2)+'×','Distancia entre la parte alta y el centro.','ratio');
+    document.querySelectorAll('#m6Ratios .stat').forEach(e=>{e.classList.remove('flash');void e.offsetWidth;e.classList.add('flash');});
+  }
+  render();
+
+  /* dos distribuciones con el mismo p90/p10 */
+  (function comparacion(){
+    const rng=makeRng(1717);
+    const base=rlnormArr(rng,6000,Math.log(500000)-0.68*0.68/2,0.68);
+    const bs=sortNum(base);
+    const q10=quantileSorted(bs,0.1),q50=quantileSorted(bs,0.5),q90=quantileSorted(bs,0.9);
+    const rBajo=q50/q10, rAlto=q90/q50, T=8; /* objetivo p90/p10 */
+    const a=Math.log(T/rAlto)/Math.log(rBajo);   /* estira la parte baja */
+    const b=Math.log(T/rBajo)/Math.log(rAlto);   /* estira la parte alta */
+    const A=new Float64Array(base.length),B=new Float64Array(base.length);
+    for(let i=0;i<base.length;i++){
+      const x=base[i];
+      A[i]= x<q50 ? q50*Math.pow(x/q50,a) : x;
+      B[i]= x>q50 ? q50*Math.pow(x/q50,b) : x;
+    }
+    const sA=sortNum(A),sB=sortNum(B);
+    const q=(s,p)=>quantileSorted(s,p);
+    drawDist(document.getElementById('m6Graf2'),{
+      sets:[{data:A,type:'line',color:cssv('--accent'),fill:true},{data:B,type:'line',color:cssv('--orange'),fill:true}],
+      lines:[{x:q(sA,0.5),color:cssv('--accent'),label:'p50 A'},{x:q(sB,0.5),color:cssv('--orange'),label:'p50 B'}],
+      xmin:0,xmax:Math.max(q(sA,0.97),q(sB,0.97)),bins:56,fmt:v=>'$'+Math.round(v/1000)+'k',xlab:'ingreso',h:250
+    });
+    const fila=(n,s)=>'<tr><td class="tx">'+n+'</td><td class="num">'+money(q(s,0.1))+'</td><td class="num">'+money(q(s,0.5))+
+      '</td><td class="num">'+money(q(s,0.9))+'</td><td class="num">'+nf(q(s,0.9)/q(s,0.1),2)+'×</td><td class="num">'+
+      nf(q(s,0.5)/q(s,0.1),2)+'×</td><td class="num">'+nf(q(s,0.9)/q(s,0.5),2)+'×</td></tr>';
+    document.getElementById('m6Tabla').innerHTML=
+      '<thead><tr><th>Distribución</th><th class="num">p10</th><th class="num">p50</th><th class="num">p90</th><th class="num">p90/p10</th><th class="num">p50/p10</th><th class="num">p90/p50</th></tr></thead><tbody>'+
+      fila('A · brecha abajo',sA)+fila('B · brecha arriba',sB)+'</tbody>';
+  })();
+})();
+
+/* ============================================================
+   MÓDULO 7 — acumulada
+   ============================================================ */
+(function m7(){
+  const N=6000, rng=makeRng(88);
+  const d1=rlnormArr(rng,N,Math.log(500000)-0.55*0.55/2,0.55);
+  const d2=rlnormArr(rng,N,Math.log(430000)-0.95*0.95/2,0.95);
+  const s1=sortNum(d1),s2=sortNum(d2);
+  const XMAX=quantileSorted(s1,0.985);
+  let vista='dist', umbral=Math.round(quantileSorted(s1,0.5));
+  const slUm=slider(document.getElementById('m7Sliders'),{label:'Umbral de ingreso',min:50000,max:Math.round(XMAX),step:5000,
+    value:umbral,fmt:v=>money(v),on:v=>{umbral=v;render();}});
+  function ecdf(s,x){ /* proporción <= x */
+    let lo=0,hi=s.length;
+    while(lo<hi){const mid=(lo+hi)>>1; if(s[mid]<=x)lo=mid+1;else hi=mid;}
+    return lo/s.length;
+  }
+  function curva(s){
+    const pts=[];const k=160;
+    for(let i=0;i<=k;i++){const x=XMAX*i/k;pts.push([x,ecdf(s,x)]);}
+    return pts;
+  }
+  function render(){
+    botones(document.getElementById('m7Vista'),[{id:'dist',t:'Distribución'},{id:'cdf',t:'Acumulada'}],vista,
+      id=>{vista=id;render();marcar('m7');});
+    const F=ecdf(s1,umbral);
+    if(vista==='dist'){
+      drawDist(document.getElementById('m7Graf'),{
+        sets:[{data:d1,color:cssv('--blue'),opacity:0.45}],
+        lines:[{x:umbral,color:cssv('--purple'),label:'umbral'},{x:quantileSorted(s1,0.5),color:cssv('--green'),label:'mediana'}],
+        xmin:0,xmax:XMAX,bins:56,fmt:v=>'$'+Math.round(v/1000)+'k',xlab:'ingreso',h:300
+      });
+    }else{
+      drawLines(document.getElementById('m7Graf'),{
+        xmin:0,xmax:XMAX,ymin:0,ymax:1,
+        series:[{pts:curva(s1),color:cssv('--accent')}],
+        marks:[{x:umbral,color:cssv('--purple'),pts:[{y:F,color:cssv('--purple'),label:pct(F*100,0)}]}],
+        fmt:v=>'$'+Math.round(v/1000)+'k', yfmt:v=>nf(v*100,0)+'%',
+        xlab:'ingreso',ylab:'% acumulado',h:300
+      });
+    }
+    document.getElementById('m7Frase').innerHTML='<b>Lectura</b>Con un umbral de <strong>'+money(umbral)+'</strong>: el <strong>'+
+      pct(F*100)+'</strong> de las personas tiene ingresos menores o iguales a ese valor, y el <strong>'+pct(100-F*100)+'</strong> lo supera.';
+    /* comparación */
+    const c1=curva(s1),c2=curva(s2);
+    const F2=ecdf(s2,umbral);
+    drawLines(document.getElementById('m7Graf2'),{
+      xmin:0,xmax:XMAX,ymin:0,ymax:1,
+      series:[{pts:c1,color:cssv('--accent')},{pts:c2,color:cssv('--orange')}],
+      marks:[{x:umbral,color:cssv('--purple'),pts:[{y:F,color:cssv('--accent'),label:pct(F*100,0)},{y:F2,color:cssv('--orange'),label:pct(F2*100,0)}]}],
+      fmt:v=>'$'+Math.round(v/1000)+'k',yfmt:v=>nf(v*100,0)+'%',xlab:'ingreso',ylab:'% acumulado',h:300
+    });
+    /* detección de cruce */
+    let cruce=null;
+    for(let i=1;i<c1.length;i++){
+      const a=c1[i-1][1]-c2[i-1][1], b=c1[i][1]-c2[i][1];
+      if(a===0)continue;
+      if(a*b<0&&c1[i][0]>quantileSorted(s1,0.02)){cruce=c1[i][0];break;}
+    }
+    const dif=F-F2;
+    document.getElementById('m7Cruce').innerHTML= cruce?
+      '<b>Las curvas se cruzan cerca de '+money(cruce)+'</b>Las distribuciones no mantienen el mismo orden en todos los umbrales. '+
+      'Con el umbral actual ('+money(umbral)+'), la Región '+(dif>0?'1':'2')+' tiene más gente por debajo ('+pct(Math.abs(dif)*100)+' de diferencia). '+
+      'Cruzá el umbral por encima de '+money(cruce)+' y el orden se invierte.'
+      : '<b>Las curvas no se cruzan</b>Una región domina a la otra en todos los umbrales.';
+  }
+  render();
+})();
+
+/* ============================================================
+   MÓDULO 8 — agregación
+   ============================================================ */
+(function m8(){
+  const rng=makeRng(606);
+  const defs=[
+    {n:120,mx:3.2,my:6.5,sx:0.9,sy:1.1,b:0.35,c:'--accent',t:'Grupo A'},
+    {n:150,mx:5.4,my:5.2,sx:1.0,sy:1.2,b:0.30,c:'--orange',t:'Grupo B'},
+    {n:100,mx:7.6,my:3.6,sx:0.9,sy:1.0,b:0.32,c:'--teal',t:'Grupo C'}
+  ];
+  const datos=defs.map(g=>{
+    const xs=[],ys=[];
+    for(let i=0;i<g.n;i++){const x=g.mx+g.sx*rng.norm();xs.push(x);ys.push(g.my+g.b*(x-g.mx)+g.sy*rng.norm());}
+    return {def:g,x:xs,y:ys};
+  });
+  let vista='ind';
+  function render(){
+    botones(document.getElementById('m8Vista'),
+      [{id:'ind',t:'Datos individuales'},{id:'prom',t:'Promedios por grupo'},{id:'ambos',t:'Ambos'}],vista,
+      id=>{vista=id;render();marcar('m8');});
+    const pts=[],big=[];
+    datos.forEach(d=>{
+      const col=cssv(d.def.c);
+      if(vista!=='prom')for(let i=0;i<d.x.length;i++)pts.push({x:d.x[i],y:d.y[i],c:col,o:vista==='ambos'?0.28:0.5});
+      if(vista!=='ind')big.push({x:mean(d.x),y:mean(d.y),c:col,label:d.def.t});
+    });
+    drawScatter(document.getElementById('m8Graf'),{
+      points:pts,big:big,xmin:0,xmax:11,ymin:0,ymax:11,xlab:'X',ylab:'Y',h:360
+    });
+    document.getElementById('m8Leyenda').innerHTML=datos.map(d=>
+      '<span><i class="sw pt" style="background:'+cssv(d.def.c)+'"></i> '+d.def.t+' (n='+d.x.length+')</span>').join('');
+    document.getElementById('m8Tabla').innerHTML=
+      '<thead><tr><th>Grupo</th><th class="num">n</th><th class="num">X medio</th><th class="num">Y medio</th><th class="num">Desvío de Y</th><th class="num">Y mínimo</th><th class="num">Y máximo</th></tr></thead><tbody>'+
+      datos.map(d=>{const sy=sortNum(d.y);return '<tr><td class="tx">'+d.def.t+'</td><td class="num">'+d.x.length+'</td><td class="num">'+
+        nf(mean(d.x),2)+'</td><td class="num">'+nf(mean(d.y),2)+'</td><td class="num">'+nf(sd(d.y),2)+'</td><td class="num">'+
+        nf(sy[0],2)+'</td><td class="num">'+nf(sy[sy.length-1],2)+'</td></tr>';}).join('')+
+      '</tbody>';
+  }
+  render();
+})();
+
+/* ============================================================
+   MÓDULO 9 — Simpson
+   ============================================================ */
+(function m9(){
+  const st={nA:220,nB:220,mxA:3.2,mxB:7.0,myA:3.6,myB:7.2,b:-60,lineas:'todas'};
+  const c=document.getElementById('m9Sliders');
+  slider(c,{label:'Tamaño del grupo A',min:40,max:500,step:10,value:st.nA,on:v=>{st.nA=v;render();}});
+  slider(c,{label:'Tamaño del grupo B',min:40,max:500,step:10,value:st.nB,on:v=>{st.nB=v;render();}});
+  slider(c,{label:'Media de X · grupo A',min:1,max:9,step:0.1,value:st.mxA,fmt:v=>nf(v,1),on:v=>{st.mxA=v;render();}});
+  slider(c,{label:'Media de X · grupo B',min:1,max:9,step:0.1,value:st.mxB,fmt:v=>nf(v,1),on:v=>{st.mxB=v;render();}});
+  slider(c,{label:'Media de Y · grupo A',min:1,max:9,step:0.1,value:st.myA,fmt:v=>nf(v,1),on:v=>{st.myA=v;render();}});
+  slider(c,{label:'Media de Y · grupo B',min:1,max:9,step:0.1,value:st.myB,fmt:v=>nf(v,1),on:v=>{st.myB=v;render();}});
+  slider(c,{label:'Relación dentro de cada grupo',min:-120,max:60,step:5,value:st.b,fmt:v=>'pendiente '+nf(v/100,2),on:v=>{st.b=v;render();}});
+
+  function generar(){
+    const rng=makeRng(3131), b=st.b/100;
+    const gen=(n,mx,my)=>{const x=[],y=[];
+      for(let i=0;i<n;i++){const xi=mx+0.8*rng.norm();x.push(xi);y.push(my+b*(xi-mx)+0.7*rng.norm());}
+      return {x:x,y:y};};
+    return {A:gen(st.nA,st.mxA,st.myA),B:gen(st.nB,st.mxB,st.myB)};
+  }
+  function render(){
+    botones(document.getElementById('m9Lineas'),
+      [{id:'ninguna',t:'Sin líneas'},{id:'grupos',t:'Solo dentro de cada grupo'},{id:'agregada',t:'Solo la agregada'},{id:'todas',t:'Todas'}],
+      st.lineas,id=>{st.lineas=id;render();marcar('m9');});
+    const g=generar();
+    const xT=g.A.x.concat(g.B.x), yT=g.A.y.concat(g.B.y);
+    const bA=lm(g.A.x,g.A.y), bB=lm(g.B.x,g.B.y), bT=lm(xT,yT);
+    const pts=[];
+    g.A.x.forEach((x,i)=>pts.push({x:x,y:g.A.y[i],c:cssv('--orange'),o:0.5}));
+    g.B.x.forEach((x,i)=>pts.push({x:x,y:g.B.y[i],c:cssv('--teal'),o:0.5}));
+    const lines=[];
+    if(st.lineas==='grupos'||st.lineas==='todas'){
+      lines.push({a:bA.a,b:bA.b,color:cssv('--orange')});
+      lines.push({a:bB.a,b:bB.b,color:cssv('--teal')});
+    }
+    if(st.lineas==='agregada'||st.lineas==='todas')lines.push({a:bT.a,b:bT.b,color:cssv('--red'),width:3.2,dash:'7 4'});
+    drawScatter(document.getElementById('m9Graf'),{
+      points:pts,lines:lines,xmin:0,xmax:11,ymin:0,ymax:11,xlab:'X (intensidad del tratamiento)',ylab:'Y (resultado)',h:370
+    });
+    const sig=v=>v<0?'negativa':(v>0?'positiva':'nula');
+    const paradoja=(bA.b<0&&bB.b<0&&bT.b>0)||(bA.b>0&&bB.b>0&&bT.b<0);
+    document.getElementById('m9Stats').innerHTML=
+      statCard('Dentro de A',nf(bA.b,2),'relación '+sig(bA.b),'disp')+
+      statCard('Dentro de B',nf(bB.b,2),'relación '+sig(bB.b),'ratio')+
+      statCard('Agregado',nf(bT.b,2),'relación '+sig(bT.b),'media')+
+      statCard('Correlación agregada',nf(corr(xT,yT),2),'','mediana')+
+      statCard('¿Paradoja?',paradoja?'Sí':'No',paradoja?'el signo se invierte al agregar':'los signos coinciden','moda');
+    /* composición y promedio ponderado */
+    const n=st.nA+st.nB, wA=st.nA/n, wB=st.nB/n;
+    const mYA=mean(g.A.y), mYB=mean(g.B.y), mY=mean(yT);
+    document.getElementById('m9Comp').innerHTML=
+      '<div style="width:'+(wA*100)+'%;background:'+cssv('--orange')+'">A '+pct(wA*100,0)+'</div>'+
+      '<div style="width:'+(wB*100)+'%;background:'+cssv('--teal')+'">B '+pct(wB*100,0)+'</div>';
+    document.getElementById('m9Pond').innerHTML=
+      '<div class="stats">'+
+      statCard('Y medio en A',nf(mYA,2),'peso '+pct(wA*100,0),'disp')+
+      statCard('Y medio en B',nf(mYB,2),'peso '+pct(wB*100,0),'ratio')+
+      statCard('Y medio agregado',nf(mY,2),'','media')+
+      '</div>'+
+      '<p class="chico" style="margin-top:.4rem">Resultado agregado = composición × resultado dentro de cada grupo: '+
+      '<span class="formula">'+nf(wA,2)+' × '+nf(mYA,2)+' + '+nf(wB,2)+' × '+nf(mYB,2)+' = '+nf(wA*mYA+wB*mYB,2)+'</span>'+
+      ' &nbsp;Movés los tamaños y el agregado se mueve, aunque nada haya cambiado adentro de los grupos.</p>';
+  }
+  render();
+
+  /* ---- Berkeley ---- */
+  const DEP=[
+    {d:'A',mA:825,mR:0.62,fA:108,fR:0.82},
+    {d:'B',mA:560,mR:0.63,fA:25,fR:0.68},
+    {d:'C',mA:325,mR:0.37,fA:593,fR:0.34},
+    {d:'D',mA:417,mR:0.33,fA:375,fR:0.35},
+    {d:'E',mA:191,mR:0.28,fA:393,fR:0.24},
+    {d:'F',mA:373,mR:0.06,fA:341,fR:0.07}
+  ].map(x=>Object.assign({},x,{mAd:Math.round(x.mA*x.mR),fAd:Math.round(x.fA*x.fR)}));
+  const totM=DEP.reduce((a,d)=>a+d.mA,0), totMad=DEP.reduce((a,d)=>a+d.mAd,0);
+  const totF=DEP.reduce((a,d)=>a+d.fA,0), totFad=DEP.reduce((a,d)=>a+d.fAd,0);
+  let desagregado=false;
+  function berk(){
+    botones(document.getElementById('m9BerkBtns'),
+      [{id:false,t:'Ver el agregado'},{id:true,t:'Desagregar por departamento'}],desagregado,
+      id=>{desagregado=id;berk();marcar('m9');});
+    const tM=totMad/totM*100, tF=totFad/totF*100;
+    document.getElementById('m9BerkAgg').innerHTML=
+      '<div class="stats">'+
+      statCard('Varones · tasa de admisión',pct(tM),totMad.toLocaleString('es-AR')+' de '+totM.toLocaleString('es-AR'),'media')+
+      statCard('Mujeres · tasa de admisión',pct(tF),totFad.toLocaleString('es-AR')+' de '+totF.toLocaleString('es-AR'),'disp')+
+      statCard('Diferencia',(tM-tF>0?'+':'')+nf(tM-tF,1)+' pp','a favor de los varones','ratio')+
+      '</div>';
+    const det=document.getElementById('m9BerkDetalle');
+    det.style.display=desagregado?'block':'none';
+    if(!desagregado)return;
+    const orden=DEP.slice().sort((a,b)=>((b.mAd+b.fAd)/(b.mA+b.fA))-((a.mAd+a.fAd)/(a.mA+a.fA)));
+    document.getElementById('m9BerkTabla').innerHTML=
+      '<thead><tr><th>Depto.</th><th class="num">Postulantes V</th><th class="num">Tasa V</th><th class="num">Postulantes M</th><th class="num">Tasa M</th><th class="num">Diferencia</th><th class="num">Tasa general</th></tr></thead><tbody>'+
+      orden.map(d=>{const dif=(d.fR-d.mR)*100, gen=(d.mAd+d.fAd)/(d.mA+d.fA)*100;
+        return '<tr'+(dif>=0?' class="destacada"':'')+'><td class="tx">'+d.d+'</td><td class="num">'+d.mA.toLocaleString('es-AR')+
+        '</td><td class="num">'+pct(d.mR*100)+'</td><td class="num">'+d.fA.toLocaleString('es-AR')+'</td><td class="num">'+pct(d.fR*100)+
+        '</td><td class="num">'+(dif>0?'+':'')+nf(dif,1)+' pp</td><td class="num">'+pct(gen)+'</td></tr>';}).join('')+'</tbody>';
+    document.getElementById('m9BerkComp').innerHTML=orden.map(d=>{
+      const pm=d.mA/totM*100, pf=d.fA/totF*100, gen=(d.mAd+d.fAd)/(d.mA+d.fA)*100;
+      return '<div style="margin:.45rem 0">'+
+        '<div class="chico" style="display:flex;justify-content:space-between"><span>Depto. '+d.d+' · tasa general '+pct(gen,0)+'</span>'+
+        '<span>V '+pct(pm,0)+' · M '+pct(pf,0)+'</span></div>'+
+        '<div style="display:flex;gap:3px;align-items:center;margin-top:2px"><div class="hbar" style="width:'+(pm*2.2)+'%"></div></div>'+
+        '<div style="display:flex;gap:3px;align-items:center;margin-top:2px"><div class="hbar f" style="width:'+(pf*2.2)+'%"></div></div>'+
+      '</div>';
+    }).join('');
+    const favor=DEP.filter(d=>d.fR>=d.mR).length;
+    document.getElementById('m9BerkTexto').innerHTML=
+      '<b>El mecanismo</b>En <strong>'+favor+' de los 6 departamentos</strong> las mujeres tienen una tasa de admisión igual o mayor que los varones. '+
+      'Pero las postulantes se concentran en los departamentos con tasas generales más bajas (C, E, F), mientras que los varones se concentran en A y B, '+
+      'que admiten a más del 60%. La tasa agregada mezcla la probabilidad de entrar <em>dado el departamento</em> con la elección de departamento.';
+  }
+  berk();
+})();
+
+/* ============================================================
+   MÓDULO 10 — escenarios "no te quedes con el promedio"
+   ============================================================ */
+(function m10(){
+  const N=5000;
+  function estandarizar(a,mu,s){const m=mean(a),d=sd(a),o=new Float64Array(a.length);
+    for(let i=0;i<a.length;i++)o[i]=mu+(a[i]-m)/d*s;return o;}
+  function escenarios(){
+    const r=makeRng(9090);
+    /* 1: misma media, distinta desigualdad */
+    const a1=rnormArr(r,N,500000,90000);
+    let b1=rlnormArr(r,N,Math.log(500000)-0.85*0.85/2,0.85);
+    const k=500000/mean(b1); b1=Float64Array.from(b1,v=>v*k);
+    /* 2: misma mediana, distinta cola superior */
+    const a2=rlnormArr(r,N,Math.log(450000)-0.5*0.5/2,0.5);
+    const s2=sortNum(a2),c90=quantileSorted(s2,0.9);
+    const b2=Float64Array.from(a2,v=>v>c90?v*2.6:v);
+    /* 3: mismo p90/p10, distinta ubicación */
+    const base=rlnormArr(r,N,Math.log(500000)-0.68*0.68/2,0.68), bs=sortNum(base);
+    const q10=quantileSorted(bs,0.1),q50=quantileSorted(bs,0.5),q90=quantileSorted(bs,0.9);
+    const rb=q50/q10,ra=q90/q50,Tt=8;
+    const ea=Math.log(Tt/ra)/Math.log(rb), eb=Math.log(Tt/rb)/Math.log(ra);
+    const a3=Float64Array.from(base,v=>v<q50?q50*Math.pow(v/q50,ea):v);
+    const b3=Float64Array.from(base,v=>v>q50?q50*Math.pow(v/q50,eb):v);
+    /* 4: misma media y desvío, distinta forma */
+    const a4=estandarizar(rnormArr(r,N,0,1),500000,125000);
+    const b4=estandarizar(rmixArr(r,N,-1,0.55,1,0.55,0.5),500000,125000);
+    return [
+      {t:'1. Misma media, distinta desigualdad',A:a1,B:b1,
+       nota:'Las dos regiones tienen exactamente el mismo ingreso promedio.'},
+      {t:'2. Misma mediana, distinta cola',A:a2,B:b2,
+       nota:'La mediana es idéntica: solo cambió lo que pasa arriba del p90.'},
+      {t:'3. Mismo p90/p10, distinta ubicación',A:a3,B:b3,
+       nota:'La brecha global es la misma; lo que cambia es dónde está.'},
+      {t:'4. Misma media y desvío, distinta forma',A:a4,B:b4,
+       nota:'Media y desvío coinciden hasta el decimal. Las formas no se parecen en nada.'}
+    ];
+  }
+  const ESC=escenarios();
+  let ie=0, stat='media';
+  const STATS=[
+    {id:'media',t:'Media',f:(d,s)=>mean(d),fmt:money},
+    {id:'mediana',t:'Mediana',f:(d,s)=>quantileSorted(s,0.5),fmt:money},
+    {id:'p10',t:'p10',f:(d,s)=>quantileSorted(s,0.1),fmt:money},
+    {id:'p90',t:'p90',f:(d,s)=>quantileSorted(s,0.9),fmt:money},
+    {id:'desvio',t:'Desvío',f:(d,s)=>sd(d),fmt:money},
+    {id:'ratio',t:'p90/p10',f:(d,s)=>quantileSorted(s,0.9)/quantileSorted(s,0.1),fmt:v=>nf(v,2)+'×'}
+  ];
+  function render(){
+    botones(document.getElementById('m10Esc'),ESC.map((e,i)=>({id:i,t:e.t})),ie,id=>{ie=id;render();marcar('m10');});
+    botones(document.getElementById('m10Stat'),STATS.map(s=>({id:s.id,t:s.t})),stat,id=>{stat=id;render();marcar('m10');});
+    const e=ESC[ie], sA=sortNum(e.A), sB=sortNum(e.B);
+    const hi=Math.max(quantileSorted(sA,0.985),quantileSorted(sB,0.985));
+    drawDist(document.getElementById('m10Graf'),{
+      sets:[{data:e.A,type:'line',color:cssv('--accent'),fill:true},{data:e.B,type:'line',color:cssv('--orange'),fill:true}],
+      xmin:Math.max(0,Math.min(sA[0],sB[0])),xmax:hi,bins:60,fmt:v=>'$'+Math.round(v/1000)+'k',xlab:'ingreso',h:280,
+      nota:e.nota
+    });
+    const S=STATS.filter(s=>s.id===stat)[0];
+    const va=S.f(e.A,sA), vb=S.f(e.B,sB);
+    document.getElementById('m10A').innerHTML='<div class="k">Región A · '+S.t+'</div><div class="v">'+S.fmt(va)+'</div>';
+    document.getElementById('m10B').innerHTML='<div class="k">Región B · '+S.t+'</div><div class="v">'+S.fmt(vb)+'</div>';
+    const rel=Math.abs(va-vb)/Math.max(Math.abs(va),Math.abs(vb))*100;
+    document.getElementById('m10Veredicto').innerHTML= rel<1.5
+      ? '<b>Con este estadístico, las dos regiones parecen iguales</b>La diferencia es de '+nf(rel,1)+'%. Probá con otro estadístico antes de concluir que no hay diferencias.'
+      : '<b>Con este estadístico, las regiones difieren</b>La Región '+(va>vb?'A':'B')+' está '+nf(rel,1)+'% por encima. El mismo par de distribuciones puede parecer idéntico o muy distinto según qué número mires.';
+  }
+  render();
+})();
+
+/* ============================================================
+   DESAFÍOS
+   ============================================================ */
+(function desafios(){
+  const D=[
+    {p:'Una persona extremadamente rica entra en la muestra de 5.000 hogares. ¿Qué estadístico debería cambiar más?',
+     o:['La mediana','La media','La moda','El IQR'],ok:1,
+     e:'La media usa el valor de todas las observaciones: una sola observación gigante mueve la suma total y arrastra el promedio. La mediana, la moda y el IQR dependen del orden o de la zona central, así que apenas se inmutan. En el módulo 2 podés verlo con el multiplicador de la cola.'},
+    {p:'Dos grupos muy diferentes se combinan. La media resultante queda entre ambos grupos, pero casi nadie tiene ese valor. ¿Qué tipo de distribución podría estar detrás?',
+     o:['Una distribución uniforme','Una distribución normal con desvío grande','Una distribución bimodal','Una distribución con asimetría negativa'],ok:2,
+     e:'Es el caso típico de una mezcla de dos poblaciones: dos picos con un valle en el medio. La media cae en el valle, que es justamente donde hay menos observaciones. No es un error de la media: es que un solo número no puede describir una distribución con dos grupos adentro.'},
+    {p:'En un país, p90/p10 aumenta pero p90/p50 se mantiene casi constante. ¿Dónde parece haberse ampliado la desigualdad?',
+     o:['En la parte alta: los ingresos altos se despegaron','En la parte baja: los ingresos bajos quedaron más rezagados respecto del centro','En el medio de la distribución','No se puede saber con esa información'],ok:1,
+     e:'Como p90/p10 = (p90/p50) × (p50/p10), si el ratio global sube y p90/p50 no se mueve, el que subió tiene que ser p50/p10. Es decir, la distancia entre el centro y la parte baja: los de abajo se quedaron atrás respecto de la mediana.'},
+    {p:'Dentro de cada grupo, X e Y están negativamente asociados. ¿Puede la asociación agregada ser positiva?',
+     o:['No, es imposible: agregar preserva el signo','Sí, si los grupos difieren en sus niveles de X y de Y','Sí, pero solo si los grupos tienen el mismo tamaño','Solo si la relación dentro de los grupos es muy débil'],ok:1,
+     e:'Es la paradoja de Simpson. Si el grupo con X alto también tiene Y alto, la comparación entre grupos empuja la nube de puntos hacia arriba y a la derecha, y esa tendencia entre grupos puede dominar a la tendencia negativa que hay dentro de cada uno. El módulo 9 permite construirlo y destruirlo moviendo las medias.'},
+    {p:'Una ciudad concentra el 80% de la población y otra el 20%. Las dos tienen medias de ingreso muy distintas. ¿Qué debería ocurrir con la media agregada?',
+     o:['Debería quedar en el punto medio entre las dos','Debería parecerse mucho más a la ciudad grande','Debería ser mayor a las dos','Depende de la dispersión dentro de cada ciudad'],ok:1,
+     e:'La media agregada es un promedio ponderado por el tamaño de cada grupo: 0,8 × media grande + 0,2 × media chica. Queda mucho más cerca de la ciudad grande. Por eso, cuando cambia la composición de la población, la media nacional puede moverse sin que haya cambiado nada dentro de ninguna ciudad.'},
+    {p:'Una distribución tiene dos picos claramente separados. ¿Es razonable describirla solamente mediante su media?',
+     o:['Sí, la media siempre resume bien','No: conviene reportar la distribución o los grupos por separado','Sí, si además se informa el desvío estándar','No, pero alcanza con reemplazarla por la mediana'],ok:1,
+     e:'Ni la media ni la mediana ni el desvío detectan bimodalidad: dos distribuciones con la misma media y el mismo desvío pueden tener formas completamente distintas (escenario 4 del módulo 10). Con dos poblaciones adentro, lo correcto es desagregar y reportar el peso de cada grupo.'},
+    {p:'Querés comparar la dispersión del ingreso mensual (en pesos) con la de los años de educación. ¿Qué medida usarías?',
+     o:['El desvío estándar de cada variable','El IQR de cada variable','El coeficiente de variación','El rango'],ok:2,
+     e:'El desvío, el IQR y el rango están en las unidades de cada variable, así que compararlos entre pesos y años no significa nada. El CV (desvío / media) es adimensional y permite comparar dispersión relativa. Cuidado: no sirve si la media puede ser cero o negativa.'},
+    {p:'En un país, la media del ingreso sube 8% en un año y la mediana baja 1%. ¿Qué interpretación es más plausible?',
+     o:['Hubo un error de medición: es imposible','La mejora se concentró en la parte alta de la distribución','Toda la población mejoró un poco','La distribución se volvió más simétrica'],ok:1,
+     e:'La media sube cuando aumenta la suma total de ingresos, y eso puede pasar por lo que ocurre arriba. La mediana solo se mueve si cambia la situación del hogar que está justo en el medio. Media que sube con mediana que baja es la firma estadística de una ganancia concentrada en la cola derecha. Es el mismo experimento del módulo 2.'}
+  ];
+  const cont=document.getElementById('desafios');
+  D.forEach((d,i)=>{
+    const el=document.createElement('div'); el.className='desafio';
+    el.innerHTML='<p class="num">Desafío '+(i+1)+'</p><p class="preg">'+d.p+'</p>'+
+      '<div class="opciones">'+d.o.map((t,j)=>
+        '<label class="op"><input type="radio" name="d'+i+'" value="'+j+'"><span>'+t+'</span></label>').join('')+'</div>'+
+      '<button class="btn" type="button">Comprobar</button><div class="feedback"></div>';
+    el.querySelectorAll('.op').forEach(o=>o.addEventListener('click',()=>{
+      el.querySelectorAll('.op').forEach(x=>x.classList.remove('sel'));o.classList.add('sel');}));
+    el.querySelector('button').addEventListener('click',()=>{
+      const sel=el.querySelector('input:checked');
+      const fb=el.querySelector('.feedback');
+      if(!sel){fb.className='feedback on no';fb.textContent='Elegí una opción antes de comprobar.';return;}
+      const ok=+sel.value===d.ok;
+      el.querySelectorAll('.op').forEach(o=>{
+        const inp=o.querySelector('input'); o.classList.remove('sel','bien','mal');
+        if(+inp.value===d.ok)o.classList.add('bien');
+        else if(inp.checked)o.classList.add('mal');
+      });
+      fb.className='feedback on '+(ok?'ok':'no');
+      fb.innerHTML='<strong>'+(ok?'Correcto. ':'No es la respuesta esperada. ')+'</strong>'+d.e;
+    });
+    cont.appendChild(el);
+  });
+})();
+</script>
+</body>
+</html>
