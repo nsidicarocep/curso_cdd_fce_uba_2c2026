@@ -1,0 +1,1845 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>De la muestra a la conclusión — Laboratorio de remuestreo</title>
+<style>
+:root{
+  --bg:#F7F5F0;--bg-alt:#EDEAE3;--bg-canvas:#FFFFFF;
+  --text:#2C2C2E;--text-sec:#636366;--heading:#1A2744;
+  --accent:#3170A2;--accent-light:#E3EEF6;
+  --green:#2D8659;--green-light:#D4EDDF;
+  --red:#D45A3A;--red-light:#FBEAE5;
+  --orange:#C87A1A;--orange-light:#FDF0DB;
+  --purple:#7B5EA7;--purple-light:#EDE7F6;
+  --blue:#5B9BD5;--teal:#2A8C8C;
+  --border:#DCDAD4;--shadow:rgba(28,28,30,.07);
+  --grid:#E4E1DA;
+  --font-d:Georgia,"Palatino Linotype","Book Antiqua",Palatino,serif;
+  --font-b:"Segoe UI",system-ui,-apple-system,sans-serif;
+  --font-m:"Cascadia Code","Fira Code",Consolas,monospace;
+  --cw:960px;
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#151820;--bg-alt:#1C2028;--bg-canvas:#1E2430;
+  --text:#D4D2CC;--text-sec:#8E8E93;--heading:#B8C8E0;
+  --accent:#6AADE8;--accent-light:#1A2A3A;
+  --green:#4DBB7F;--green-light:#1A3329;
+  --red:#F07A5A;--red-light:#3D2219;
+  --orange:#E8A84C;--orange-light:#3D2E14;
+  --purple:#A78BDB;--purple-light:#2A2040;
+  --blue:#7FC4F5;--teal:#4FC0C0;
+  --border:#2A2E36;--shadow:rgba(0,0,0,.25);--grid:#262B34;
+}}
+:root[data-theme="dark"]{
+  --bg:#151820;--bg-alt:#1C2028;--bg-canvas:#1E2430;
+  --text:#D4D2CC;--text-sec:#8E8E93;--heading:#B8C8E0;
+  --accent:#6AADE8;--accent-light:#1A2A3A;
+  --green:#4DBB7F;--green-light:#1A3329;
+  --red:#F07A5A;--red-light:#3D2219;
+  --orange:#E8A84C;--orange-light:#3D2E14;
+  --purple:#A78BDB;--purple-light:#2A2040;
+  --blue:#7FC4F5;--teal:#4FC0C0;
+  --border:#2A2E36;--shadow:rgba(0,0,0,.25);--grid:#262B34;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:110px}
+body{background:var(--bg);color:var(--text);font-family:var(--font-b);font-size:17px;line-height:1.7}
+.wrap{max-width:var(--cw);margin:0 auto;padding:0 1.25rem}
+
+/* ---------- barra superior ---------- */
+.tope{position:sticky;top:0;z-index:50;background:var(--bg);border-bottom:1px solid var(--border);backdrop-filter:blur(6px)}
+.tope-fila{display:flex;align-items:center;gap:1rem;padding:.6rem 0;flex-wrap:wrap}
+.marca{font-family:var(--font-d);font-weight:700;color:var(--heading);font-size:1rem;white-space:nowrap}
+.tope-sp{flex:1}
+.prog-txt{font-size:.78rem;color:var(--text-sec);font-family:var(--font-m);white-space:nowrap}
+.barra-prog{height:3px;background:var(--bg-alt)}
+.barra-prog i{display:block;height:100%;width:0;background:var(--accent);transition:width .5s cubic-bezier(.4,0,.2,1)}
+.modulos{display:flex;gap:.3rem;overflow-x:auto;padding:.45rem 0 .55rem;scrollbar-width:thin}
+.modulos a{font-size:.76rem;padding:.28rem .6rem;border:1px solid var(--border);border-radius:20px;color:var(--text-sec);text-decoration:none;white-space:nowrap;transition:all .15s}
+.modulos a:hover{border-color:var(--accent);color:var(--accent)}
+.modulos a.visto{background:var(--green-light);border-color:var(--green);color:var(--green)}
+
+/* ---------- tipografía ---------- */
+h1{font-family:var(--font-d);font-size:clamp(2rem,5vw,2.7rem);color:var(--heading);line-height:1.12;letter-spacing:-.025em;margin-bottom:.5rem}
+h2{font-family:var(--font-d);font-size:1.6rem;color:var(--heading);line-height:1.25;margin-bottom:.3rem}
+h3{font-family:var(--font-d);font-size:1.1rem;color:var(--heading);margin:1.6rem 0 .5rem}
+h4{font-family:var(--font-b);font-size:.78rem;text-transform:uppercase;letter-spacing:.09em;color:var(--text-sec);font-weight:600;margin-bottom:.5rem}
+p{margin-bottom:1rem;max-width:68ch}
+strong{color:var(--heading);font-weight:600}
+.eyebrow{font-size:.74rem;text-transform:uppercase;letter-spacing:.13em;color:var(--accent);font-weight:600;margin-bottom:.35rem}
+.subtitle{font-family:var(--font-d);font-size:1.1rem;color:var(--text-sec);font-style:italic;margin-bottom:1.5rem;max-width:60ch}
+.motiva{font-family:var(--font-d);font-size:1.12rem;color:var(--text-sec);font-style:italic;margin:.4rem 0 1.2rem;max-width:60ch}
+small,.chico{font-size:.82rem;color:var(--text-sec)}
+
+section.mod{padding:3rem 0 1rem;border-top:1px solid var(--border);margin-top:2rem}
+section.mod:first-of-type{border-top:none}
+
+/* ---------- tarjetas / paneles ---------- */
+.panel{background:var(--bg-canvas);border:1px solid var(--border);border-radius:10px;padding:1.1rem;margin:1.1rem 0;box-shadow:0 2px 12px var(--shadow)}
+.panel-t{font-family:var(--font-d);font-size:1rem;color:var(--heading);font-weight:700;margin-bottom:.7rem}
+figure{margin:0}
+svg.graf{width:100%;height:auto;display:block;overflow:visible}
+.leyenda{display:flex;flex-wrap:wrap;gap:.9rem;font-size:.8rem;color:var(--text-sec);margin-top:.5rem}
+.leyenda span{display:flex;align-items:center;gap:.35rem}
+.sw{width:14px;height:3px;border-radius:2px;display:inline-block}
+.sw.pt{height:10px;width:10px;border-radius:50%}
+
+/* ---------- controles ---------- */
+.btns{display:flex;flex-wrap:wrap;gap:.35rem;margin:.6rem 0}
+.btn{font-family:var(--font-b);font-size:.82rem;padding:.38rem .8rem;border:1px solid var(--border);border-radius:5px;background:var(--bg);color:var(--text);cursor:pointer;transition:all .15s;font-weight:500}
+.btn:hover{background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
+.btn.act{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn.act:hover{color:#fff}
+.sliders{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:.5rem .9rem;margin:.7rem 0}
+.sl{display:flex;flex-direction:column;gap:.1rem}
+.sl.oculto{display:none}
+.sl-cab{display:flex;justify-content:space-between;align-items:baseline;font-size:.79rem;color:var(--text-sec)}
+.sl-cab b{font-family:var(--font-m);font-size:.79rem;color:var(--accent);font-weight:600}
+.sl input[type=range]{width:100%;accent-color:var(--accent);cursor:pointer}
+label.chk{display:inline-flex;align-items:center;gap:.35rem;font-size:.82rem;color:var(--text-sec);cursor:pointer;margin-right:.9rem}
+label.chk input{accent-color:var(--accent);cursor:pointer}
+
+/* ---------- tarjetas de estadísticos ---------- */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.55rem;margin:.8rem 0}
+.stat{background:var(--bg-alt);border-radius:8px;padding:.6rem .7rem;border-left:3px solid var(--border)}
+.stat .k{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-sec);font-weight:600}
+.stat .v{font-family:var(--font-m);font-size:1.12rem;font-weight:600;color:var(--heading);transition:color .3s}
+.stat .d{font-size:.72rem;color:var(--text-sec)}
+.stat.media{border-left-color:var(--accent)}.stat.media .v{color:var(--accent)}
+.stat.mediana{border-left-color:var(--green)}.stat.mediana .v{color:var(--green)}
+.stat.moda{border-left-color:var(--purple)}.stat.moda .v{color:var(--purple)}
+.stat.disp{border-left-color:var(--orange)}
+.stat.ratio{border-left-color:var(--teal)}
+.flash{animation:flash .5s ease}
+@keyframes flash{0%{background:var(--accent-light)}100%{background:var(--bg-alt)}}
+
+/* ---------- cajas pedagógicas ---------- */
+.observa{background:var(--accent-light);border-left:3px solid var(--accent);padding:.8rem 1rem;border-radius:0 8px 8px 0;margin:1.1rem 0;font-size:.92rem}
+.observa b{display:block;font-family:var(--font-d);color:var(--heading);margin-bottom:.3rem}
+.observa ul{margin:.2rem 0 0 1.1rem}
+.observa li{margin-bottom:.15rem}
+details.expli{background:var(--bg-alt);border:1px solid var(--border);border-radius:8px;padding:.6rem .9rem;margin:1rem 0;font-size:.93rem}
+details.expli summary{cursor:pointer;font-weight:600;color:var(--accent);font-size:.88rem;list-style:none}
+details.expli summary::-webkit-details-marker{display:none}
+details.expli summary::before{content:"▸ ";transition:.2s}
+details.expli[open] summary::before{content:"▾ "}
+details.expli .cuerpo{padding-top:.6rem}
+details.expli p{margin-bottom:.6rem;max-width:70ch}
+details.expli ul{margin:.3rem 0 .8rem 1.2rem}
+
+.docente{background:var(--purple-light);border:1px dashed var(--purple);border-radius:8px;padding:.85rem 1rem;margin:1rem 0;font-size:.9rem;display:none}
+body.modo-docente .docente{display:block}
+.docente h4{color:var(--purple)}
+.docente ul{margin:.3rem 0 .5rem 1.2rem}
+.formula{font-family:var(--font-m);font-size:.85rem;background:var(--bg-canvas);border:1px solid var(--border);border-radius:5px;padding:.4rem .6rem;display:inline-block;margin:.2rem 0}
+
+/* ---------- tablas ---------- */
+.tabla-wrap{overflow-x:auto;margin:.8rem 0;border:1px solid var(--border);border-radius:8px}
+table.t{width:100%;border-collapse:collapse;font-size:.85rem}
+table.t th{font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text-sec);font-weight:600;padding:.5rem .65rem;text-align:left;border-bottom:2px solid var(--border);background:var(--bg-alt)}
+table.t td{padding:.42rem .65rem;border-bottom:1px solid var(--border);font-family:var(--font-m);font-size:.82rem}
+table.t td.tx{font-family:var(--font-b)}
+table.t .num{text-align:right}
+table.t tbody tr:hover{background:var(--bg-alt)}
+table.t tr.destacada td{background:var(--green-light)}
+
+/* ---------- barras de cuantiles / composición ---------- */
+.segbar{display:flex;height:46px;border-radius:6px;overflow:hidden;border:1px solid var(--border);margin:.7rem 0}
+.segbar div{display:flex;align-items:center;justify-content:center;font-size:.72rem;font-family:var(--font-m);color:#fff;transition:flex-grow .5s cubic-bezier(.4,0,.2,1),background .3s;overflow:hidden;white-space:nowrap}
+.compbar{display:flex;height:30px;border-radius:6px;overflow:hidden;border:1px solid var(--border);margin:.5rem 0}
+.compbar div{display:flex;align-items:center;justify-content:center;font-size:.75rem;color:#fff;font-family:var(--font-m);transition:width .5s cubic-bezier(.4,0,.2,1)}
+.hbar{height:16px;background:var(--accent);border-radius:3px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.hbar.f{background:var(--orange)}
+
+/* ---------- desafíos ---------- */
+.desafio{background:var(--bg-canvas);border:1px solid var(--border);border-radius:10px;padding:1.1rem;margin:1rem 0;box-shadow:0 2px 12px var(--shadow)}
+.desafio .num{font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--accent);font-weight:600}
+.desafio .preg{font-family:var(--font-d);font-size:1.05rem;color:var(--heading);margin:.25rem 0 .8rem}
+.opciones{display:flex;flex-direction:column;gap:.35rem;margin-bottom:.7rem}
+.op{display:flex;gap:.55rem;align-items:flex-start;padding:.5rem .7rem;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:.9rem;transition:all .15s;background:var(--bg)}
+.op:hover{border-color:var(--accent)}
+.op input{margin-top:.35rem;accent-color:var(--accent)}
+.op.sel{border-color:var(--accent);background:var(--accent-light)}
+.op.bien{border-color:var(--green);background:var(--green-light)}
+.op.mal{border-color:var(--red);background:var(--red-light)}
+.feedback{font-size:.9rem;padding:.7rem .9rem;border-radius:6px;margin-top:.6rem;display:none}
+.feedback.on{display:block}
+.feedback.ok{background:var(--green-light);border-left:3px solid var(--green)}
+.feedback.no{background:var(--red-light);border-left:3px solid var(--red)}
+
+/* ---------- cierre ---------- */
+.cierre{background:var(--bg-canvas);border:1px solid var(--border);border-radius:12px;padding:1.6rem;margin:1.5rem 0;box-shadow:0 2px 16px var(--shadow)}
+.preguntas-cierre{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.7rem;margin:1.2rem 0}
+.pc{background:var(--bg-alt);border-radius:8px;padding:.9rem;font-family:var(--font-d);font-size:1rem;color:var(--heading);line-height:1.4}
+.pc i{display:block;font-family:var(--font-m);font-style:normal;font-size:.75rem;color:var(--accent);margin-bottom:.3rem}
+.frase-final{font-family:var(--font-d);font-size:1.25rem;color:var(--heading);text-align:center;line-height:1.45;margin:1.5rem auto;max-width:38ch}
+
+.dos-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:720px){.dos-col{grid-template-columns:1fr}}
+footer{border-top:1px solid var(--border);margin-top:3rem;padding:1.5rem 0 3rem;font-size:.85rem;color:var(--text-sec)}
+footer a{color:var(--accent)}
+
+/* ---------- añadidos del laboratorio de remuestreo ---------- */
+.pred{background:var(--orange-light);border:1px solid var(--orange);border-radius:10px;padding:1rem 1.1rem;margin:1.1rem 0}
+.pred .num{font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--orange);font-weight:600}
+.pred .preg{font-family:var(--font-d);font-size:1.05rem;color:var(--heading);margin:.25rem 0 .8rem}
+.pred .aviso{font-size:.82rem;color:var(--text-sec);font-style:italic;margin-top:.5rem}
+.pred .op{background:var(--bg-canvas)}
+.pred .op.fija{border-color:var(--orange);background:var(--orange-light);font-weight:600}
+.pred .btn.bloq{opacity:.5;cursor:not-allowed}
+.cierre-mod{background:var(--bg-canvas);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:0 10px 10px 0;padding:1rem 1.1rem;margin:1.1rem 0}
+.cierre-mod .num{font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--green);font-weight:600}
+.cierre-mod .preg{font-family:var(--font-d);font-size:1.05rem;color:var(--heading);margin:.25rem 0 .7rem}
+.cierre-mod textarea{width:100%;min-height:72px;font-family:var(--font-b);font-size:.9rem;padding:.55rem .7rem;
+  border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);resize:vertical;line-height:1.5}
+.cierre-mod textarea:focus{outline:none;border-color:var(--green)}
+.ref{background:var(--green-light);border-radius:6px;padding:.7rem .9rem;margin-top:.6rem;font-size:.9rem;display:none}
+.ref.on{display:block}
+.ref b{display:block;font-family:var(--font-d);color:var(--heading);margin-bottom:.25rem}
+.recuerdo{background:var(--bg-alt);border-radius:6px;padding:.5rem .75rem;font-size:.85rem;margin-top:.6rem;display:none}
+.recuerdo.on{display:block}
+
+.tarea{background:var(--bg-alt);border:1px solid var(--border);border-radius:8px;padding:.8rem 1rem;margin:1rem 0;font-size:.92rem}
+.tarea b{display:block;font-family:var(--font-d);color:var(--heading);margin-bottom:.35rem}
+.tarea ol{margin:.2rem 0 0 1.2rem}
+.tarea li{margin-bottom:.2rem}
+
+/* urna y bolitas */
+.urna{display:flex;flex-wrap:wrap;gap:.3rem;padding:.7rem;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;min-height:58px}
+.bola{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-m);font-size:.72rem;font-weight:600;color:#fff;background:var(--accent);
+  transition:transform .25s,opacity .25s}
+.bola.fuera{opacity:.22}
+.bola.sale{transform:scale(1.35)}
+.bola.dup{background:var(--purple)}
+.bola.g2{background:var(--orange)}
+.bola.mini{width:22px;height:22px;font-size:.62rem}
+.flecha{text-align:center;font-size:1.3rem;color:var(--text-sec);line-height:1;margin:.35rem 0}
+
+.tres-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:760px){.tres-col{grid-template-columns:1fr}}
+.mini-t{font-size:.75rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text-sec);font-weight:600;margin-bottom:.35rem}
+.pill{display:inline-block;font-family:var(--font-m);font-size:.78rem;padding:.15rem .5rem;border-radius:20px;
+  background:var(--bg-alt);border:1px solid var(--border);color:var(--text-sec);margin-right:.3rem}
+.pill.ok{background:var(--green-light);border-color:var(--green);color:var(--green)}
+.pill.no{background:var(--red-light);border-color:var(--red);color:var(--red)}
+
+/* clasificación de afirmaciones */
+.clasif{display:flex;flex-direction:column;gap:.45rem;margin:.8rem 0}
+.fila-clasif{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;padding:.55rem .7rem;border:1px solid var(--border);border-radius:8px;background:var(--bg)}
+.fila-clasif .txt{flex:1;min-width:200px;font-size:.9rem}
+.fila-clasif .ops{display:flex;gap:.25rem}
+.fila-clasif .ops button{font-size:.76rem;padding:.25rem .55rem;border:1px solid var(--border);border-radius:5px;
+  background:var(--bg-canvas);color:var(--text-sec);cursor:pointer;transition:all .15s}
+.fila-clasif .ops button:hover{border-color:var(--accent);color:var(--accent)}
+.fila-clasif .ops button.sel{background:var(--accent);border-color:var(--accent);color:#fff}
+.fila-clasif.bien{border-color:var(--green);background:var(--green-light)}
+.fila-clasif.mal{border-color:var(--red);background:var(--red-light)}
+
+/* diagnóstico */
+.caso{background:var(--bg-canvas);border:1px solid var(--border);border-radius:10px;padding:1.1rem;margin:1rem 0;box-shadow:0 2px 12px var(--shadow)}
+.caso .sit{font-size:.93rem;margin-bottom:.7rem}
+.caso .just{margin-top:.6rem}
+.caso .just label{display:block;font-size:.82rem;color:var(--text-sec);margin-bottom:.25rem}
+.caso textarea{width:100%;min-height:56px;font-family:var(--font-b);font-size:.9rem;padding:.5rem .65rem;
+  border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);resize:vertical}
+</style>
+</head>
+<body>
+
+<div class="tope">
+  <div class="wrap">
+    <div class="tope-fila">
+      <p class="marca">De la muestra a la conclusión</p>
+      <span class="tope-sp"></span>
+      <p class="prog-txt" id="progTxt">Módulos explorados: 0/7</p>
+      <button class="btn" id="btnDocente" type="button">Modo docente</button>
+    </div>
+  </div>
+  <div class="barra-prog"><i id="barraProg"></i></div>
+  <div class="wrap"><nav class="modulos" id="navMod" aria-label="Módulos"></nav></div>
+</div>
+
+<div class="wrap">
+
+<header style="padding:2.5rem 0 1rem">
+  <p class="eyebrow">Clase 7 · Ciencia de Datos para Economía · FCE-UBA</p>
+  <h1>De la muestra a la conclusión</h1>
+  <p class="subtitle">Muestreo, ley de los grandes números, bootstrap, intervalos de confianza y tests de permutación. Un laboratorio para simular y mirar qué pasa.</p>
+  <p>Todo lo que ves acá se simula en tu navegador, en el momento. No hay resultados escritos a mano: cada vez que apretás un botón se sortean datos nuevos y los números se recalculan.</p>
+  <p><strong>Cada módulo tiene la misma estructura:</strong> una pregunta de predicción que contestás <em>antes</em> de tocar nada, la simulación, tres tareas concretas de exploración, y una pregunta de cierre. La devolución de la predicción aparece recién cuando exploraste la simulación: la idea es que descubras la respuesta manipulando, no leyéndola.</p>
+</header>
+
+<!-- ============================================================ M1 -->
+<section class="mod" id="m1" data-mod="m1">
+  <p class="eyebrow">Módulo 1 · Tres cosas distintas</p>
+  <h2>La rueda de la muestra</h2>
+  <p class="motiva">Población, muestra y distribución muestral. Se parecen en el nombre y no son lo mismo: casi todas las confusiones que vienen después arrancan acá.</p>
+
+  <p>Arriba está la <strong>población</strong>: todas las unidades que existen, con su forma fija. En el medio, <strong>una muestra</strong> concreta de tamaño <span class="formula">n</span>, sorteada al azar. Abajo, la <strong>distribución muestral del promedio</strong>: un punto por cada muestra que tomás, ubicado en el promedio de esa muestra.</p>
+
+  <div class="pred" data-pred="p1"></div>
+
+  <div class="panel">
+    <div class="btns" id="m1Formas"></div>
+    <div class="sliders" id="m1Sliders"></div>
+    <div class="btns" id="m1Botones"></div>
+
+    <div class="mini-t">1 · Población (nunca cambia de forma)</div>
+    <figure><svg class="graf" id="m1Pob" role="img" aria-label="Histograma de la población"></svg></figure>
+    <div class="flecha">↓ se sortean n observaciones al azar</div>
+    <div class="mini-t">2 · Una muestra de tamaño n</div>
+    <figure><svg class="graf" id="m1Mue" role="img" aria-label="Puntos de la muestra actual"></svg></figure>
+    <div class="flecha">↓ se calcula el promedio de esa muestra y se deposita abajo</div>
+    <div class="mini-t">3 · Distribución muestral del promedio</div>
+    <figure><svg class="graf" id="m1Dis" role="img" aria-label="Histograma de promedios muestrales"></svg></figure>
+    <div class="stats" id="m1Stats"></div>
+    <div class="leyenda">
+      <span><i class="sw" style="background:var(--accent)"></i> población</span>
+      <span><i class="sw pt" style="background:var(--orange)"></i> muestra actual</span>
+      <span><i class="sw" style="background:var(--purple)"></i> promedios muestrales</span>
+      <span><i class="sw" style="background:var(--green)"></i> media poblacional</span>
+    </div>
+  </div>
+
+  <div class="tarea">
+    <b>Exploración dirigida</b>
+    <ol>
+      <li>Con población <em>asimétrica a derecha</em> y <span class="formula">n = 2</span>, tomá cien muestras. ¿Qué forma tiene el panel 3?</li>
+      <li>Subí a <span class="formula">n = 30</span> sin cambiar la población. Fijate en <strong>dos</strong> cosas que cambian en el panel 3: la forma y el ancho.</li>
+      <li>Pasá a <em>cola pesada</em> y buscá el <span class="formula">n</span> más chico con el que el panel 3 te parezca simétrico. ¿Alcanza con 30?</li>
+    </ol>
+  </div>
+
+  <div class="cierre-mod" data-cierre="c1"></div>
+
+  <details class="expli"><summary>Ver explicación</summary><div class="cuerpo">
+    <p>Los tres paneles responden preguntas distintas. El panel 1 describe <strong>cómo se distribuyen las unidades</strong> de la población: su forma no depende de vos ni de cuántas muestras tomes. El panel 2 es <strong>lo único que en la vida real observás</strong>: una muestra. El panel 3 es un objeto que en la práctica nunca ves, porque tomarías una sola muestra, y sin embargo es el que gobierna toda la inferencia: describe <strong>cuánto varía el promedio de muestra en muestra</strong>.</p>
+    <p>Eso es lo que dice el Teorema Central del Límite: bajo varianza finita, la distribución del panel 3 se acerca a una normal a medida que crece <span class="formula">n</span>, <em>sea cual sea la forma del panel 1</em>. Y su ancho se achica como <span class="formula">σ/√n</span>: para partirlo al medio hay que cuadruplicar la muestra.</p>
+    <p>Dos advertencias que el laboratorio muestra bien. Primero, el panel 1 <strong>nunca</strong> se vuelve normal: los datos no se "normalizan" al crecer la muestra, lo que se vuelve normal es la distribución del promedio. Segundo, "n = 30 alcanza" es una regla de bolsillo, no un teorema: con cola pesada, con n = 30 el panel 3 sigue teniendo cola.</p>
+  </div></details>
+
+  <div class="docente">
+    <h4>Modo docente</h4>
+    <ul>
+      <li>La población es un vector fijo de 40.000 valores generado con semilla constante. El muestreo es con reposición sobre ese vector, así que la "media poblacional" que se dibuja es exactamente la media de ese vector.</li>
+      <li><strong>Error frecuente:</strong> responder que "los datos se vuelven normales". Conviene señalar que el panel 1 no se movió ni un pixel.</li>
+      <li>La tarjeta "desvío teórico" muestra <span class="formula">σ/√n</span> para comparar con el desvío empírico de los promedios acumulados. Con pocas muestras difieren; con quinientas se pegan.</li>
+      <li>Cola pesada es una Pareto con α = 1,5: tiene esperanza finita pero varianza infinita. El TCL clásico no aplica, y se ve.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================ M2 -->
+<section class="mod" id="m2" data-mod="m2">
+  <p class="eyebrow">Módulo 2 · Convergencia</p>
+  <h2>El embudo de la ley de los grandes números</h2>
+  <p class="motiva">El promedio se acerca al valor verdadero a medida que crece la muestra. La pregunta interesante es <em>cuán rápido</em>, y cuándo esa promesa no vale.</p>
+
+  <p>Cada línea es una investigación distinta que va acumulando observaciones. En el eje horizontal, el tamaño de muestra en escala logarítmica; en el vertical, el promedio calculado con las primeras <span class="formula">n</span> observaciones. La línea horizontal marca el valor verdadero.</p>
+
+  <div class="pred" data-pred="p2"></div>
+
+  <div class="panel">
+    <div class="btns" id="m2Pobs"></div>
+    <div class="sliders" id="m2Sliders"></div>
+    <div class="btns" id="m2Botones"></div>
+    <figure><svg class="graf" id="m2Graf" role="img" aria-label="Trayectorias del promedio acumulado"></svg></figure>
+    <div class="leyenda">
+      <span><i class="sw" style="background:var(--green)"></i> valor verdadero</span>
+      <span><i class="sw" style="background:var(--accent);opacity:.4"></i> banda teórica ±2 σ/√n</span>
+      <span><i class="sw" style="background:var(--text-sec)"></i> trayectorias</span>
+    </div>
+    <div class="stats" id="m2Stats"></div>
+  </div>
+
+  <div class="tarea">
+    <b>Exploración dirigida</b>
+    <ol>
+      <li>Con población simétrica, mové el cursor de <em>lectura</em> y estimá en qué <span class="formula">n</span> el ancho del embudo se reduce a la mitad respecto de <span class="formula">n = 100</span>.</li>
+      <li>Compará el ancho del embudo entre la población simétrica y la de cola pesada <strong>en el mismo n</strong>.</li>
+      <li>Activá <em>sin esperanza finita</em> y mirá las trayectorias. ¿Se estabilizan alguna vez?</li>
+    </ol>
+  </div>
+
+  <div class="cierre-mod" data-cierre="c2"></div>
+
+  <details class="expli"><summary>Ver explicación</summary><div class="cuerpo">
+    <p>La ley de los grandes números dice que el promedio muestral converge al valor esperado. Pero la velocidad es <span class="formula">1/√n</span>, que es lenta: para reducir el error a la mitad hay que <strong>cuadruplicar</strong> la muestra. Por eso, con mil observaciones y una variable ruidosa, todavía puede haber trayectorias visiblemente lejos.</p>
+    <p>La velocidad depende de σ, no sólo de n. Con la misma cantidad de datos, una variable con cola pesada tiene un embudo mucho más ancho: aparecen saltos bruscos, cada vez que entra una observación extrema el promedio pega un tirón.</p>
+    <p>Y hay un caso donde la promesa directamente no existe. Si la distribución no tiene esperanza finita (la Cauchy es el ejemplo de manual), el promedio de n observaciones se distribuye igual que una sola observación: acumular datos no ayuda. Las trayectorias saltan para siempre. En economía esto no es una curiosidad de pizarrón: distribuciones de ingresos, de tamaños de empresa o de retornos financieros pueden tener colas lo bastante pesadas como para que las muestras chicas se comporten así.</p>
+  </div></details>
+
+  <div class="docente">
+    <h4>Modo docente</h4>
+    <ul>
+      <li>La banda dibujada es <span class="formula">μ ± 2σ/√n</span> con la σ verdadera de la población. Sirve para chequear que el embudo empírico tiene el ancho que predice la teoría, y para ver que en la Pareto la banda queda corta.</li>
+      <li>Con "sin esperanza finita" no se dibuja banda ni media: se marca la mediana, que sí existe. Buen momento para separar "centro" de "esperanza".</li>
+      <li><strong>Pregunta útil:</strong> ¿por qué el eje x está en escala logarítmica? Porque en escala lineal el 90% del gráfico sería la parte donde ya no pasa nada.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================ M3 -->
+<section class="mod" id="m3" data-mod="m3">
+  <p class="eyebrow">Módulo 3 · La mecánica</p>
+  <h2>Fábrica de bootstrap</h2>
+  <p class="motiva">"Remuestrear con reposición" es una instrucción abstracta hasta que se ve la bolita salir de la urna y volver.</p>
+
+  <h3>Etapa A · La mecánica, con doce bolitas</h3>
+  <p>La urna tiene las doce observaciones de una muestra. Una remuestra bootstrap se arma sacando doce veces <strong>con reposición</strong>: cada bolita se copia y vuelve a la urna, así que puede salir de nuevo. Algunas van a aparecer repetidas y otras van a quedar afuera.</p>
+
+  <div class="panel">
+    <div class="mini-t">Urna: la muestra original</div>
+    <div class="urna" id="m3Urna"></div>
+    <div class="btns" id="m3BotonesA"></div>
+    <div class="mini-t" style="margin-top:.6rem">Remuestra bootstrap</div>
+    <div class="urna" id="m3Remuestra"></div>
+    <p class="chico" id="m3Info" style="margin-top:.5rem"></p>
+    <div class="leyenda">
+      <span><i class="sw pt" style="background:var(--accent)"></i> aparece una vez</span>
+      <span><i class="sw pt" style="background:var(--purple)"></i> aparece repetida</span>
+      <span><i class="sw pt" style="background:var(--accent);opacity:.25"></i> quedó afuera</span>
+    </div>
+  </div>
+
+  <div class="pred" data-pred="p3"></div>
+
+  <h3>Etapa B · La acumulación</h3>
+  <p>Ahora la muestra original tiene <span class="formula">n</span> observaciones (ingresos simulados de un aglomerado) y de cada remuestra se calcula un estadístico. El histograma acumula esos valores: es la <strong>distribución bootstrap</strong> del estadístico, la aproximación a su distribución muestral construida sin fórmulas.</p>
+
+  <div class="panel">
+    <div class="btns" id="m3Stats"></div>
+    <div class="btns" id="m3Bs"></div>
+    <div class="sliders" id="m3Sliders"></div>
+    <div class="btns" id="m3BotonesB"></div>
+    <figure><svg class="graf" id="m3Graf" role="img" aria-label="Distribución bootstrap del estadístico"></svg></figure>
+    <div class="stats" id="m3Tarjetas"></div>
+    <div class="mini-t" style="margin-top:.8rem">Registro de corridas</div>
+    <div class="tabla-wrap"><table class="t" id="m3Tabla"></table></div>
+  </div>
+
+  <div class="tarea">
+    <b>Exploración dirigida</b>
+    <ol>
+      <li>Con <span class="formula">B = 10</span>, corré tres veces sin cambiar nada y mirá el registro: ¿cuánto varía el intervalo entre corridas?</li>
+      <li>Repetí con <span class="formula">B = 10.000</span>. ¿Cuánto varía ahora? ¿Y el ancho, cambió?</li>
+      <li>Compará el ancho del intervalo de la media contra el de la mediana con la misma muestra. Después bajá <span class="formula">n</span> a 10 y mirá qué le pasa al histograma.</li>
+    </ol>
+  </div>
+
+  <div class="cierre-mod" data-cierre="c3"></div>
+
+  <details class="expli"><summary>Ver explicación</summary><div class="cuerpo">
+    <p>La proporción de observaciones que queda afuera de una remuestra tiende a <span class="formula">(1 − 1/n)ⁿ → 1/e ≈ 0,368</span>. Es decir, alrededor de un 37% de la muestra original no participa de cada remuestra, y el otro 63% aparece, algunas veces repetido. Ese es todo el truco: tratar a la muestra como si fuera la población y volver a muestrear de ella.</p>
+    <p><strong>El punto difícil.</strong> Subir B suaviza el histograma y estabiliza el intervalo entre corridas, pero <em>no agrega información sobre la población</em>. La información sobre la población entra por un único lugar: el tamaño de la muestra original. Con n = 10, un B de un millón te da un intervalo muy preciso… de un procedimiento que arranca de diez datos. El histograma queda con escalones porque literalmente hay pocos valores distintos posibles.</p>
+    <p>Dicho de otro modo: B controla el <strong>ruido de la simulación</strong>; n controla la <strong>incertidumbre estadística</strong>. Son dos cosas distintas y sólo una se arregla con computadora.</p>
+    <p>El bootstrap sirve justamente cuando no hay fórmula cerrada: mediana, percentil 90, coeficiente de Gini, razón entre percentiles, índices compuestos. Fijate cómo cambia el ancho del intervalo según qué estadístico elijas, con exactamente los mismos datos.</p>
+  </div></details>
+
+  <div class="docente">
+    <h4>Modo docente</h4>
+    <ul>
+      <li>Conviene hacer la etapa A en vivo, una remuestra a la vez, y pedir que canten qué bolita salió antes de mirarla.</li>
+      <li><strong>Error conceptual central:</strong> creer que B es "el tamaño de la muestra". Con la tabla de registro se ve directo: al subir B el intervalo deja de bailar entre corridas, pero su ancho se queda donde estaba.</li>
+      <li>El intervalo que se reporta es el percentil bootstrap: percentiles 2,5 y 97,5 de la distribución bootstrap. Es el más simple y el que peor se porta con muestras chicas y asimétricas; eso se discute en el módulo 4.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================ M4 -->
+<section class="mod" id="m4" data-mod="m4">
+  <p class="eyebrow">Módulo 4 · Cobertura</p>
+  <h2>Constructor de intervalos</h2>
+  <p class="motiva">"Intervalo de confianza al 95%" es una frase que se repite mucho y se verifica poco. Acá se verifica.</p>
+
+  <p>Cada corrida hace todo el proceso de nuevo: sortea una muestra de la población, construye el intervalo con el método elegido y lo dibuja. Verde si contiene el valor verdadero, rojo si no. El contador acumula la proporción que lo contiene, que es la <strong>cobertura efectiva</strong>.</p>
+
+  <div class="pred" data-pred="p4"></div>
+
+  <div class="panel">
+    <div class="btns" id="m4Metodos"></div>
+    <div class="btns" id="m4Pobs"></div>
+    <div class="sliders" id="m4Sliders"></div>
+    <div class="btns" id="m4Botones"></div>
+    <div class="stats" id="m4Stats"></div>
+    <figure><svg class="graf" id="m4Graf" role="img" aria-label="Intervalos de confianza acumulados"></svg></figure>
+    <p class="chico">Se muestran los últimos 60 intervalos; el contador acumula todas las corridas.</p>
+    <div class="mini-t" style="margin-top:.8rem">Comparación de los tres métodos en el escenario actual</div>
+    <div class="btns" id="m4Comp"></div>
+    <div class="tabla-wrap"><table class="t" id="m4Tabla"></table></div>
+  </div>
+
+  <div class="tarea">
+    <b>Exploración dirigida</b>
+    <ol>
+      <li>Población simétrica, <span class="formula">n = 50</span>, 95%: acumulá quinientas corridas y mirá el contador.</li>
+      <li>Cambiá a población fuertemente asimétrica con <span class="formula">n = 15</span>. ¿El contador se sigue quedando en 95%?</li>
+      <li>Corré la comparación de los tres métodos en ese escenario adverso. Después bajá el nivel a 80% y mirá qué pasa con el ancho.</li>
+    </ol>
+  </div>
+
+  <div class="cierre-mod" data-cierre="c4"></div>
+
+  <details class="expli"><summary>Ver explicación</summary><div class="cuerpo">
+    <p>El 95% no es una propiedad del intervalo que tenés en la mano: es una propiedad del <strong>procedimiento</strong>. Si repetís todo el proceso muchas veces, alrededor del 95% de los intervalos que generás van a contener el parámetro. El tuyo lo contiene o no lo contiene, y no vas a saber cuál de las dos cosas pasó.</p>
+    <p>Por eso la formulación correcta no es "hay 95% de probabilidad de que el parámetro esté en mi intervalo" sino "este intervalo viene de un procedimiento que acierta el 95% de las veces". El contador de la pantalla es exactamente esa frecuencia, hecha visible.</p>
+    <p>Y el 95% es una <em>promesa nominal</em> que puede incumplirse. Con muestras chicas y asimetría fuerte, la cobertura efectiva cae por debajo del nivel nominal, y cada método falla a su manera: el percentil bootstrap se corre hacia un lado, el normal con error estándar bootstrap subestima la cola larga, y la fórmula clásica supone una normalidad que no está. Bajar el nivel de confianza angosta el intervalo, pero no es gratis: se falla más seguido. Precisión y confianza se compran una a costa de la otra; lo único que compra las dos juntas es más datos.</p>
+  </div></details>
+
+  <div class="docente">
+    <h4>Modo docente</h4>
+    <ul>
+      <li>Métodos implementados: <span class="formula">percentil bootstrap</span> (cuantiles de la distribución bootstrap), <span class="formula">normal con EE bootstrap</span> (estimación ± z·EE, con EE = desvío de las réplicas) y <span class="formula">clásico</span> (media ± t·s/√n).</li>
+      <li>Los tres apuntan a la media poblacional, así que son comparables. Con la Pareto la cobertura de los tres cae.</li>
+      <li><strong>Discusión que conviene abrir:</strong> el intervalo es aleatorio, el parámetro no. Es la diferencia entre el enfoque frecuentista y el bayesiano, y no hace falta resolverla en clase, sí nombrarla.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================ M5 -->
+<section class="mod" id="m5" data-mod="m5">
+  <p class="eyebrow">Módulo 5 · La hipótesis nula, hecha operación</p>
+  <h2>Mezclador de etiquetas</h2>
+  <p class="motiva">Si el grupo no importara, las etiquetas serían intercambiables. Mezclarlas es simular ese mundo, no imaginarlo.</p>
+
+  <p>Hay dos grupos y una diferencia observada entre ellos. Mezclar las etiquetas significa repartir de nuevo quién es A y quién es B <strong>al azar</strong>, dejando los valores donde están, y recalcular la diferencia. El histograma junta esas diferencias: es cómo se vería el mundo si la etiqueta de grupo no tuviera nada que ver con la variable.</p>
+
+  <div class="pred" data-pred="p5"></div>
+
+  <div class="panel">
+    <div class="btns" id="m5Stats"></div>
+    <div class="sliders" id="m5Sliders"></div>
+    <div class="btns" id="m5Botones"></div>
+    <div>
+      <label class="chk"><input type="checkbox" id="m5Cola"> sombrear la cola usada para el p-valor</label>
+      <label class="chk"><input type="checkbox" id="m5Anim" checked> animar el mezclado</label>
+    </div>
+    <figure><svg class="graf" id="m5Datos" role="img" aria-label="Los dos grupos y sus medias"></svg></figure>
+    <div class="stats" id="m5Tarjetas"></div>
+    <div class="mini-t" style="margin-top:.6rem">Distribución de la diferencia bajo H₀ (etiquetas mezcladas)</div>
+    <figure><svg class="graf" id="m5Graf" role="img" aria-label="Distribución de permutación"></svg></figure>
+    <p class="observa" id="m5Veredicto" style="margin-bottom:0"></p>
+  </div>
+
+  <div class="tarea">
+    <b>Exploración dirigida</b>
+    <ol>
+      <li>Con separación verdadera en 0, mezclá mil veces y ubicá la línea observada dentro del histograma. Subí a 1 desvío y repetí: ¿dónde queda ahora?</li>
+      <li>Buscá la separación mínima que da un p-valor por debajo de 0,05 con grupos de 20. Repetí con grupos de 200: ¿hace falta la misma separación?</li>
+      <li>Cambiá el estadístico sin tocar nada más. El histograma cambia de forma; el procedimiento es idéntico.</li>
+    </ol>
+  </div>
+
+  <div class="cierre-mod" data-cierre="c5"></div>
+
+  <details class="expli"><summary>Ver explicación</summary><div class="cuerpo">
+    <p>El test de permutación no supone ninguna distribución. Supone algo mucho más concreto: que bajo H₀ las etiquetas son <strong>intercambiables</strong>, o sea que cualquier reasignación de quién es A y quién es B era igual de probable. Bajo ese supuesto, el conjunto de todas las reasignaciones posibles <em>es</em> la distribución nula. Nosotros no las recorremos todas: sorteamos unas cuantas miles.</p>
+    <p>El histograma que ves en pantalla no es una aproximación teórica: es literalmente un mundo donde H₀ vale, construido con tus propios datos. Está centrado en cero porque, si la etiqueta no significa nada, en promedio no hay diferencia; y tiene ancho porque el azar del reparto genera diferencias no nulas todo el tiempo.</p>
+    <p>El p-valor es la proporción de esas diferencias simuladas que resultan tanto o más extremas que la observada. Un p-valor chico dice: "un mundo sin efecto casi nunca produce una diferencia como la mía". No dice cuán grande es el efecto, ni cuán probable es H₀. Y fijate en la segunda tarea: con grupos de 200 una separación mucho más chica alcanza para dar significativo. Significatividad no es magnitud.</p>
+    <p>El procedimiento sirve para cualquier estadístico: diferencia de medias, de medianas, de percentiles 90 o de varianzas. La receta no cambia, sólo cambia qué se calcula en cada mezcla. Eso es lo que lo hace tan útil cuando no hay una fórmula a mano.</p>
+  </div></details>
+
+  <div class="docente">
+    <h4>Modo docente</h4>
+    <ul>
+      <li>El p-valor se calcula a dos colas como <span class="formula">(1 + #{|d*| ≥ |d_obs|}) / (B + 1)</span>. El +1 evita reportar p = 0: con B mezclas, lo más chico que se puede afirmar es 1/(B+1).</li>
+      <li><strong>Error frecuente:</strong> pensar que la mezcla "destruye los datos". Los valores no se tocan nunca; lo único que se reasigna es la etiqueta. Conviene mostrarlo con la animación activada.</li>
+      <li>La comparación grupos de 20 contra grupos de 200 es el mejor momento del módulo para separar significatividad estadística de relevancia económica.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================ M6 -->
+<section class="mod" id="m6" data-mod="m6">
+  <p class="eyebrow">Módulo 6 · La confusión más común</p>
+  <h2>Bootstrap contra permutación</h2>
+  <p class="motiva">Mecánicamente se parecen: los dos remuestrean miles de veces. Responden preguntas distintas.</p>
+
+  <p>Los dos paneles arrancan del mismo conjunto de datos. El de la izquierda remuestrea <strong>observaciones con reposición</strong> y termina en un intervalo. El de la derecha reordena <strong>etiquetas sin reposición</strong> y termina en un p-valor. Corren en simultáneo con un solo botón.</p>
+
+  <div class="pred" data-pred="p6"></div>
+
+  <div class="panel">
+    <div class="btns" id="m6Botones"></div>
+    <label class="chk"><input type="checkbox" id="m6Resalta" checked> resaltar qué se está moviendo</label>
+    <div class="tres-col">
+      <div>
+        <div class="mini-t" style="color:var(--accent)">Bootstrap · remuestrea observaciones</div>
+        <div class="urna" id="m6BootDatos"></div>
+        <p class="chico" id="m6BootInfo"></p>
+        <figure><svg class="graf" id="m6BootGraf" role="img" aria-label="Distribución bootstrap"></svg></figure>
+        <div class="stat media" id="m6BootSalida"></div>
+      </div>
+      <div>
+        <div class="mini-t" style="color:var(--orange)">Permutación · reordena etiquetas</div>
+        <div class="urna" id="m6PermDatos"></div>
+        <p class="chico" id="m6PermInfo"></p>
+        <figure><svg class="graf" id="m6PermGraf" role="img" aria-label="Distribución de permutación"></svg></figure>
+        <div class="stat ratio" id="m6PermSalida"></div>
+      </div>
+    </div>
+    <div class="leyenda">
+      <span><i class="sw pt" style="background:var(--accent)"></i> grupo A</span>
+      <span><i class="sw pt" style="background:var(--orange)"></i> grupo B</span>
+      <span><i class="sw pt" style="background:var(--purple)"></i> observación duplicada / etiqueta cambiada</span>
+    </div>
+  </div>
+
+  <div class="tarea">
+    <b>Exploración dirigida</b>
+    <ol>
+      <li>Poné velocidad <em>paso a paso</em> y mirá qué se altera en cada panel: ¿la observación o la etiqueta?</li>
+      <li>Verificá que en el panel izquierdo hay valores repetidos y en el derecho no aparece ninguno dos veces.</li>
+      <li>Anotá qué produce cada panel como salida final. No son dos versiones de lo mismo.</li>
+    </ol>
+  </div>
+
+  <h3>Actividad de cierre: ¿de quién es cada afirmación?</h3>
+  <p class="chico">Ubicá cada afirmación en la columna que corresponda. Puede ser de los dos.</p>
+  <div class="clasif" id="m6Clasif"></div>
+  <div class="btns"><button class="btn" id="m6Comprobar" type="button">Comprobar clasificación</button></div>
+  <div class="feedback" id="m6Feedback"></div>
+
+  <details class="expli"><summary>Ver explicación</summary><div class="cuerpo">
+    <p>El bootstrap responde <strong>"¿cuánta incertidumbre tiene mi estimación?"</strong>. Para eso necesita imitar el mecanismo que generó la muestra, y lo hace remuestreando observaciones con reposición: cada remuestra es una muestra alternativa plausible. Su salida natural es un error estándar o un intervalo.</p>
+    <p>La permutación responde <strong>"¿podría este resultado venir del puro azar?"</strong>. Para eso necesita construir un mundo donde H₀ vale, y lo hace reasignando etiquetas sin reposición: los datos son exactamente los mismos, sólo cambia quién está en qué grupo. Su salida natural es un p-valor.</p>
+    <p>De ahí la pregunta de predicción. Si multiplicás todos los ingresos por dos, el intervalo bootstrap se duplica: está en las unidades de la variable. El p-valor de permutación no se mueve, porque la transformación afecta igual a todas las reasignaciones: el estadístico observado y los simulados se escalan juntos y su posición relativa no cambia.</p>
+    <p>Las dos técnicas comparten algo importante: descansan en que las observaciones sean independientes. Si hay datos de panel, conglomerados o series de tiempo, remuestrear observaciones sueltas rompe la estructura de dependencia y los dos procedimientos dan intervalos demasiado angostos y p-valores demasiado chicos.</p>
+  </div></details>
+
+  <div class="docente">
+    <h4>Modo docente</h4>
+    <ul>
+      <li>Vale la pena correr el módulo con velocidad paso a paso y preguntar antes de cada animación qué esperan ver moverse.</li>
+      <li>La tabla de clasificación funciona bien como cierre oral: pedir la justificación de las dos que suelen fallar, "sirve para estadísticos sin fórmula cerrada" (ambos) y "requiere observaciones independientes" (ambos).</li>
+      <li>Si el curso viene rápido, se puede mencionar el bootstrap por bloques y el de clusters como respuesta a la dependencia, sin desarrollarlos.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================ M7 -->
+<section class="mod" id="m7" data-mod="m7">
+  <p class="eyebrow">Módulo 7 · Cierre</p>
+  <h2>Diagnóstico rápido</h2>
+  <p class="motiva">Seis situaciones aplicadas. Elegí la decisión y escribí en una oración por qué. La respuesta de referencia aparece después de contestar.</p>
+
+  <div id="m7Casos"></div>
+
+  <div class="cierre">
+    <h2 style="text-align:center">Antes de aplicar cualquiera de los dos, preguntá…</h2>
+    <div class="preguntas-cierre">
+      <div class="pc"><i>01</i>¿Quiero estimar con incertidumbre o contrastar una hipótesis?</div>
+      <div class="pc"><i>02</i>¿De qué tamaño es la muestra <em>original</em>?</div>
+      <div class="pc"><i>03</i>¿Las observaciones son independientes?</div>
+      <div class="pc"><i>04</i>¿El estadístico tiene fórmula cerrada confiable?</div>
+      <div class="pc"><i>05</i>¿Qué tan pesada es la cola de esta variable?</div>
+    </div>
+    <p class="frase-final">Ninguna cantidad de simulación agrega información que la muestra no tenía.</p>
+  </div>
+</section>
+
+<footer>
+  <p>Material interactivo de la clase 7 · Ciencia de Datos para Economía y Negocios · FCE-UBA. No se entrega ni se corrige. Todos los datos son simulados en el navegador y ninguna observación corresponde a personas o empresas reales. Las respuestas y el progreso se guardan solo en este navegador. <button class="btn" id="reset" type="button">borrar progreso</button></p>
+</footer>
+
+</div>
+<script>
+"use strict";
+/* ============================================================
+   1. Utilidades numéricas
+   ============================================================ */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function makeRng(seed){
+  const u=mulberry32(seed); let spare=null;
+  return {
+    unif:u,
+    int:function(k){let i=Math.floor(u()*k);if(i>=k)i=k-1;return i;},
+    norm(){ if(spare!==null){const s=spare;spare=null;return s;}
+      let a=0,b=0; while(a===0)a=u(); b=u();
+      const r=Math.sqrt(-2*Math.log(a)); spare=r*Math.sin(2*Math.PI*b); return r*Math.cos(2*Math.PI*b); }
+  };
+}
+const RG=makeRng(20260907|0);           /* generador global para las corridas */
+const sortNum=a=>Float64Array.from(a).sort();
+function mean(a){let s=0;for(let i=0;i<a.length;i++)s+=a[i];return s/a.length;}
+function quantileSorted(s,p){const n=s.length;if(!n)return NaN;if(p<=0)return s[0];if(p>=1)return s[n-1];
+  const h=(n-1)*p,lo=Math.floor(h),hi=Math.ceil(h);return s[lo]+(h-lo)*(s[hi]-s[lo]);}
+function quantile(a,p){return quantileSorted(sortNum(a),p);}
+function median(a){return quantile(a,0.5);}
+function variance(a){if(a.length<2)return 0;const m=mean(a);let s=0;for(let i=0;i<a.length;i++){const d=a[i]-m;s+=d*d;}return s/(a.length-1);}
+const sd=a=>Math.sqrt(variance(a));
+function minmax(a){let lo=Infinity,hi=-Infinity;for(let i=0;i<a.length;i++){if(a[i]<lo)lo=a[i];if(a[i]>hi)hi=a[i];}return[lo,hi];}
+function histCounts(a,lo,hi,k){
+  const w=(hi-lo)/k,c=new Array(k).fill(0);
+  if(!(w>0))return c;
+  for(let i=0;i<a.length;i++){let j=Math.floor((a[i]-lo)/w);if(j>=k)j=k-1;if(j<0)j=0;c[j]++;}
+  return c;
+}
+/* cuantil normal estándar (Acklam) */
+function qnorm(p){
+  if(p<=0)return -Infinity; if(p>=1)return Infinity;
+  const a=[-3.969683028665376e+01,2.209460984245205e+02,-2.759285104469687e+02,1.383577518672690e+02,-3.066479806614716e+01,2.506628277459239e+00];
+  const b=[-5.447609879822406e+01,1.615858368580409e+02,-1.556989798598866e+02,6.680131188771972e+01,-1.328068155288572e+01];
+  const c=[-7.784894002430293e-03,-3.223964580411365e-01,-2.400758277161838e+00,-2.549732539343734e+00,4.374664141464968e+00,2.938163982698783e+00];
+  const d=[7.784695709041462e-03,3.224671290700398e-01,2.445134137142996e+00,3.754408661907416e+00];
+  const pl=0.02425;let q,r;
+  if(p<pl){q=Math.sqrt(-2*Math.log(p));
+    return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}
+  if(p>1-pl){q=Math.sqrt(-2*Math.log(1-p));
+    return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}
+  q=p-0.5;r=q*q;
+  return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);
+}
+/* cuantil t de Student por expansión de Cornish-Fisher */
+function qt(p,v){
+  if(v>200)return qnorm(p);
+  const z=qnorm(p),z2=z*z;
+  const g1=(z2*z+z)/4;
+  const g2=(5*z2*z2*z+16*z2*z+3*z)/96;
+  const g3=(3*z2*z2*z2*z+19*z2*z2*z+17*z2*z-15*z)/384;
+  return z+g1/v+g2/(v*v)+g3/(v*v*v);
+}
+/* formato */
+const nf=(x,d)=>(isFinite(x)?x:0).toLocaleString('es-AR',{minimumFractionDigits:d===undefined?1:d,maximumFractionDigits:d===undefined?1:d});
+const money=x=>'$'+Math.round(x).toLocaleString('es-AR');
+const miles=x=>Math.round(x).toLocaleString('es-AR');
+const pct=(x,d)=>nf(x,d===undefined?1:d)+'%';
+
+/* ============================================================
+   2. Poblaciones compartidas
+   ============================================================ */
+const NPOB=40000;
+const POBS=[
+  {id:'sim',t:'Simétrica'},
+  {id:'asim',t:'Asimétrica a derecha'},
+  {id:'bimodal',t:'Bimodal'},
+  {id:'pesada',t:'Cola pesada'}
+];
+const cachePob={};
+function poblacion(id){
+  if(cachePob[id])return cachePob[id];
+  const r=makeRng(777*(id.length+3)+id.charCodeAt(0)*13);
+  const a=new Float64Array(NPOB);
+  for(let i=0;i<NPOB;i++){
+    switch(id){
+      case 'sim': a[i]=100+20*r.norm(); break;
+      case 'asim': {const s=0.9; a[i]=Math.exp(Math.log(100)-s*s/2+s*r.norm()); break;}
+      case 'bimodal': a[i]=(r.unif()<0.5? 70+9*r.norm() : 130+9*r.norm()); break;
+      case 'pesada': {let u=r.unif(); if(u<1e-9)u=1e-9; a[i]=(1/Math.pow(u,1/1.5))*(100/3); break;}
+    }
+  }
+  const s=sortNum(a);
+  const o={id:id,data:a,mu:mean(a),sigma:sd(a),med:quantileSorted(s,0.5),
+    lo:Math.max(0,quantileSorted(s,0.002)),hi:quantileSorted(s,0.99)};
+  cachePob[id]=o; return o;
+}
+function muestrear(pob,n,rng){
+  const a=new Float64Array(n),d=pob.data;
+  for(let i=0;i<n;i++)a[i]=d[rng.int(NPOB)];
+  return a;
+}
+
+/* ============================================================
+   3. Dibujo (SVG a mano, sin librerías)
+   ============================================================ */
+const NS='http://www.w3.org/2000/svg';
+function S(tag,at){const e=document.createElementNS(NS,tag);for(const k in at){e.setAttribute(k,at[k]);}return e;}
+function T(x,y,txt,at){const e=S('text',Object.assign({x:x,y:y},at||{}));e.textContent=txt;return e;}
+function cssv(v){return getComputedStyle(document.body).getPropertyValue(v).trim();}
+
+/* histograma con líneas verticales */
+function drawDist(svg,cfg){
+  const W=820,H=cfg.h||220,m={t:24,r:16,b:34,l:16};
+  svg.setAttribute('viewBox','0 0 '+W+' '+H); svg.innerHTML='';
+  const g=S('g',{}); svg.appendChild(g);
+  let lo=cfg.xmin,hi=cfg.xmax;
+  if(hi<=lo)hi=lo+1;
+  const k=cfg.bins||46;
+  const X=v=>m.l+(Math.max(lo,Math.min(hi,v))-lo)/(hi-lo)*(W-m.l-m.r);
+  const sets=(cfg.sets||[]).filter(s=>s.data&&s.data.length);
+  const counts=sets.map(s=>histCounts(s.data,lo,hi,k));
+  let maxc=0; counts.forEach(c=>c.forEach(v=>{if(v>maxc)maxc=v;}));
+  if(!maxc)maxc=1;
+  const Y=c=>H-m.b-(c/maxc)*(H-m.t-m.b);
+  const bw=(W-m.l-m.r)/k;
+  sets.forEach((s,si)=>{
+    const c=counts[si];
+    for(let j=0;j<k;j++){
+      if(!c[j])continue;
+      const dentro=cfg.sombra&&cfg.sombra(lo+(hi-lo)*(j+0.5)/k);
+      g.appendChild(S('rect',{x:m.l+j*bw+0.4,y:Y(c[j]),width:Math.max(0.8,bw-0.8),height:H-m.b-Y(c[j]),
+        fill:dentro?(cfg.colorSombra||cssv('--red')):s.color,opacity:dentro?0.75:(s.opacity||0.6),rx:1}));
+    }
+  });
+  g.appendChild(S('line',{x1:m.l,y1:H-m.b,x2:W-m.r,y2:H-m.b,stroke:cssv('--border'),'stroke-width':1}));
+  const nt=cfg.ticks||6, fmt=cfg.fmt||(v=>nf(v,0));
+  for(let i=0;i<=nt;i++){
+    const v=lo+(hi-lo)*i/nt,x=X(v);
+    g.appendChild(S('line',{x1:x,y1:H-m.b,x2:x,y2:H-m.b+4,stroke:cssv('--border')}));
+    g.appendChild(T(x,H-m.b+17,fmt(v),{'text-anchor':'middle','font-size':11,fill:cssv('--text-sec'),'font-family':'var(--font-m)'}));
+  }
+  (cfg.lines||[]).forEach((L,i)=>{
+    if(!isFinite(L.x))return;
+    const x=X(L.x), dentro=L.x>=lo&&L.x<=hi;
+    g.appendChild(S('line',{x1:x,y1:m.t-8,x2:x,y2:H-m.b,stroke:L.color,'stroke-width':L.w||2,
+      'stroke-dasharray':L.dash||'none',opacity:dentro?1:0.3}));
+    if(L.label)g.appendChild(T(x,m.t-13+(i%2)*11,L.label,{'text-anchor':'middle','font-size':11,fill:L.color,'font-weight':600,'font-family':'var(--font-m)'}));
+  });
+  if(cfg.vacio)g.appendChild(T(W/2,H/2,cfg.vacio,{'text-anchor':'middle','font-size':13,fill:cssv('--text-sec'),'font-style':'italic'}));
+  if(cfg.nota)g.appendChild(T(m.l+2,H-4,cfg.nota,{'font-size':10.5,fill:cssv('--text-sec'),'font-style':'italic'}));
+}
+
+/* tira de puntos (una muestra) */
+function drawDots(svg,cfg){
+  const W=820,H=cfg.h||96,m={t:16,r:16,b:26,l:16};
+  svg.setAttribute('viewBox','0 0 '+W+' '+H); svg.innerHTML='';
+  const g=S('g',{}); svg.appendChild(g);
+  const lo=cfg.xmin,hi=cfg.xmax;
+  const X=v=>m.l+(Math.max(lo,Math.min(hi,v))-lo)/(hi-lo)*(W-m.l-m.r);
+  g.appendChild(S('line',{x1:m.l,y1:H-m.b,x2:W-m.r,y2:H-m.b,stroke:cssv('--border')}));
+  const d=cfg.data||[],r=d.length>200?2:(d.length>60?3:4.2);
+  const vis=cfg.hasta===undefined?d.length:cfg.hasta;
+  for(let i=0;i<Math.min(d.length,vis);i++){
+    const jt=((i*2654435761)%1000)/1000;
+    g.appendChild(S('circle',{cx:X(d[i]),cy:m.t+jt*(H-m.t-m.b-6),r:r,fill:cfg.color,opacity:.62}));
+  }
+  (cfg.lines||[]).forEach(L=>{
+    if(!isFinite(L.x))return;
+    g.appendChild(S('line',{x1:X(L.x),y1:m.t-10,x2:X(L.x),y2:H-m.b,stroke:L.color,'stroke-width':2,'stroke-dasharray':L.dash||'none'}));
+    if(L.label)g.appendChild(T(X(L.x),H-m.b+16,L.label,{'text-anchor':'middle','font-size':11,fill:L.color,'font-weight':600,'font-family':'var(--font-m)'}));
+  });
+  if(cfg.nota)g.appendChild(T(W-m.r,m.t-4,cfg.nota,{'text-anchor':'end','font-size':11,fill:cssv('--text-sec'),'font-style':'italic'}));
+}
+
+/* trayectorias con eje x logarítmico */
+function drawTray(svg,cfg){
+  const W=820,H=cfg.h||330,m={t:18,r:18,b:38,l:52};
+  svg.setAttribute('viewBox','0 0 '+W+' '+H); svg.innerHTML='';
+  const g=S('g',{}); svg.appendChild(g);
+  const lx=Math.log(cfg.xmin),hx=Math.log(cfg.xmax);
+  const X=v=>m.l+(Math.log(Math.max(cfg.xmin,Math.min(cfg.xmax,v)))-lx)/(hx-lx)*(W-m.l-m.r);
+  const Y=v=>H-m.b-(Math.max(cfg.ymin,Math.min(cfg.ymax,v))-cfg.ymin)/(cfg.ymax-cfg.ymin)*(H-m.t-m.b);
+  for(let i=0;i<=4;i++){
+    const yv=cfg.ymin+(cfg.ymax-cfg.ymin)*i/4;
+    g.appendChild(S('line',{x1:m.l,y1:Y(yv),x2:W-m.r,y2:Y(yv),stroke:cssv('--grid')}));
+    g.appendChild(T(m.l-8,Y(yv)+4,nf(yv,0),{'text-anchor':'end','font-size':11,fill:cssv('--text-sec'),'font-family':'var(--font-m)'}));
+  }
+  if(cfg.banda){
+    let d1='',d2='';
+    const pts=cfg.banda;
+    for(let i=0;i<pts.length;i++)d1+=(i?'L':'M')+X(pts[i][0]).toFixed(1)+' '+Y(pts[i][1]).toFixed(1)+' ';
+    for(let i=pts.length-1;i>=0;i--)d2+='L'+X(pts[i][0]).toFixed(1)+' '+Y(pts[i][2]).toFixed(1)+' ';
+    g.appendChild(S('path',{d:d1+d2+'Z',fill:cssv('--accent'),opacity:.15}));
+  }
+  if(isFinite(cfg.verdadero))
+    g.appendChild(S('line',{x1:m.l,y1:Y(cfg.verdadero),x2:W-m.r,y2:Y(cfg.verdadero),stroke:cssv('--green'),'stroke-width':2}));
+  (cfg.trays||[]).forEach(tr=>{
+    let d='';
+    for(let i=0;i<tr.pts.length;i++)d+=(i?'L':'M')+X(tr.pts[i][0]).toFixed(1)+' '+Y(tr.pts[i][1]).toFixed(1)+' ';
+    g.appendChild(S('path',{d:d,fill:'none',stroke:tr.color,'stroke-width':1.6,opacity:.85,'stroke-linejoin':'round'}));
+  });
+  if(isFinite(cfg.lectura)){
+    const x=X(cfg.lectura);
+    g.appendChild(S('line',{x1:x,y1:m.t,x2:x,y2:H-m.b,stroke:cssv('--orange'),'stroke-width':2,'stroke-dasharray':'4 3'}));
+    g.appendChild(T(x,m.t+2,'n = '+miles(cfg.lectura),{'text-anchor':'middle','font-size':11,fill:cssv('--orange'),'font-weight':600,'font-family':'var(--font-m)'}));
+  }
+  g.appendChild(S('line',{x1:m.l,y1:H-m.b,x2:W-m.r,y2:H-m.b,stroke:cssv('--border')}));
+  [1,10,100,1000,10000].forEach(v=>{
+    if(v<cfg.xmin||v>cfg.xmax)return;
+    g.appendChild(T(X(v),H-m.b+17,miles(v),{'text-anchor':'middle','font-size':11,fill:cssv('--text-sec'),'font-family':'var(--font-m)'}));
+  });
+  g.appendChild(T(W-m.r,H-4,'tamaño de muestra acumulado (escala log)',{'text-anchor':'end','font-size':11,fill:cssv('--text-sec')}));
+  g.appendChild(T(m.l-44,m.t+2,'promedio',{'font-size':11,fill:cssv('--text-sec')}));
+}
+
+/* segmentos de intervalos de confianza */
+function drawIC(svg,cfg){
+  const items=cfg.items||[];
+  const H=Math.max(120,26+items.length*4.4),W=820,m={t:16,r:16,b:30,l:16};
+  svg.setAttribute('viewBox','0 0 '+W+' '+H); svg.innerHTML='';
+  const g=S('g',{}); svg.appendChild(g);
+  const lo=cfg.xmin,hi=cfg.xmax;
+  const X=v=>m.l+(Math.max(lo,Math.min(hi,v))-lo)/(hi-lo)*(W-m.l-m.r);
+  const paso=items.length?(H-m.t-m.b)/items.length:1;
+  items.forEach((it,i)=>{
+    const y=m.t+paso*(i+0.5), c=it.ok?cssv('--green'):cssv('--red');
+    g.appendChild(S('line',{x1:X(it.lo),y1:y,x2:X(it.hi),y2:y,stroke:c,'stroke-width':Math.min(3,Math.max(1.4,paso*0.6)),'stroke-linecap':'round',opacity:.85}));
+    if(items.length<=30)g.appendChild(S('circle',{cx:X(it.est),cy:y,r:2.2,fill:c}));
+  });
+  const xv=X(cfg.verdadero);
+  g.appendChild(S('line',{x1:xv,y1:m.t-8,x2:xv,y2:H-m.b,stroke:cssv('--heading'),'stroke-width':2}));
+  g.appendChild(T(xv,H-m.b+16,'valor verdadero',{'text-anchor':'middle','font-size':11,fill:cssv('--heading'),'font-weight':600}));
+  g.appendChild(S('line',{x1:m.l,y1:H-m.b,x2:W-m.r,y2:H-m.b,stroke:cssv('--border')}));
+  for(let i=0;i<=4;i++){
+    const v=lo+(hi-lo)*i/4;
+    g.appendChild(T(X(v),H-m.b+16,nf(v,0),{'text-anchor':'middle','font-size':11,fill:cssv('--text-sec'),'font-family':'var(--font-m)'}));
+  }
+  if(!items.length)g.appendChild(T(W/2,H/2,'Todavía no construiste ningún intervalo.',{'text-anchor':'middle','font-size':13,fill:cssv('--text-sec'),'font-style':'italic'}));
+}
+
+/* dos grupos de puntos */
+function drawGrupos(svg,cfg){
+  const W=820,H=cfg.h||200,m={t:22,r:16,b:30,l:70};
+  svg.setAttribute('viewBox','0 0 '+W+' '+H); svg.innerHTML='';
+  const g=S('g',{}); svg.appendChild(g);
+  const lo=cfg.xmin,hi=cfg.xmax;
+  const X=v=>m.l+(Math.max(lo,Math.min(hi,v))-lo)/(hi-lo)*(W-m.l-m.r);
+  const filas=[{lab:'Grupo A',color:cssv('--accent')},{lab:'Grupo B',color:cssv('--orange')}];
+  const alto=(H-m.t-m.b)/2;
+  filas.forEach((f,gi)=>{
+    const y0=m.t+alto*gi;
+    g.appendChild(T(m.l-10,y0+alto/2,f.lab,{'text-anchor':'end','font-size':12,fill:f.color,'font-weight':600}));
+    const d=cfg.datos.filter((v,i)=>cfg.grupo[i]===gi);
+    const r=d.length>120?2.2:(d.length>50?3:4);
+    d.forEach((v,i)=>{
+      const jt=((i*2654435761)%1000)/1000;
+      g.appendChild(S('circle',{cx:X(v),cy:y0+8+jt*(alto-20),r:r,fill:cfg.resaltar&&cfg.cambio&&cfg.cambio[i]?cssv('--purple'):f.color,opacity:.6}));
+    });
+    const mm=d.length?mean(d):NaN;
+    if(isFinite(mm)){
+      g.appendChild(S('line',{x1:X(mm),y1:y0+2,x2:X(mm),y2:y0+alto-4,stroke:f.color,'stroke-width':2.6}));
+      g.appendChild(T(X(mm),y0+alto-6,nf(mm,2),{'text-anchor':'middle','font-size':10.5,fill:f.color,'font-weight':700,'font-family':'var(--font-m)'}));
+    }
+  });
+  g.appendChild(S('line',{x1:m.l,y1:H-m.b,x2:W-m.r,y2:H-m.b,stroke:cssv('--border')}));
+  for(let i=0;i<=5;i++){
+    const v=lo+(hi-lo)*i/5;
+    g.appendChild(T(X(v),H-m.b+16,nf(v,1),{'text-anchor':'middle','font-size':11,fill:cssv('--text-sec'),'font-family':'var(--font-m)'}));
+  }
+  if(cfg.nota)g.appendChild(T(W-m.r,m.t-8,cfg.nota,{'text-anchor':'end','font-size':11,fill:cssv('--text-sec'),'font-style':'italic'}));
+}
+
+/* ============================================================
+   4. Widgets de UI
+   ============================================================ */
+function botones(cont,opciones,activo,onSel){
+  cont.innerHTML='';
+  opciones.forEach(o=>{
+    const b=document.createElement('button');
+    b.className='btn'+(o.id===activo?' act':''); b.type='button'; b.textContent=o.t;
+    if(o.tit)b.title=o.tit;
+    b.addEventListener('click',()=>{onSel(o.id);});
+    cont.appendChild(b);
+  });
+}
+function acciones(cont,lista){
+  cont.innerHTML='';
+  const refs={};
+  lista.forEach(o=>{
+    const b=document.createElement('button');
+    b.className='btn'; b.type='button'; b.textContent=o.t;
+    b.addEventListener('click',o.on);
+    cont.appendChild(b); refs[o.id]=b;
+  });
+  return refs;
+}
+function slider(cont,cfg){
+  const d=document.createElement('div'); d.className='sl';
+  const cab=document.createElement('div'); cab.className='sl-cab';
+  const lab=document.createElement('span'); lab.textContent=cfg.label;
+  const val=document.createElement('b');
+  const inp=document.createElement('input');
+  inp.type='range'; inp.min=cfg.min; inp.max=cfg.max; inp.step=cfg.step; inp.value=cfg.value;
+  const pinta=()=>{val.textContent=cfg.fmt?cfg.fmt(+inp.value):inp.value;};
+  pinta();
+  inp.addEventListener('input',()=>{pinta();cfg.on(+inp.value);});
+  cab.appendChild(lab);cab.appendChild(val);d.appendChild(cab);d.appendChild(inp);cont.appendChild(d);
+  return {el:d,input:inp,set:v=>{inp.value=v;pinta();},get:()=>+inp.value};
+}
+/* corre una tarea pesada dejando que el botón se repinte antes de bloquear el hilo */
+function diferido(btn,fn){
+  if(btn.disabled)return;
+  const txt=btn.textContent;
+  btn.disabled=true; btn.textContent='Calculando…';
+  setTimeout(()=>{try{fn();}finally{btn.disabled=false;btn.textContent=txt;}},30);
+}
+function statCard(k,v,d,cls){
+  return '<div class="stat '+(cls||'')+'"><div class="k">'+k+'</div><div class="v">'+v+'</div>'+(d?'<div class="d">'+d+'</div>':'')+'</div>';
+}
+/* ============================================================
+   5. Progreso, navegación y registro de respuestas
+   ============================================================ */
+const MODULOS=[
+  {id:'m1',t:'1. Muestra'},{id:'m2',t:'2. Ley de grandes números'},{id:'m3',t:'3. Bootstrap'},
+  {id:'m4',t:'4. Intervalos'},{id:'m5',t:'5. Permutación'},{id:'m6',t:'6. Bootstrap vs. permutación'},
+  {id:'m7',t:'7. Diagnóstico'}
+];
+const TOTAL=MODULOS.length;
+const LS='cdd_remuestreo_v1';
+const UMBRAL=6;   /* interacciones necesarias para desbloquear la devolución */
+let estado={vistos:[],inter:{},pred:{},cierre:{},diag:{},clasif:{},docente:false};
+try{const raw=localStorage.getItem(LS); if(raw)estado=Object.assign(estado,JSON.parse(raw));}catch(e){}
+['inter','pred','cierre','diag','clasif'].forEach(k=>{if(!estado[k]||typeof estado[k]!=='object')estado[k]={};});
+if(!Array.isArray(estado.vistos))estado.vistos=[];
+function guardar(){try{localStorage.setItem(LS,JSON.stringify(estado));}catch(e){}}
+function pintarProgreso(){
+  const n=estado.vistos.length;
+  document.getElementById('progTxt').textContent='Módulos explorados: '+n+'/'+TOTAL;
+  document.getElementById('barraProg').style.width=(n/TOTAL*100)+'%';
+  document.querySelectorAll('#navMod a').forEach(a=>{
+    a.classList.toggle('visto',estado.vistos.indexOf(a.dataset.id)>=0);
+  });
+}
+function marcar(id){
+  estado.inter[id]=(estado.inter[id]||0)+1;
+  if(estado.inter[id]>=UMBRAL&&estado.vistos.indexOf(id)<0)estado.vistos.push(id);
+  guardar(); pintarProgreso(); refrescarPred(id);
+}
+(function navInit(){
+  const nav=document.getElementById('navMod');
+  MODULOS.forEach(m=>{
+    const a=document.createElement('a');a.href='#'+m.id;a.textContent=m.t;a.dataset.id=m.id;nav.appendChild(a);
+  });
+  document.querySelectorAll('section[data-mod]').forEach(s=>{
+    const id=s.dataset.mod;
+    s.addEventListener('input',e=>{if(e.target.closest('.pred,.cierre-mod,.caso'))return;marcar(id);});
+    s.addEventListener('click',e=>{
+      if(e.target.closest('.pred,.cierre-mod,.caso'))return;
+      if(e.target.closest('button,label,summary,input'))marcar(id);
+    });
+  });
+  pintarProgreso();
+})();
+document.getElementById('btnDocente').addEventListener('click',function(){
+  estado.docente=!estado.docente; guardar(); aplicarDocente();
+});
+function aplicarDocente(){
+  document.body.classList.toggle('modo-docente',!!estado.docente);
+  const b=document.getElementById('btnDocente');
+  b.classList.toggle('act',!!estado.docente);
+  b.textContent=estado.docente?'Modo docente ✓':'Modo docente';
+}
+aplicarDocente();
+document.getElementById('reset').addEventListener('click',function(){
+  if(!confirm('Se borran todas tus respuestas y el progreso guardado en este navegador. ¿Seguimos?'))return;
+  estado={vistos:[],inter:{},pred:{},cierre:{},diag:{},clasif:{},docente:false};
+  guardar(); location.reload();
+});
+
+/* ---------- preguntas de predicción ---------- */
+const PRED={
+  p1:{mod:'m1',preg:'Si tomás muchas muestras de tamaño 30 de una población muy asimétrica, el histograma de los promedios va a ser…',
+    ops:['Asimétrico, igual que la población','Aproximadamente simétrico','Depende de cuántas muestras tome'],ok:1,
+    dev:'La forma del panel 3 se vuelve aproximadamente simétrica aunque la población no lo sea: eso es el Teorema Central del Límite. La cantidad de muestras que tomes no cambia la <em>forma</em> de esa distribución, sólo la suaviza: con cien muestras se ve rugosa y con cinco mil se ve prolija, pero está centrada y ensanchada igual. Y ojo con la primera opción: es la confusión más común, porque mezcla la distribución de los <em>datos</em> con la distribución del <em>promedio</em>. El panel 1 nunca cambió de forma mientras explorabas.'},
+  p2:{mod:'m2',preg:'Con mil observaciones acumuladas, ¿dónde van a estar las trayectorias?',
+    ops:['Todas prácticamente sobre el valor verdadero','Cerca, pero con algunas todavía visiblemente lejos','Dispersas, sin ninguna tendencia a acercarse'],ok:1,
+    dev:'La convergencia es real pero lenta: el error típico cae como 1/√n, así que pasar de 1.000 a 4.000 observaciones sólo lo parte al medio. Con mil datos el embudo ya es angosto, pero sigue teniendo ancho, y con cola pesada bastante más. La tercera opción sólo describe bien un caso: el de la población sin esperanza finita, donde efectivamente no hay a dónde converger.'},
+  p3:{mod:'m3',preg:'En una remuestra bootstrap del mismo tamaño que la muestra original, ¿qué proporción de las observaciones queda afuera?',
+    ops:['Ninguna: se usan todas','Alrededor del 10%','Alrededor del 37%','Alrededor del 50%'],ok:2,
+    dev:'Alrededor del 37%. La probabilidad de que una observación no salga en ninguno de los n sorteos es (1 − 1/n)ⁿ, que tiende a 1/e ≈ 0,368. En la urna de doce bolitas lo verificás a ojo: en cada remuestra hay tres, cuatro o cinco bolitas apagadas. Que queden afuera no es un defecto: es exactamente lo que genera la variabilidad entre remuestras, que es lo que el bootstrap quiere medir.'},
+  p4:{mod:'m4',preg:'De cien intervalos construidos al 95%, ¿cuántos esperás que contengan el valor verdadero?',
+    ops:['Los cien: para eso se construyen','Alrededor de 95','Alrededor de 95, pero sólo si el método es apropiado para esos datos','Ninguno: el valor verdadero no se conoce'],ok:2,
+    dev:'La respuesta completa es la tercera. El 95% es una promesa <em>nominal</em> del procedimiento: se cumple cuando los supuestos del método se sostienen. Con población simétrica y n razonable el contador se planta en 95%. Con n = 15 y asimetría fuerte cae por debajo, y cada método falla distinto. Si respondiste "alrededor de 95" no estabas equivocado, estabas siendo optimista: te faltaba la condición.'},
+  p5:{mod:'m5',preg:'Si las etiquetas de grupo no tuvieran ninguna relación con la variable, la diferencia entre grupos después de mezclar sería…',
+    ops:['Exactamente cero','Cercana a cero, pero distinta en cada mezcla','Impredecible: cualquier valor es igual de probable'],ok:1,
+    dev:'Cercana a cero con variación. El azar del reparto casi nunca deja las dos medias exactamente iguales, así que cada mezcla da una diferencia chica y distinta. Esa nube de diferencias <em>es</em> el histograma que construiste, y su ancho es la vara con la que se mide la diferencia observada. La tercera opción tampoco va: los valores extremos son posibles pero mucho menos probables que los cercanos a cero, y eso es justo lo que hace informativo al p-valor.'},
+  p6:{mod:'m6',preg:'¿Cuál de los dos procedimientos produce un resultado que cambia si multiplicás todos los ingresos por dos?',
+    ops:['El bootstrap: el intervalo se duplica','La permutación: el p-valor se duplica','Los dos cambian','Ninguno de los dos cambia'],ok:0,
+    dev:'El bootstrap. Su salida es un intervalo en las unidades de la variable: si duplicás los ingresos, se duplican la estimación y los dos extremos del intervalo. El p-valor de permutación no se mueve, porque la reescala afecta por igual al estadístico observado y a todos los simulados: la posición relativa de la línea dentro del histograma queda idéntica. Es una buena forma de recordar que uno mide magnitud con incertidumbre y el otro mide rareza bajo H₀.'}
+};
+const CIERRE={
+  c1:{mod:'m1',pred:'p1',preg:'El panel 1 y el panel 3 tienen distinta forma y distinto ancho. Explicá en dos oraciones qué representa cada uno.',
+    ref:'El panel 1 es la <strong>población</strong>: cómo se reparten los valores entre las unidades que existen. Su forma y su dispersión son propiedades del mundo, no cambian con lo que hagas. El panel 3 es la <strong>distribución muestral del promedio</strong>: cómo varía el promedio si repetís el muestreo muchas veces. Está centrada en la media poblacional, se vuelve aproximadamente normal al crecer n y es más angosta que la población por un factor √n.'},
+  c2:{mod:'m2',pred:'p2',preg:'Un colega afirma que con muestras grandes el promedio siempre se estabiliza. ¿Bajo qué condición esa afirmación es falsa?',
+    ref:'Es falsa cuando la distribución no tiene esperanza finita: si la media poblacional no existe, no hay valor al que converger y el promedio sigue saltando por más datos que acumules (la Cauchy es el ejemplo clásico). Un caso menos extremo, pero igual de práctico: con cola muy pesada la esperanza existe pero la convergencia es tan lenta que, con los datos que realmente tenés, el promedio no se estabilizó. También falla si las observaciones no son independientes o si la distribución cambia mientras las vas juntando.'},
+  c3:{mod:'m3',pred:'p3',preg:'Aumentar B reduce una de estas dos cosas y no la otra. ¿Cuál reduce?',
+    ops:['La incertidumbre sobre el parámetro poblacional','El ruido del propio procedimiento de simulación'],ok:1,
+    ref:'Reduce el <strong>ruido de la simulación</strong>. Con B chico el intervalo baila de corrida en corrida, aunque los datos sean exactamente los mismos: esa variación es tuya, la produjo la computadora. Con B grande el intervalo se planta siempre en el mismo lugar. Pero su <em>ancho</em> no se achica, y el ancho es la incertidumbre sobre la población. Esa sólo baja con más datos originales: la información entra por n, nunca por B. Con n = 10 y B = 10.000 tenés una respuesta muy estable a una pregunta que sigue teniendo diez datos atrás.'},
+  c4:{mod:'m4',pred:'p4',preg:'Un estudiante dice: "hay 95% de probabilidad de que el parámetro esté dentro de mi intervalo". Reformulá la afirmación correctamente usando lo que muestra el contador.',
+    ref:'Lo correcto es hablar del procedimiento, no de este intervalo: "construí el intervalo con un método que, repetido muchas veces, produce intervalos que contienen al parámetro el 95% de las veces". El contador de la pantalla es esa frecuencia. El parámetro es un número fijo y el intervalo es lo aleatorio: el que tenés en la mano lo contiene o no lo contiene, y no hay forma de saber cuál de las dos cosas pasó. Conviene agregar la condición que descubriste explorando: el 95% es la promesa nominal y se cumple si el método es adecuado para esos datos.'},
+  c5:{mod:'m5',pred:'p5',preg:'Explicá por qué el histograma que ves en pantalla representa "un mundo donde H₀ es verdadera".',
+    ref:'Porque H₀ dice que la etiqueta de grupo es irrelevante, y mezclar las etiquetas es exactamente eso: si el grupo no importa, cualquier reasignación de quién es A y quién es B era igual de posible que la que se observó. Cada mezcla produce entonces un conjunto de datos que <em>podría haber ocurrido</em> si H₀ fuera cierta, y su diferencia entre grupos es una de las diferencias posibles en ese mundo. El histograma junta miles de esos mundos. El p-valor mide qué tan rara resulta la diferencia real dentro de esa colección.'}
+};
+function refrescarPred(mod){
+  document.querySelectorAll('.pred[data-pred]').forEach(box=>{
+    const q=PRED[box.dataset.pred]; if(!q||q.mod!==mod)return;
+    const b=box.querySelector('.btn-dev'); if(!b)return;
+    const listo=(estado.inter[mod]||0)>=UMBRAL;
+    const resp=estado.pred[box.dataset.pred]!==undefined;
+    b.classList.toggle('bloq',!(listo&&resp));
+    b.textContent=!resp?'Primero elegí una opción':(listo?'Ver devolución':'Explorá la simulación para desbloquear la devolución');
+  });
+}
+(function armarPred(){
+  document.querySelectorAll('.pred[data-pred]').forEach(box=>{
+    const id=box.dataset.pred,q=PRED[id];
+    box.innerHTML='<p class="num">Predicción · antes de tocar nada</p><p class="preg">'+q.preg+'</p>'+
+      '<div class="opciones">'+q.ops.map((t,j)=>
+        '<label class="op"><input type="radio" name="'+id+'" value="'+j+'"><span>'+t+'</span></label>').join('')+'</div>'+
+      '<button class="btn btn-dev" type="button">Primero elegí una opción</button>'+
+      '<p class="aviso">La devolución aparece recién después de que explores la simulación. La idea es que la descubras moviendo los controles, no leyéndola.</p>'+
+      '<div class="feedback"></div>';
+    const ops=box.querySelectorAll('.op');
+    function pintarSel(){
+      const v=estado.pred[id];
+      ops.forEach(o=>{const i=o.querySelector('input');o.classList.toggle('sel',+i.value===v);if(+i.value===v)i.checked=true;});
+    }
+    ops.forEach(o=>o.addEventListener('click',()=>{
+      estado.pred[id]=+o.querySelector('input').value; guardar(); pintarSel(); refrescarPred(q.mod);
+    }));
+    pintarSel();
+    box.querySelector('.btn-dev').addEventListener('click',function(){
+      if(this.classList.contains('bloq'))return;
+      const v=estado.pred[id],ok=v===q.ok;
+      ops.forEach(o=>{const i=+o.querySelector('input').value;
+        o.classList.remove('sel','bien','mal');
+        if(i===q.ok)o.classList.add('bien'); else if(i===v)o.classList.add('mal');});
+      const fb=box.querySelector('.feedback');
+      fb.className='feedback on '+(ok?'ok':'no');
+      fb.innerHTML='<strong>Tu predicción: "'+q.ops[v]+'". '+(ok?'Coincide con lo que muestra la simulación. ':'La simulación muestra otra cosa. ')+'</strong>'+q.dev;
+    });
+  });
+  refrescarPred('m1');
+})();
+(function armarCierre(){
+  document.querySelectorAll('.cierre-mod[data-cierre]').forEach(box=>{
+    const id=box.dataset.cierre,q=CIERRE[id];
+    const guardado=estado.cierre[id]||{};
+    box.innerHTML='<p class="num">Pregunta de cierre</p><p class="preg">'+q.preg+'</p>'+
+      (q.ops?'<div class="opciones">'+q.ops.map((t,j)=>
+        '<label class="op"><input type="radio" name="'+id+'" value="'+j+'"><span>'+t+'</span></label>').join('')+'</div>':'')+
+      '<textarea placeholder="Escribí tu respuesta en una o dos oraciones. Se guarda en este navegador."></textarea>'+
+      '<div class="btns"><button class="btn btn-ref" type="button">Ver respuesta de referencia</button></div>'+
+      '<div class="recuerdo"></div><div class="ref"><b>Respuesta de referencia</b>'+q.ref+'</div>';
+    const ta=box.querySelector('textarea');
+    ta.value=guardado.txt||'';
+    ta.addEventListener('input',()=>{
+      estado.cierre[id]=Object.assign({},estado.cierre[id],{txt:ta.value}); guardar();
+    });
+    if(q.ops){
+      const ops=box.querySelectorAll('.op');
+      function pinta(){
+        const v=(estado.cierre[id]||{}).op;
+        ops.forEach(o=>{const i=o.querySelector('input');o.classList.remove('sel','bien','mal');
+          if(+i.value===v){i.checked=true;o.classList.add('sel');}});
+      }
+      ops.forEach(o=>o.addEventListener('click',()=>{
+        estado.cierre[id]=Object.assign({},estado.cierre[id],{op:+o.querySelector('input').value});guardar();pinta();
+      }));
+      pinta();
+    }
+    box.querySelector('.btn-ref').addEventListener('click',()=>{
+      box.querySelector('.ref').classList.add('on');
+      if(q.ops){
+        const v=(estado.cierre[id]||{}).op;
+        box.querySelectorAll('.op').forEach(o=>{const i=+o.querySelector('input').value;
+          o.classList.remove('sel','bien','mal');
+          if(i===q.ok)o.classList.add('bien'); else if(i===v)o.classList.add('mal');});
+      }
+      const pv=estado.pred[q.pred];
+      const rec=box.querySelector('.recuerdo');
+      if(pv!==undefined&&PRED[q.pred]){
+        rec.className='recuerdo on';
+        rec.innerHTML='<strong>Tu predicción al empezar el módulo:</strong> "'+PRED[q.pred].ops[pv]+'". '+
+          (pv===PRED[q.pred].ok?'Era la que la simulación confirma.':'La simulación mostró otra cosa: revisá la devolución de la predicción antes de dar el módulo por cerrado.');
+      }
+    });
+  });
+})();
+/* ============================================================
+   MÓDULO 1 — la rueda de la muestra
+   ============================================================ */
+(function m1(){
+  const st={pob:'asim',n:2,medias:[],muestra:null,zoom:false,anim:0};
+  const cont=document.getElementById('m1Sliders');
+  const slN=slider(cont,{id:'n',label:'Tamaño de muestra n',min:2,max:500,step:1,value:st.n,
+    fmt:v=>'n = '+v,on:v=>{st.n=v;st.medias=[];tomarUna(false);render();}});
+  const chk=document.createElement('div');
+  chk.innerHTML='<label class="chk"><input type="checkbox" id="m1Zoom"> ampliar el panel 3 (zoom automático)</label>'+
+    '<span class="chico">Al cambiar n o la población, el panel 3 se vacía: cada histograma corresponde a un solo tamaño de muestra.</span>';
+  cont.parentNode.insertBefore(chk,cont.nextSibling);
+
+  acciones(document.getElementById('m1Botones'),[
+    {id:'una',t:'Tomar una muestra',on:()=>{tomarUna(true);render();}},
+    {id:'cien',t:'Tomar cien muestras',on:()=>{for(let i=0;i<100;i++)tomarUna(false);render();}},
+    {id:'mil',t:'Tomar mil muestras',on:()=>{for(let i=0;i<1000;i++)tomarUna(false);render();}},
+    {id:'reset',t:'Reiniciar panel 3',on:()=>{st.medias=[];render();}}
+  ]);
+  document.getElementById('m1Zoom').addEventListener('change',function(){st.zoom=this.checked;render();});
+
+  function tomarUna(animar){
+    const p=poblacion(st.pob);
+    const m=muestrear(p,st.n,RG);
+    st.muestra=m; st.medias.push(mean(m));
+    if(st.medias.length>20000)st.medias.splice(0,10000);
+    if(animar){
+      st.anim=0;
+      const paso=()=>{ st.anim+=Math.max(1,Math.ceil(st.n/14));
+        if(st.anim<st.n){render();requestAnimationFrame(paso);} else {st.anim=st.n;render();} };
+      requestAnimationFrame(paso);
+    } else st.anim=st.n;
+  }
+  function render(){
+    botones(document.getElementById('m1Formas'),POBS,st.pob,id=>{
+      st.pob=id; st.medias=[];
+      st.muestra=null;render();marcar('m1');
+    });
+    const p=poblacion(st.pob);
+    const lo=p.lo,hi=p.hi;
+    drawDist(document.getElementById('m1Pob'),{
+      sets:[{data:p.data,color:cssv('--accent')}],xmin:lo,xmax:hi,bins:60,h:190,
+      lines:[{x:p.mu,color:cssv('--green'),label:'μ = '+nf(p.mu,1)}],
+      nota:st.pob==='pesada'?'la cola sigue mucho más a la derecha: el gráfico corta en el percentil 99':''
+    });
+    drawDots(document.getElementById('m1Mue'),{
+      data:st.muestra?Array.from(st.muestra):[],xmin:lo,xmax:hi,color:cssv('--orange'),h:100,
+      hasta:st.anim,
+      lines:st.muestra&&st.anim>=st.n?[{x:mean(st.muestra),color:cssv('--orange'),label:'x̄ = '+nf(mean(st.muestra),1)}]:[],
+      nota:st.muestra?('n = '+st.n+' observaciones sorteadas'):'todavía no tomaste ninguna muestra'
+    });
+    let dlo=lo,dhi=hi;
+    if(st.zoom&&st.medias.length>2){const mm=minmax(st.medias);const pad=(mm[1]-mm[0])*0.12+1e-9;dlo=mm[0]-pad;dhi=mm[1]+pad;}
+    drawDist(document.getElementById('m1Dis'),{
+      sets:[{data:st.medias,color:cssv('--purple')}],xmin:dlo,xmax:dhi,bins:st.zoom?48:60,h:200,
+      lines:[{x:p.mu,color:cssv('--green'),label:'μ'}],
+      vacio:st.medias.length?'':'Tomá muestras para llenar este panel',
+      nota:st.zoom?'escala ampliada: no la compares con los paneles de arriba':'misma escala que los paneles de arriba'
+    });
+    const me=st.medias,teo=p.sigma/Math.sqrt(st.n);
+    document.getElementById('m1Stats').innerHTML=
+      statCard('Media poblacional μ',nf(p.mu,1),'no cambia nunca','media')+
+      statCard('Desvío poblacional σ',nf(p.sigma,1),'panel 1','disp')+
+      statCard('Muestras tomadas',miles(me.length),'puntos del panel 3','')+
+      statCard('Media de los promedios',me.length?nf(mean(me),1):'—','se acerca a μ','mediana')+
+      statCard('Desvío de los promedios',me.length>2?nf(sd(me),2):'—','ancho del panel 3','moda')+
+      statCard('Desvío teórico σ/√n',nf(teo,2),'lo que predice el TCL','ratio');
+  }
+  render();
+})();
+
+/* ============================================================
+   MÓDULO 2 — el embudo de la ley de los grandes números
+   ============================================================ */
+(function m2(){
+  const NMAX=10000, PASOS=200;
+  const IDX=(function(){const a=[];for(let i=0;i<PASOS;i++){
+    const v=Math.round(Math.exp(Math.log(1)+(Math.log(NMAX)-Math.log(1))*i/(PASOS-1)));
+    if(!a.length||v>a[a.length-1])a.push(v);} return a;})();
+  const POBS2=POBS.concat([{id:'cauchy',t:'Sin esperanza finita'}]);
+  const COLORES=['--accent','--orange','--purple','--teal','--red','--green','--blue'];
+  const IDX0=Math.round((IDX.length-1)*Math.log(100)/Math.log(NMAX));
+  const st={pob:'sim',k:8,vel:6,lectura:IDX[IDX0],prog:IDX.length,trays:[],corriendo:false};
+
+  const cont=document.getElementById('m2Sliders');
+  slider(cont,{label:'Trayectorias',min:1,max:20,step:1,value:st.k,on:v=>{st.k=v;generar();render();}});
+  slider(cont,{label:'Velocidad',min:1,max:12,step:1,value:st.vel,on:v=>{st.vel=v;}});
+  slider(cont,{label:'Lectura en n',min:0,max:IDX.length-1,step:1,value:IDX0,
+    fmt:v=>'n = '+miles(IDX[Math.min(v,IDX.length-1)]),on:v=>{st.lectura=IDX[Math.min(v,IDX.length-1)];render();}});
+
+  acciones(document.getElementById('m2Botones'),[
+    {id:'play',t:'Reproducir',on:()=>{if(st.corriendo)return;st.prog=1;st.corriendo=true;animar();}},
+    {id:'nuevas',t:'Nuevas trayectorias',on:()=>{generar();st.prog=IDX.length;render();}},
+    {id:'todo',t:'Mostrar todo',on:()=>{st.corriendo=false;st.prog=IDX.length;render();}}
+  ]);
+  function animar(){
+    st.prog+=st.vel;
+    if(st.prog>=IDX.length){st.prog=IDX.length;st.corriendo=false;}
+    render();
+    if(st.corriendo)requestAnimationFrame(animar);
+  }
+  function sortear(r){
+    if(st.pob==='cauchy')return 100+10*Math.tan(Math.PI*(r.unif()-0.5));
+    const p=poblacion(st.pob); return p.data[r.int(NPOB)];
+  }
+  function generar(){
+    st.trays=[];
+    for(let t=0;t<st.k;t++){
+      const r=makeRng(Math.floor(RG.unif()*1e9));
+      const pts=[]; let acc=0,i=0;
+      for(let s=0;s<IDX.length;s++){
+        const hasta=IDX[s];
+        while(i<hasta){acc+=sortear(r);i++;}
+        pts.push([hasta,acc/i]);
+      }
+      st.trays.push({pts:pts,color:cssv(COLORES[t%COLORES.length])});
+    }
+  }
+  function render(){
+    botones(document.getElementById('m2Pobs'),POBS2,st.pob,id=>{st.pob=id;generar();st.prog=IDX.length;render();marcar('m2');});
+    const cauchy=st.pob==='cauchy';
+    const p=cauchy?null:poblacion(st.pob);
+    const centro=cauchy?100:p.mu;
+    const sg=cauchy?60:p.sigma;
+    const half=Math.max(sg*2.2,cauchy?120:sg*0.4);
+    const ymin=centro-half,ymax=centro+half;
+    const banda=cauchy?null:IDX.map(n=>[n,centro-2*p.sigma/Math.sqrt(n),centro+2*p.sigma/Math.sqrt(n)]);
+    drawTray(document.getElementById('m2Graf'),{
+      trays:st.trays.map(t=>({color:t.color,pts:t.pts.slice(0,st.prog)})),
+      xmin:1,xmax:NMAX,ymin:ymin,ymax:ymax,verdadero:centro,banda:banda,lectura:st.lectura,h:340
+    });
+    /* lectura */
+    let s=IDX.indexOf(st.lectura); if(s<0)s=0;
+    const vals=st.trays.map(t=>t.pts[Math.max(0,Math.min(s,t.pts.length-1))][1]).filter(v=>isFinite(v));
+    const mm=vals.length?minmax(vals):[NaN,NaN];
+    const rango=mm[1]-mm[0];
+    const teo=cauchy?NaN:4*p.sigma/Math.sqrt(st.lectura);
+    const cerca=vals.filter(v=>Math.abs(v-centro)<=Math.abs(centro)*0.01).length;
+    document.getElementById('m2Stats').innerHTML=
+      statCard(cauchy?'Mediana verdadera':'Valor verdadero',nf(centro,1),cauchy?'la esperanza no existe':'media poblacional','media')+
+      statCard('n de lectura',miles(st.lectura),'línea naranja','')+
+      statCard('Rango entre trayectorias',vals.length?nf(rango,2):'—','ancho observado del embudo','disp')+
+      statCard('Ancho teórico ±2 EE',isFinite(teo)?nf(teo,2):'no definido','4σ/√n','ratio')+
+      statCard('Trayectorias a menos de 1%',vals.length?cerca+' de '+vals.length:'—','del valor verdadero','mediana');
+  }
+  generar(); render();
+})();
+/* ============================================================
+   MÓDULO 3 — fábrica de bootstrap
+   ============================================================ */
+(function m3(){
+  /* ---------- Etapa A: la urna de doce bolitas ---------- */
+  const VAL=[180,240,310,150,420,260,205,700,330,275,190,255];
+  const A={cuentas:new Array(12).fill(0),orden:[],animando:false,remuestras:0,afueraAcum:0};
+  function pintarUrna(){
+    const u=document.getElementById('m3Urna');
+    u.innerHTML=VAL.map((v,i)=>'<div class="bola'+(A.remuestras&&A.cuentas[i]===0?' fuera':'')+
+      (A.cuentas[i]>1?' dup':'')+'" title="observación '+(i+1)+': $'+miles(v*1000)+'">'+(i+1)+'</div>').join('');
+    const rm=document.getElementById('m3Remuestra');
+    rm.innerHTML=A.orden.map(i=>'<div class="bola'+(A.cuentas[i]>1?' dup':'')+'">'+(i+1)+'</div>').join('')||
+      '<span class="chico" style="align-self:center">Apretá “remuestrear” para armar una remuestra.</span>';
+    const afuera=A.remuestras?A.cuentas.filter(c=>c===0).length:0;
+    document.getElementById('m3Info').innerHTML=A.remuestras
+      ? 'Quedaron afuera <strong>'+afuera+' de 12</strong> observaciones ('+pct(afuera/12*100,0)+') y '+
+        A.cuentas.filter(c=>c>1).length+' aparecen repetidas. Promedio de las '+A.remuestras+' remuestras hechas: '+
+        pct(A.afueraAcum/A.remuestras/12*100,1)+' afuera. Valores (en miles de $): '+VAL.join(', ')+'.'
+      : 'Valores de la muestra original, en miles de pesos: '+VAL.join(', ')+'.';
+  }
+  function remuestrearA(){
+    if(A.animando)return;
+    A.animando=true; A.cuentas=new Array(12).fill(0); A.orden=[];
+    let k=0;
+    const paso=()=>{
+      const i=RG.int(12); A.cuentas[i]++; A.orden.push(i);
+      const bolas=document.getElementById('m3Urna').children;
+      if(bolas[i]){bolas[i].classList.add('sale');setTimeout(()=>bolas[i].classList.remove('sale'),140);}
+      document.getElementById('m3Remuestra').innerHTML=A.orden.map(j=>'<div class="bola'+(A.cuentas[j]>1?' dup':'')+'">'+(j+1)+'</div>').join('');
+      k++;
+      if(k<12)setTimeout(paso,150);
+      else{A.animando=false;A.remuestras++;A.afueraAcum+=A.cuentas.filter(c=>c===0).length;pintarUrna();}
+    };
+    paso();
+  }
+  acciones(document.getElementById('m3BotonesA'),[
+    {id:'r1',t:'Remuestrear',on:()=>{remuestrearA();marcar('m3');}},
+    {id:'r10',t:'Remuestrear diez veces (sin animación)',on:()=>{
+      for(let t=0;t<10;t++){A.cuentas=new Array(12).fill(0);A.orden=[];
+        for(let k=0;k<12;k++){const i=RG.int(12);A.cuentas[i]++;A.orden.push(i);}
+        A.remuestras++;A.afueraAcum+=A.cuentas.filter(c=>c===0).length;}
+      pintarUrna();marcar('m3');}},
+    {id:'rs',t:'Reiniciar urna',on:()=>{A.cuentas=new Array(12).fill(0);A.orden=[];A.remuestras=0;A.afueraAcum=0;pintarUrna();}}
+  ]);
+  pintarUrna();
+
+  /* ---------- Etapa B: la acumulación ---------- */
+  const STATS=[
+    {id:'media',t:'Media',f:(a,s)=>mean(a)},
+    {id:'mediana',t:'Mediana',f:(a,s)=>quantileSorted(s,0.5)},
+    {id:'p90',t:'Percentil 90',f:(a,s)=>quantileSorted(s,0.9)},
+    {id:'sd',t:'Desvío estándar',f:(a,s)=>sd(a)},
+    {id:'ratio',t:'Razón p90/p10',f:(a,s)=>quantileSorted(s,0.9)/quantileSorted(s,0.1)}
+  ];
+  const BS=[{id:10,t:'B = 10'},{id:100,t:'B = 100'},{id:1000,t:'B = 1.000'},{id:10000,t:'B = 10.000'}];
+  const B={stat:'media',B:100,n:60,muestra:null,reps:[],corrida:0,registro:[]};
+  function nuevaMuestra(){
+    const r=makeRng(Math.floor(RG.unif()*1e9));
+    const a=new Float64Array(B.n),s=0.85;
+    for(let i=0;i<B.n;i++)a[i]=Math.exp(Math.log(420000)-s*s/2+s*r.norm());
+    B.muestra=a; B.reps=[]; B.registro=[]; B.corrida=0;
+  }
+  const contB=document.getElementById('m3Sliders');
+  slider(contB,{label:'Tamaño de la muestra original n',min:10,max:1000,step:5,value:B.n,
+    fmt:v=>'n = '+v,on:v=>{B.n=v;nuevaMuestra();render();}});
+  acciones(document.getElementById('m3BotonesB'),[
+    {id:'run',t:'Correr el bootstrap',on:function(){
+      if(B.B*B.n>200000)diferido(this,()=>{correr();marcar('m3');});
+      else{correr();marcar('m3');}
+    }},
+    {id:'nueva',t:'Nueva muestra original',on:()=>{nuevaMuestra();render();marcar('m3');}},
+    {id:'limpiar',t:'Limpiar registro',on:()=>{B.registro=[];B.corrida=0;render();}}
+  ]);
+  function estadistico(a){return STATS.filter(s=>s.id===B.stat)[0].f(a,sortNum(a));}
+  function correr(){
+    const n=B.n,d=B.muestra,reps=new Float64Array(B.B),tmp=new Float64Array(n);
+    const r=makeRng(Math.floor(RG.unif()*1e9));
+    const F=STATS.filter(s=>s.id===B.stat)[0].f;
+    for(let b=0;b<B.B;b++){
+      for(let i=0;i<n;i++)tmp[i]=d[r.int(n)];
+      reps[b]=F(tmp,sortNum(tmp));
+    }
+    B.reps=reps; B.corrida++;
+    const s=sortNum(reps);
+    const li=quantileSorted(s,0.025),ls=quantileSorted(s,0.975);
+    B.registro.unshift({c:B.corrida,st:B.stat,n:n,B:B.B,li:li,ls:ls,ee:sd(reps)});
+    if(B.registro.length>10)B.registro.pop();
+    render();
+  }
+  function fmtVal(v){return B.stat==='ratio'?nf(v,2)+'×':money(v);}
+  function render(){
+    botones(document.getElementById('m3Stats'),STATS,B.stat,id=>{B.stat=id;B.reps=[];render();marcar('m3');});
+    botones(document.getElementById('m3Bs'),BS,B.B,id=>{B.B=id;render();marcar('m3');});
+    const obs=estadistico(B.muestra);
+    const reps=B.reps;
+    if(reps.length){
+      const s=sortNum(reps),li=quantileSorted(s,0.025),ls=quantileSorted(s,0.975);
+      const mm=minmax(reps),pad=(mm[1]-mm[0])*0.08+1e-9;
+      drawDist(document.getElementById('m3Graf'),{
+        sets:[{data:reps,color:cssv('--purple')}],xmin:mm[0]-pad,xmax:mm[1]+pad,
+        bins:Math.max(12,Math.min(60,Math.round(Math.sqrt(reps.length)*2))),h:250,
+        fmt:v=>B.stat==='ratio'?nf(v,1):'$'+Math.round(v/1000)+'k',
+        lines:[{x:obs,color:cssv('--green'),label:'valor observado'},
+               {x:li,color:cssv('--red'),label:'2,5%',dash:'4 3'},
+               {x:ls,color:cssv('--red'),label:'97,5%',dash:'4 3'}],
+        nota:B.B+' remuestras · cada barra cuenta remuestras, no observaciones'
+      });
+      document.getElementById('m3Tarjetas').innerHTML=
+        statCard('Estadístico observado',fmtVal(obs),'en la muestra original','media')+
+        statCard('Error estándar bootstrap',fmtVal(sd(reps)),'desvío de las réplicas','disp')+
+        statCard('IC percentil 95%',fmtVal(li)+' – '+fmtVal(ls),'percentiles 2,5 y 97,5','mediana')+
+        statCard('Ancho del intervalo',fmtVal(ls-li),'depende de n, no de B','ratio')+
+        statCard('n original',miles(B.n),'de acá viene la información','')+
+        statCard('B',miles(B.B),'de acá viene la suavidad','moda');
+    }else{
+      drawDist(document.getElementById('m3Graf'),{sets:[],xmin:0,xmax:1,h:250,
+        vacio:'Apretá “correr el bootstrap” para llenar el histograma.'});
+      document.getElementById('m3Tarjetas').innerHTML=
+        statCard('Estadístico observado',fmtVal(obs),'en la muestra original','media')+
+        statCard('n original',miles(B.n),'muestra actual','')+
+        statCard('B elegido',miles(B.B),'remuestras por corrida','moda');
+    }
+    const nom={};STATS.forEach(s=>nom[s.id]=s.t);
+    document.getElementById('m3Tabla').innerHTML=
+      '<thead><tr><th>#</th><th>Estadístico</th><th class="num">n</th><th class="num">B</th><th class="num">Límite inf.</th><th class="num">Límite sup.</th><th class="num">Ancho</th></tr></thead><tbody>'+
+      (B.registro.length?B.registro.map(r=>'<tr><td>'+r.c+'</td><td class="tx">'+nom[r.st]+'</td><td class="num">'+r.n+
+        '</td><td class="num">'+miles(r.B)+'</td><td class="num">'+(r.st==='ratio'?nf(r.li,2):miles(r.li))+
+        '</td><td class="num">'+(r.st==='ratio'?nf(r.ls,2):miles(r.ls))+'</td><td class="num">'+
+        (r.st==='ratio'?nf(r.ls-r.li,2):miles(r.ls-r.li))+'</td></tr>').join('')
+        :'<tr><td colspan="7" class="tx">Todavía no corriste el bootstrap. Corré tres veces seguidas con el mismo B y compará las filas.</td></tr>')+
+      '</tbody>';
+  }
+  nuevaMuestra(); render();
+})();
+
+/* ============================================================
+   MÓDULO 4 — constructor de intervalos
+   ============================================================ */
+(function m4(){
+  const METODOS=[
+    {id:'perc',t:'Percentil bootstrap'},
+    {id:'norm',t:'Normal con EE bootstrap'},
+    {id:'clas',t:'Fórmula clásica (t)'}
+  ];
+  const BB=300;
+  const st={met:'perc',pob:'sim',n:50,nivel:95,items:[],dentro:0,total:0,tabla:null};
+  const cont=document.getElementById('m4Sliders');
+  slider(cont,{label:'Tamaño de muestra n',min:5,max:200,step:1,value:st.n,fmt:v=>'n = '+v,
+    on:v=>{st.n=v;reiniciar();render();}});
+  slider(cont,{label:'Nivel de confianza',min:80,max:99,step:1,value:st.nivel,fmt:v=>v+'%',
+    on:v=>{st.nivel=v;reiniciar();render();}});
+  acciones(document.getElementById('m4Botones'),[
+    {id:'una',t:'Una corrida',on:()=>{corrida(st.met);render();marcar('m4');}},
+    {id:'cien',t:'Cien corridas',on:()=>{for(let i=0;i<100;i++)corrida(st.met);render();marcar('m4');}},
+    {id:'quin',t:'Quinientas corridas',on:function(){diferido(this,()=>{for(let i=0;i<500;i++)corrida(st.met);render();marcar('m4');});}},
+    {id:'res',t:'Reiniciar contador',on:()=>{reiniciar();render();}}
+  ]);
+  acciones(document.getElementById('m4Comp'),[
+    {id:'cmp',t:'Comparar los tres métodos (300 corridas cada uno)',on:function(){diferido(this,()=>{comparar();render();marcar('m4');});}},
+    {id:'lim',t:'Limpiar comparación',on:()=>{st.tabla=null;render();}}
+  ]);
+  function reiniciar(){st.items=[];st.dentro=0;st.total=0;}
+  function intervalo(met,m,alfa){
+    const n=m.length,est=mean(m);
+    if(met==='clas'){
+      const t=qt(1-alfa/2,n-1),e=sd(m)/Math.sqrt(n);
+      return [est-t*e,est+t*e,est];
+    }
+    const reps=new Float64Array(BB),tmp=new Float64Array(n);
+    for(let b=0;b<BB;b++){
+      for(let i=0;i<n;i++)tmp[i]=m[RG.int(n)];
+      reps[b]=mean(tmp);
+    }
+    if(met==='norm'){const z=qnorm(1-alfa/2),e=sd(reps);return [est-z*e,est+z*e,est];}
+    const s=sortNum(reps);
+    return [quantileSorted(s,alfa/2),quantileSorted(s,1-alfa/2),est];
+  }
+  function unaCorrida(met){
+    const p=poblacion(st.pob), m=muestrear(p,st.n,RG), alfa=1-st.nivel/100;
+    const iv=intervalo(met,m,alfa);
+    return {lo:iv[0],hi:iv[1],est:iv[2],ok:(iv[0]<=p.mu&&p.mu<=iv[1])};
+  }
+  function corrida(met){
+    const it=unaCorrida(met);
+    st.items.push(it); if(st.items.length>60)st.items.shift();
+    st.total++; if(it.ok)st.dentro++;
+  }
+  function comparar(){
+    const K=300,filas=[];
+    METODOS.forEach(M=>{
+      let d=0,anchos=0;
+      for(let i=0;i<K;i++){const it=unaCorrida(M.id);if(it.ok)d++;anchos+=it.hi-it.lo;}
+      filas.push({t:M.t,cob:d/K*100,ancho:anchos/K});
+    });
+    st.tabla={filas:filas,esc:POBS.filter(p=>p.id===st.pob)[0].t+', n = '+st.n+', nivel '+st.nivel+'%'};
+  }
+  function render(){
+    botones(document.getElementById('m4Metodos'),METODOS,st.met,id=>{st.met=id;reiniciar();render();marcar('m4');});
+    botones(document.getElementById('m4Pobs'),POBS,st.pob,id=>{st.pob=id;reiniciar();render();marcar('m4');});
+    const p=poblacion(st.pob);
+    const cob=st.total?st.dentro/st.total*100:NaN;
+    const anchoProm=st.items.length?mean(st.items.map(i=>i.hi-i.lo)):NaN;
+    document.getElementById('m4Stats').innerHTML=
+      statCard('Corridas',miles(st.total),'intervalos construidos','')+
+      statCard('Cobertura efectiva',st.total?pct(cob,1):'—','contienen el valor verdadero',
+        st.total<50?'':(Math.abs(cob-st.nivel)<2?'mediana':'disp'))+
+      statCard('Nivel nominal',st.nivel+'%','lo prometido','media')+
+      statCard('Fallaron',miles(st.total-st.dentro),'no lo contienen','ratio')+
+      statCard('Ancho promedio',isFinite(anchoProm)?nf(anchoProm,1):'—','de los últimos 60','moda');
+    const rango=Math.max(p.sigma/Math.sqrt(st.n)*4.2,1);
+    drawIC(document.getElementById('m4Graf'),{
+      items:st.items,verdadero:p.mu,xmin:p.mu-rango,xmax:p.mu+rango
+    });
+    document.getElementById('m4Tabla').innerHTML=st.tabla
+      ? '<thead><tr><th>Método</th><th class="num">Cobertura efectiva</th><th class="num">Nivel nominal</th><th class="num">Ancho promedio</th></tr></thead><tbody>'+
+        st.tabla.filas.map(f=>'<tr'+(Math.abs(f.cob-st.nivel)<2?' class="destacada"':'')+'><td class="tx">'+f.t+
+        '</td><td class="num">'+pct(f.cob,1)+'</td><td class="num">'+st.nivel+'%</td><td class="num">'+nf(f.ancho,1)+'</td></tr>').join('')+
+        '<tr><td colspan="4" class="tx">Escenario: '+st.tabla.esc+'. En verde, los métodos cuya cobertura efectiva no se aleja más de 2 puntos del nivel nominal.</td></tr></tbody>'
+      : '<tbody><tr><td class="tx">Corré la comparación para ver los tres métodos en el escenario que tenés armado.</td></tr></tbody>';
+  }
+  render();
+})();
+/* ============================================================
+   MÓDULO 5 — mezclador de etiquetas
+   ============================================================ */
+(function m5(){
+  const STATS=[
+    {id:'medias',t:'Diferencia de medias',f:(a,b)=>mean(b)-mean(a)},
+    {id:'medianas',t:'Diferencia de medianas',f:(a,b)=>median(b)-median(a)},
+    {id:'p90',t:'Diferencia de percentiles 90',f:(a,b)=>quantile(b,0.9)-quantile(a,0.9)},
+    {id:'var',t:'Diferencia de varianzas',f:(a,b)=>variance(b)-variance(a)}
+  ];
+  const SD=3;
+  const st={stat:'medias',sep:0,n:20,datos:[],grupo:[],cambio:[],perm:[],anim:false};
+  const cont=document.getElementById('m5Sliders');
+  slider(cont,{label:'Separación verdadera entre grupos',min:0,max:30,step:1,value:0,
+    fmt:v=>nf(v/10,1)+' desvíos',on:v=>{st.sep=v/10;generar();render();}});
+  slider(cont,{label:'Tamaño de cada grupo',min:5,max:200,step:5,value:st.n,fmt:v=>'n = '+v+' por grupo',
+    on:v=>{st.n=v;generar();render();}});
+  acciones(document.getElementById('m5Botones'),[
+    {id:'m1',t:'Mezclar una vez',on:()=>{mezclar(document.getElementById('m5Anim').checked);marcar('m5');}},
+    {id:'m1000',t:'Mezclar mil veces',on:()=>{for(let i=0;i<1000;i++)mezclar(false,true);render();marcar('m5');}},
+    {id:'nuevos',t:'Nuevos datos',on:()=>{generar();render();marcar('m5');}},
+    {id:'limpiar',t:'Reiniciar histograma',on:()=>{st.perm=[];render();}}
+  ]);
+  document.getElementById('m5Cola').addEventListener('change',render);
+  function generar(){
+    const r=makeRng(Math.floor(RG.unif()*1e9));
+    st.datos=[];st.grupo=[];st.cambio=[];st.perm=[];
+    for(let i=0;i<st.n;i++){st.datos.push(12+SD*r.norm());st.grupo.push(0);st.cambio.push(false);}
+    for(let i=0;i<st.n;i++){st.datos.push(12+st.sep*SD+SD*r.norm());st.grupo.push(1);st.cambio.push(false);}
+  }
+  function calc(grupos){
+    const F=STATS.filter(s=>s.id===st.stat)[0].f;
+    const a=[],b=[];
+    for(let i=0;i<st.datos.length;i++)(grupos[i]===0?a:b).push(st.datos[i]);
+    return F(a,b);
+  }
+  function observado(){
+    const orig=st.grupo.map((g,i)=>i<st.n?0:1);
+    return calc(orig);
+  }
+  function permutar(){
+    const N=st.datos.length,idx=[];
+    for(let i=0;i<N;i++)idx.push(i);
+    for(let i=N-1;i>0;i--){const j=RG.int(i+1);const t=idx[i];idx[i]=idx[j];idx[j]=t;}
+    const g=new Array(N);
+    for(let i=0;i<N;i++)g[idx[i]]=i<st.n?0:1;
+    return g;
+  }
+  function mezclar(animar,silencioso){
+    const g=permutar();
+    st.perm.push(calc(g));
+    if(st.perm.length>40000)st.perm.splice(0,20000);
+    if(!silencioso){
+      st.cambio=g.map((v,i)=>v!==(i<st.n?0:1));
+      st.grupo=g;
+      render();
+      if(animar){
+        setTimeout(()=>{st.grupo=st.datos.map((v,i)=>i<st.n?0:1);st.cambio=st.grupo.map(()=>false);render();},900);
+      }else{
+        st.grupo=st.datos.map((v,i)=>i<st.n?0:1);st.cambio=st.grupo.map(()=>false);
+      }
+    }
+  }
+  function fmtD(v){return (v>0?'+':'')+nf(v,2);}
+  function render(){
+    botones(document.getElementById('m5Stats'),STATS,st.stat,id=>{st.stat=id;st.perm=[];render();marcar('m5');});
+    const obs=observado();
+    const mm=minmax(st.datos);
+    drawGrupos(document.getElementById('m5Datos'),{
+      datos:st.datos,grupo:st.grupo,cambio:st.cambio,
+      resaltar:document.getElementById('m5Anim').checked,
+      xmin:mm[0]-0.5,xmax:mm[1]+0.5,h:190,
+      nota:st.cambio.some(Boolean)?'etiquetas mezcladas (en violeta las que cambiaron de grupo)':'etiquetas reales'
+    });
+    const B=st.perm.length;
+    let extremos=0;
+    for(let i=0;i<B;i++)if(Math.abs(st.perm[i])>=Math.abs(obs)-1e-12)extremos++;
+    const p=B?(1+extremos)/(B+1):NaN;
+    document.getElementById('m5Tarjetas').innerHTML=
+      statCard('Diferencia observada',fmtD(obs),STATS.filter(s=>s.id===st.stat)[0].t.toLowerCase(),'media')+
+      statCard('Mezclas acumuladas',miles(B),'cada una es un mundo sin efecto','')+
+      statCard('Tanto o más extremas',B?miles(extremos):'—','en valor absoluto','disp')+
+      statCard('p-valor',B?nf(p,4):'—','(1+extremas)/(B+1)',B&&p<0.05?'mediana':'ratio')+
+      statCard('Separación verdadera',nf(st.sep,1)+' σ','la que vos pusiste','moda');
+    if(B){
+      const mp=minmax(st.perm);
+      const lo=Math.min(mp[0],obs)-Math.abs(obs)*0.15-0.2,hi=Math.max(mp[1],obs)+Math.abs(obs)*0.15+0.2;
+      const sombra=document.getElementById('m5Cola').checked;
+      drawDist(document.getElementById('m5Graf'),{
+        sets:[{data:st.perm,color:cssv('--accent')}],xmin:lo,xmax:hi,bins:44,h:240,
+        fmt:v=>nf(v,1),
+        sombra:sombra?(x=>Math.abs(x)>=Math.abs(obs)-1e-12):null,
+        lines:[{x:obs,color:cssv('--red'),label:'observada '+fmtD(obs),w:2.6},{x:0,color:cssv('--text-sec'),label:'0',dash:'3 3'}],
+        nota:sombra?'en rojo, las mezclas tanto o más extremas que la observada':'diferencias obtenidas mezclando etiquetas al azar'
+      });
+      document.getElementById('m5Veredicto').innerHTML= p<0.05
+        ? '<b>La diferencia observada queda en la cola</b>Sólo '+pct(extremos/B*100,1)+' de las mezclas produjo una diferencia tanto o más extrema. Un mundo sin efecto casi no genera resultados así: p = '+nf(p,4)+'. Eso no dice que la diferencia sea grande, sólo que es difícil de explicar por azar.'
+        : '<b>La diferencia observada es de las que el azar produce sin problema</b>El '+pct(extremos/B*100,1)+' de las mezclas dio una diferencia tanto o más extrema (p = '+nf(p,4)+'). Con estos datos no hay evidencia contra H₀, lo que no equivale a demostrar que los grupos son iguales: fijate qué pasa si subís el tamaño de los grupos.';
+    }else{
+      drawDist(document.getElementById('m5Graf'),{sets:[],xmin:-1,xmax:1,h:240,
+        vacio:'Mezclá las etiquetas para construir la distribución bajo H₀.'});
+      document.getElementById('m5Veredicto').innerHTML='<b>Todavía no hay distribución nula</b>Mezclá las etiquetas: cada mezcla es una versión de los datos en un mundo donde el grupo no importa.';
+    }
+  }
+  generar(); render();
+})();
+
+/* ============================================================
+   MÓDULO 6 — bootstrap contra permutación
+   ============================================================ */
+(function m6(){
+  const A=[22,26,31,19,28,24,35,21], Bv=[27,33,29,41,25,36,30,38];
+  const VAL=A.concat(Bv), GR=VAL.map((v,i)=>i<A.length?0:1), N=VAL.length;
+  const st={bootDif:[],permDif:[],bootIdx:null,permG:null,vel:'normal',corriendo:false};
+  const obs=mean(Bv)-mean(A);
+
+  acciones(document.getElementById('m6Botones'),[
+    {id:'una',t:'Ejecutar una vez',on:()=>{if(!st.corriendo)ejecutar(true);marcar('m6');}},
+    {id:'dos',t:'Ejecutar doscientas veces',on:()=>{if(st.corriendo)return;for(let i=0;i<200;i++)ejecutar(false);render();marcar('m6');}},
+    {id:'vel',t:'Velocidad: normal',on:function(){st.vel=st.vel==='normal'?'paso':'normal';this.textContent='Velocidad: '+(st.vel==='normal'?'normal':'paso a paso');}},
+    {id:'res',t:'Reiniciar',on:()=>{st.bootDif=[];st.permDif=[];st.bootIdx=null;st.permG=null;render();}}
+  ]);
+  document.getElementById('m6Resalta').addEventListener('change',render);
+
+  function unBoot(){
+    const idx=[];
+    for(let g=0;g<2;g++){
+      const desde=g===0?0:A.length, hasta=g===0?A.length:N;
+      for(let i=desde;i<hasta;i++)idx.push(desde+RG.int(hasta-desde));
+    }
+    return idx;
+  }
+  function unaPerm(){
+    const idx=[];for(let i=0;i<N;i++)idx.push(i);
+    for(let i=N-1;i>0;i--){const j=RG.int(i+1);const t=idx[i];idx[i]=idx[j];idx[j]=t;}
+    const g=new Array(N);
+    for(let i=0;i<N;i++)g[idx[i]]=i<A.length?0:1;
+    return g;
+  }
+  function difBoot(idx){
+    const a=[],b=[];
+    idx.forEach((j,i)=>{(i<A.length?a:b).push(VAL[j]);});
+    return mean(b)-mean(a);
+  }
+  function difPerm(g){
+    const a=[],b=[];
+    for(let i=0;i<N;i++)(g[i]===0?a:b).push(VAL[i]);
+    return mean(b)-mean(a);
+  }
+  function ejecutar(animar){
+    const idx=unBoot(),g=unaPerm();
+    st.bootDif.push(difBoot(idx)); st.permDif.push(difPerm(g));
+    if(!animar){st.bootIdx=idx;st.permG=g;return;}
+    if(st.vel==='paso'){
+      st.corriendo=true;
+      let k=0; st.bootIdx=[]; st.permG=GR.slice();
+      const paso=()=>{
+        st.bootIdx.push(idx[k]); st.permG[k]=g[k]; k++;
+        render();
+        if(k<N)setTimeout(paso,190); else {st.bootIdx=idx;st.permG=g;st.corriendo=false;render();}
+      };
+      paso();
+    }else{st.bootIdx=idx;st.permG=g;render();}
+  }
+  function bolas(cont,items){
+    cont.innerHTML=items.map(it=>'<div class="bola mini '+it.cls+'">'+it.v+'</div>').join('');
+  }
+  function render(){
+    const res=document.getElementById('m6Resalta').checked;
+    /* panel bootstrap */
+    if(st.bootIdx){
+      const cuenta={};st.bootIdx.forEach(j=>cuenta[j]=(cuenta[j]||0)+1);
+      bolas(document.getElementById('m6BootDatos'),st.bootIdx.map((j,i)=>({
+        v:VAL[j],cls:(res&&cuenta[j]>1?'dup':(i<A.length?'':'g2'))})));
+      const rep=Object.keys(cuenta).filter(k=>cuenta[k]>1).length;
+      const fuera=N-Object.keys(cuenta).length;
+      document.getElementById('m6BootInfo').innerHTML='Se remuestrearon <strong>observaciones con reposición</strong> dentro de cada grupo: '+
+        rep+' valores aparecen repetidos y '+fuera+' quedaron afuera. Los grupos conservan su tamaño y su identidad.';
+    }else{
+      bolas(document.getElementById('m6BootDatos'),VAL.map((v,i)=>({v:v,cls:i<A.length?'':'g2'})));
+      document.getElementById('m6BootInfo').textContent='Datos originales. Al ejecutar, se remuestrean observaciones con reposición dentro de cada grupo.';
+    }
+    /* panel permutación */
+    if(st.permG){
+      bolas(document.getElementById('m6PermDatos'),VAL.map((v,i)=>({
+        v:v,cls:(res&&st.permG[i]!==GR[i]?'dup':(st.permG[i]===0?'':'g2'))})));
+      const cam=st.permG.filter((g,i)=>g!==GR[i]).length;
+      document.getElementById('m6PermInfo').innerHTML='Se reasignaron <strong>etiquetas sin reposición</strong>: '+cam+
+        ' observaciones cambiaron de grupo. Los valores son exactamente los mismos y ninguno aparece dos veces.';
+    }else{
+      bolas(document.getElementById('m6PermDatos'),VAL.map((v,i)=>({v:v,cls:i<A.length?'':'g2'})));
+      document.getElementById('m6PermInfo').textContent='Datos originales. Al ejecutar, se reordenan las etiquetas de grupo sin reposición.';
+    }
+    /* histogramas y salidas */
+    const bd=st.bootDif,pd=st.permDif;
+    if(bd.length){
+      const mm=minmax(bd),pad=(mm[1]-mm[0])*0.1+0.4;
+      const s=sortNum(bd),li=quantileSorted(s,0.025),ls=quantileSorted(s,0.975);
+      drawDist(document.getElementById('m6BootGraf'),{sets:[{data:bd,color:cssv('--accent')}],
+        xmin:mm[0]-pad,xmax:mm[1]+pad,bins:30,h:170,fmt:v=>nf(v,0),
+        lines:[{x:obs,color:cssv('--green'),label:'obs.'},{x:li,color:cssv('--red'),dash:'4 3'},{x:ls,color:cssv('--red'),dash:'4 3'}],
+        nota:'centrada en la diferencia observada'});
+      document.getElementById('m6BootSalida').innerHTML='<div class="k">Salida: intervalo de confianza 95%</div>'+
+        '<div class="v">'+nf(li,1)+' a '+nf(ls,1)+'</div><div class="d">'+bd.length+' remuestras · cuánta incertidumbre tiene la diferencia estimada</div>';
+    }else{
+      drawDist(document.getElementById('m6BootGraf'),{sets:[],xmin:-1,xmax:1,h:170,vacio:'Sin remuestras todavía'});
+      document.getElementById('m6BootSalida').innerHTML='<div class="k">Salida: intervalo de confianza</div><div class="v">—</div><div class="d">ejecutá para construirlo</div>';
+    }
+    if(pd.length){
+      const mm=minmax(pd.concat([obs])),pad=(mm[1]-mm[0])*0.1+0.4;
+      let ex=0;for(let i=0;i<pd.length;i++)if(Math.abs(pd[i])>=Math.abs(obs)-1e-12)ex++;
+      const p=(1+ex)/(pd.length+1);
+      drawDist(document.getElementById('m6PermGraf'),{sets:[{data:pd,color:cssv('--orange')}],
+        xmin:mm[0]-pad,xmax:mm[1]+pad,bins:30,h:170,fmt:v=>nf(v,0),
+        lines:[{x:obs,color:cssv('--red'),label:'obs.'},{x:0,color:cssv('--text-sec'),dash:'3 3'}],
+        nota:'centrada en cero'});
+      document.getElementById('m6PermSalida').innerHTML='<div class="k">Salida: p-valor</div>'+
+        '<div class="v">'+nf(p,4)+'</div><div class="d">'+pd.length+' mezclas · qué tan rara sería la diferencia sin efecto</div>';
+    }else{
+      drawDist(document.getElementById('m6PermGraf'),{sets:[],xmin:-1,xmax:1,h:170,vacio:'Sin mezclas todavía'});
+      document.getElementById('m6PermSalida').innerHTML='<div class="k">Salida: p-valor</div><div class="v">—</div><div class="d">ejecutá para construirlo</div>';
+    }
+  }
+  render();
+
+  /* ---------- clasificación de afirmaciones ---------- */
+  const AFIR=[
+    {t:'Remuestrea con reposición',ok:'boot',e:'Sólo el bootstrap. La permutación reordena etiquetas sin reposición: cada observación aparece exactamente una vez.'},
+    {t:'Construye un intervalo de confianza',ok:'boot',e:'Sólo el bootstrap: su salida está en las unidades del estadístico y expresa incertidumbre de estimación.'},
+    {t:'Simula un mundo donde no hay efecto',ok:'perm',e:'Sólo la permutación. El bootstrap simula muestras alternativas del mundo tal como es, no de un mundo sin efecto.'},
+    {t:'Sirve para estadísticos sin fórmula cerrada',ok:'ambos',e:'Los dos. Es la ventaja que comparten: medianas, percentiles, Gini, razones de percentiles, cualquier cosa que se pueda calcular.'},
+    {t:'Produce un p-valor',ok:'perm',e:'La permutación, de manera directa. El bootstrap se usa para estimar e intervalos; se lo puede forzar a dar un p-valor, pero no es su salida natural.'},
+    {t:'Requiere observaciones independientes',ok:'ambos',e:'Los dos. Con datos de panel, clusters o series de tiempo, remuestrear o permutar observaciones sueltas rompe la dependencia y produce resultados demasiado optimistas.'}
+  ];
+  const COLS=[{id:'boot',t:'Bootstrap'},{id:'perm',t:'Permutación'},{id:'ambos',t:'Los dos'}];
+  (function armar(){
+    const c=document.getElementById('m6Clasif');
+    AFIR.forEach((a,i)=>{
+      const f=document.createElement('div'); f.className='fila-clasif';
+      f.innerHTML='<span class="txt">'+a.t+'</span><span class="ops">'+
+        COLS.map(k=>'<button type="button" data-k="'+k.id+'">'+k.t+'</button>').join('')+'</span>';
+      f.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+        estado.clasif['a'+i]=b.dataset.k; guardar(); pintar();
+      }));
+      c.appendChild(f);
+    });
+    function pintar(){
+      c.querySelectorAll('.fila-clasif').forEach((f,i)=>{
+        const v=estado.clasif['a'+i];
+        f.querySelectorAll('button').forEach(b=>b.classList.toggle('sel',b.dataset.k===v));
+      });
+    }
+    pintar();
+    document.getElementById('m6Comprobar').addEventListener('click',()=>{
+      const fb=document.getElementById('m6Feedback');
+      const filas=c.querySelectorAll('.fila-clasif');
+      let faltan=0,bien=0;
+      AFIR.forEach((a,i)=>{
+        const v=estado.clasif['a'+i];
+        filas[i].classList.remove('bien','mal');
+        if(v===undefined){faltan++;return;}
+        if(v===a.ok){filas[i].classList.add('bien');bien++;}else filas[i].classList.add('mal');
+      });
+      if(faltan){fb.className='feedback on no';fb.textContent='Te faltan '+faltan+' afirmaciones por ubicar.';return;}
+      fb.className='feedback on '+(bien===AFIR.length?'ok':'no');
+      fb.innerHTML='<strong>'+bien+' de '+AFIR.length+' correctas.</strong><ul style="margin:.4rem 0 0 1.1rem">'+
+        AFIR.map((a,i)=>'<li><em>'+a.t+'</em> → <strong>'+COLS.filter(k=>k.id===a.ok)[0].t+'</strong>. '+a.e+'</li>').join('')+'</ul>';
+      marcar('m6');
+    });
+  })();
+})();
+
+/* ============================================================
+   MÓDULO 7 — diagnóstico rápido
+   ============================================================ */
+(function m7(){
+  const CASOS=[
+    {s:'Querés estimar el <strong>error estándar de la mediana</strong> del ingreso de los hogares de un aglomerado, con una muestra de 2.400 hogares.',
+     o:['Bootstrap sobre la mediana','Test de permutación','La fórmula clásica del error estándar de la media','No se puede: la mediana no tiene error estándar'],ok:0,
+     e:'Bootstrap. La pregunta es de estimación con incertidumbre, no de contraste, así que la permutación no corresponde. Y la fórmula clásica del EE es para la media: la de la mediana existe pero depende de la densidad en el centro, que no se conoce. Remuestrear la muestra y mirar cuánto se mueve la mediana resuelve el problema sin supuestos fuertes.'},
+    {s:'Querés saber si <strong>dos sucursales difieren en el tiempo de atención</strong>. Tenés 12 observaciones por sucursal y los datos son muy asimétricos, con algunos tiempos larguísimos.',
+     o:['Bootstrap del promedio de cada sucursal','Test de permutación de la diferencia','Test t de dos muestras','No se puede concluir nada con 12 observaciones'],ok:1,
+     e:'Permutación. La pregunta es de contraste: ¿podría esta diferencia venir del azar? Con n = 12 por grupo y asimetría fuerte, el test t apoya su p-valor en una normalidad que no está. La permutación no necesita ese supuesto: construye la distribución nula con los propios datos. Conviene además elegir un estadístico robusto, como la diferencia de medianas.'},
+    {s:'Alguien tomó una muestra de <strong>8 empresas</strong>, corrió bootstrap con <strong>B = 50.000</strong> y reporta un intervalo muy prolijo. ¿Cuál es el problema del análisis?',
+     o:['B es demasiado alto y sesga el resultado','Que n = 8: subir B no agrega información sobre la población','No hay problema: B alto es siempre mejor','Debería haber usado permutación'],ok:1,
+     e:'El problema es n = 8. B sólo controla el ruido de la simulación: con B enorme el intervalo deja de bailar entre corridas, pero su ancho sigue reflejando ocho datos, y encima el bootstrap tiene mal desempeño con muestras tan chicas porque la muestra es una aproximación muy pobre de la población. Un resultado estable no es lo mismo que un resultado informativo.'},
+    {s:'Un test de permutación devolvió <strong>p = 0,001</strong> comparando dos grupos. ¿Qué se puede afirmar?',
+     o:['Que hay 0,1% de probabilidad de que H₀ sea verdadera','Que el efecto es grande','Que datos como los observados son muy raros en un mundo sin efecto, sin decir nada sobre la magnitud','Que H₀ quedó demostrada falsa'],ok:2,
+     e:'El p-valor es una probabilidad calculada <em>suponiendo</em> H₀, no una probabilidad de H₀. Dice que sólo una de cada mil mezclas produjo una diferencia tan extrema. No mide magnitud: con grupos grandes, diferencias económicamente irrelevantes dan p-valores chiquísimos. Por eso conviene reportar siempre el tamaño del efecto con su intervalo, además del p-valor.'},
+    {s:'Querés un intervalo de confianza para el <strong>coeficiente de Gini</strong> del ingreso de una provincia. ¿Por qué la fórmula clásica no alcanza?',
+     o:['Porque el Gini no tiene una fórmula cerrada estándar y confiable para su error estándar: conviene bootstrap','Porque el Gini no tiene incertidumbre: es un dato, no una estimación','Porque hay que usar la fórmula del intervalo de la media','Porque el Gini requiere un test de permutación'],ok:0,
+     e:'El Gini es una función complicada de toda la distribución, no un promedio: su distribución muestral no sale de una fórmula simple y las aproximaciones existentes son sensibles a la cola alta. El bootstrap resuelve el problema remuestreando hogares y recalculando el Gini. Y sí, el Gini estimado sobre una muestra es una estimación: tiene incertidumbre y debería reportarse con intervalo.'},
+    {s:'Los datos son <strong>mediciones repetidas sobre las mismas cincuenta empresas a lo largo de doce meses</strong>. ¿Qué precaución hace falta antes de aplicar bootstrap o permutación?',
+     o:['Ninguna: los dos métodos son no paramétricos','Remuestrear o permutar empresas enteras, no observaciones sueltas','Subir B para compensar la dependencia','Quedarse sólo con el último mes disponible'],ok:1,
+     e:'Las 600 filas no son 600 observaciones independientes: las doce de cada empresa se parecen entre sí. Si remuestreás filas sueltas estás fingiendo tener mucha más información de la que hay, y los intervalos salen demasiado angostos y los p-valores demasiado chicos. La corrección estándar es remuestrear la unidad independiente, que acá es la empresa (bootstrap por clusters); con estructura temporal fuerte se usan variantes por bloques.'}
+  ];
+  const cont=document.getElementById('m7Casos');
+  CASOS.forEach((c,i)=>{
+    const g=estado.diag['d'+i]||{};
+    const el=document.createElement('div'); el.className='caso';
+    el.innerHTML='<p class="num">Situación '+(i+1)+'</p><p class="sit">'+c.s+'</p>'+
+      '<div class="opciones">'+c.o.map((t,j)=>
+        '<label class="op"><input type="radio" name="d'+i+'" value="'+j+'"><span>'+t+'</span></label>').join('')+'</div>'+
+      '<div class="just"><label>Justificación en una oración</label><textarea placeholder="¿Por qué elegiste esa opción?"></textarea></div>'+
+      '<div class="btns"><button class="btn" type="button">Comprobar</button></div><div class="feedback"></div>';
+    const ta=el.querySelector('textarea'); ta.value=g.txt||'';
+    ta.addEventListener('input',()=>{estado.diag['d'+i]=Object.assign({},estado.diag['d'+i],{txt:ta.value});guardar();});
+    const ops=el.querySelectorAll('.op');
+    function pinta(){
+      const v=(estado.diag['d'+i]||{}).op;
+      ops.forEach(o=>{const inp=o.querySelector('input');o.classList.toggle('sel',+inp.value===v);
+        if(+inp.value===v)inp.checked=true;});
+    }
+    ops.forEach(o=>o.addEventListener('click',()=>{
+      estado.diag['d'+i]=Object.assign({},estado.diag['d'+i],{op:+o.querySelector('input').value});guardar();pinta();
+    }));
+    pinta();
+    el.querySelector('button').addEventListener('click',()=>{
+      const v=(estado.diag['d'+i]||{}).op, fb=el.querySelector('.feedback');
+      if(v===undefined){fb.className='feedback on no';fb.textContent='Elegí una opción antes de comprobar.';return;}
+      ops.forEach(o=>{const j=+o.querySelector('input').value;o.classList.remove('sel','bien','mal');
+        if(j===c.ok)o.classList.add('bien'); else if(j===v)o.classList.add('mal');});
+      fb.className='feedback on '+(v===c.ok?'ok':'no');
+      fb.innerHTML='<strong>'+(v===c.ok?'Correcto. ':'No es la opción esperada. ')+'</strong>'+c.e+
+        (ta.value.trim()?'<br><br><em>Tu justificación:</em> '+ta.value.replace(/[<>]/g,''):'<br><br><em>Escribí igual tu justificación: poner en palabras por qué es la mitad del ejercicio.</em>');
+      marcar('m7');
+    });
+    cont.appendChild(el);
+  });
+})();
+</script>
+</body>
+</html>

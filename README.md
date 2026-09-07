@@ -84,7 +84,7 @@ Cada clase tiene su propia carpeta dentro de `/clases/` con los siguientes archi
 | Fecha | Evento | Link |
 |---|---|---|
 | 14/08 | Inicio de clases — Presentación del curso | |
-| 18/09 | **Instancia 1** — Estructura de base de datos y primeros descriptivos | | 
+| 22/09 | **Instancia 1** — Estructura de base de datos y primeros descriptivos | | 
 | 27/10 | **Instancia 2** — Métodos cuantitativos | |
 | 13/11 | **Instancia 3** — Validación de visualizaciones | |
 | 24/11 | **Entrega final del TP** | |
