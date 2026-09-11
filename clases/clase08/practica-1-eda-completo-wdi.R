@@ -62,7 +62,7 @@ par_original <- par(no.readonly = TRUE)
 # Nota: si quieren buscar otros indicadores, WDIsearch() busca por palabra clave.
 # WDIsearch("broadband")
 
-anio <- 2022
+anio <- 2023
 
 wdi_raw <- WDI(
   indicator = c(
@@ -78,7 +78,7 @@ wdi_raw <- WDI(
   start = anio, end = anio,
   extra = TRUE          # trae región, grupo de ingreso, coordenadas, etc.
 )
-
+write_csv(wdi_raw,r'(curso_cdd_fce_uba_2c2026\datos\wdi_datos_clase08.csv)')
 # La descarga tarda. Conviene guardarse una copia local para no depender de
 # la conexión cada vez que corren el script (y para que el trabajo sea
 # reproducible: en el TP, la base cruda va en la carpeta raw/).
@@ -168,6 +168,13 @@ str(wdi)          # equivalente de base R a glimpse()
 sum(duplicated(wdi$iso3c))
 n_distinct(wdi$iso3c) == nrow(wdi)
 
+# Cambiar nombre de columna 
+test <- wdi %>% 
+  rename(codigo_pais=iso3c)
+
+# Sacar poblacion en niveles 
+wdi <- wdi %>% 
+  select(-poblacion)
 
 # --- 2.2. Tipos de variable ---------------------------------------------------
 
@@ -200,7 +207,7 @@ faltantes
 
 # ¿Cuántos países tienen la información completa en las variables numéricas?
 vars_num <- c("internet", "movil", "banda_ancha", "electricidad",
-              "urbano", "secundaria", "activ_fem", "poblacion")
+              "urbano", "secundaria", "activ_fem", "poblacion_mill")
 
 wdi |>
   mutate(n_na = rowSums(is.na(across(all_of(vars_num))))) |>
@@ -248,7 +255,11 @@ resumen_internet <- summary(wdi_analisis$internet)
 resumen_internet["Median"]
 resumen_internet["Mean"]
 
-# Lectura rápida: si la media es bastante menor que la mediana, la distribución
+mean(wdi_analisis$internet)
+median(wdi_analisis$internet)
+
+
+# Lectura rápida: internet# Lectura rápida: si la media es bastante menor que la mediana, la distribución
 # tiene cola a la izquierda; si es mayor, cola a la derecha. Comparar las dos
 # es el diagnóstico de asimetría más barato que existe.
 mean(wdi_analisis$internet) - median(wdi_analisis$internet)
@@ -352,10 +363,12 @@ sort(table(wdi_analisis$region), decreasing = TRUE)
 wdi_analisis |>
   count(region, name = "paises") |>
   mutate(
-    porcentaje = round(100 * paises / sum(paises), 1),
-    acumulado  = cumsum(porcentaje)
+    porcentaje = round(100 * paises / sum(paises), 1)
   ) |>
-  arrange(desc(paises))
+  arrange(porcentaje) %>% 
+  mutate(
+    acumulado  = cumsum(porcentaje)
+  )
 
 
 # --- 4.2. Tablas cruzadas -----------------------------------------------------
@@ -431,7 +444,8 @@ hist(
   xlab = "% de la población que usa internet",
   ylab = "Cantidad de países",
   col  = "steelblue",
-  border = "white"
+  border = "white",
+  breaks = 10
 )
 
 
