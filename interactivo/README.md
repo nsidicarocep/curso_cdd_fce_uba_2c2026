@@ -19,6 +19,7 @@ Este es un material nuevo y de prueba, por lo que si encuentran errores o proble
 | Distribuciones y promedios | Experimentar con media, mediana y moda, formas de distribuciones, dispersión, cuantiles y ratios de desigualdad, agregación y paradoja de Simpson | [Qué esconde un promedio](./distribuciones/) |
 | Práctica de R | Escribir código de R base y Tidyverse: completar funciones, argumentos y expresiones, encontrar errores y armar pipelines completos, con pistas y puntaje | [Práctica de R](./practica_r/) |
 | Muestreo, bootstrap y permutación | Distinguir población, muestra y distribución muestral; ver la ley de los grandes números y sus límites; construir remuestras bootstrap, intervalos de confianza y tests de permutación | [De la muestra a la conclusión](./remuestreo/) |
+| ANOVA, Tukey y chi-cuadrado | Simular tests y ver cómo cambian el estadístico, el p-valor y la decisión: ANOVA de un factor (con Welch y Kruskal-Wallis cuando fallan los supuestos), comparaciones de a pares con Tukey HSD, chi-cuadrado de independencia con esperados y residuos, y t-test vs. Mann-Whitney para dos grupos | [Laboratorio de tests](./anova_chicuadrado/) |
 
 
 ## Cómo se usan

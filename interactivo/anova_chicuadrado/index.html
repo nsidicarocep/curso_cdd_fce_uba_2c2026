@@ -1,0 +1,834 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laboratorio de tests</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,650&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --ground:#F3F6F8; --surface:#FFFFFF; --sunk:#EAF0F4; --ink:#15212B; --muted:#586977; --rule:#D3DDE4;
+  --azul:#2C6E9B; --rojo:#C1553B; --gris:#8C9AA5; --azul-suave:#DCE9F2; --rojo-suave:#F6E1DA;
+  --ok:#2E7D4F; --warn:#B7791F;
+  --f-display:"Literata", Georgia, "Times New Roman", serif;
+  --f-body:"Public Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", Consolas, "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0F161C; --surface:#16202A; --sunk:#1C2934; --ink:#E4EBF0; --muted:#95A5B1; --rule:#2B3A46;
+    --azul:#6AA8D4; --rojo:#E27F63; --gris:#7D8C97; --azul-suave:#1D3446; --rojo-suave:#43271F;
+    --ok:#5DBB84; --warn:#E0A74A;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0F161C; --surface:#16202A; --sunk:#1C2934; --ink:#E4EBF0; --muted:#95A5B1; --rule:#2B3A46;
+  --azul:#6AA8D4; --rojo:#E27F63; --gris:#7D8C97; --azul-suave:#1D3446; --rojo-suave:#43271F;
+  --ok:#5DBB84; --warn:#E0A74A;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55;margin:0}
+h1,h2,h3{font-family:var(--f-display);font-weight:650;text-wrap:balance;margin:0;line-height:1.2}
+.wrap{max-width:1240px;margin:0 auto;padding:0 20px}
+header.top{padding:26px 0 14px}
+.curso{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+header.top h1{font-size:30px;margin-top:4px}
+header.top p{margin:6px 0 0;color:var(--muted);max-width:70ch}
+nav.tabs{display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--rule);margin-top:16px}
+nav.tabs button{font:inherit;background:none;border:0;border-bottom:3px solid transparent;padding:10px 14px 9px;cursor:pointer;color:var(--muted);text-align:left;display:flex;flex-direction:column;gap:1px}
+nav.tabs button b{font-weight:700;color:var(--ink);font-size:15px}
+nav.tabs button span{font-size:12.5px}
+nav.tabs button[aria-selected="true"]{border-bottom-color:var(--azul)}
+nav.tabs button[aria-selected="true"] b{color:var(--azul)}
+nav.tabs button.sec b{font-weight:600}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--azul);outline-offset:2px}
+.panel{display:grid;grid-template-columns:300px minmax(0,1fr);gap:24px;padding:22px 0 60px;align-items:start}
+@media (max-width:860px){.panel{grid-template-columns:1fr}}
+aside.ctrl{position:sticky;top:12px;background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:14px}
+@media (max-width:860px){aside.ctrl{position:static}}
+.ctrl h3{font-size:13px;font-family:var(--f-body);font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label,.lbl{font-size:13px;font-weight:600;display:flex;justify-content:space-between;gap:8px}
+.field label output{font-family:var(--f-mono);font-weight:400;color:var(--muted);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--azul)}
+select,textarea,input[type=number],.cell-in{font:inherit;color:var(--ink);background:var(--sunk);border:1px solid var(--rule);border-radius:6px;padding:6px 8px}
+textarea{font-family:var(--f-mono);font-size:13px;resize:vertical;min-height:54px}
+.seg{display:flex;border:1px solid var(--rule);border-radius:6px;overflow:hidden}
+.seg button{flex:1;font:inherit;font-size:13px;padding:6px 4px;border:0;background:var(--sunk);color:var(--muted);cursor:pointer}
+.seg button+button{border-left:1px solid var(--rule)}
+.seg button[aria-pressed="true"]{background:var(--azul);color:#fff;font-weight:600}
+.btn{font:inherit;font-weight:600;font-size:14px;border-radius:6px;padding:8px 12px;cursor:pointer;border:1px solid var(--azul);background:var(--azul);color:#fff}
+.btn.ghost{background:transparent;color:var(--azul)}
+.btn:disabled{opacity:.55;cursor:progress}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap}
+.check{display:flex;gap:8px;align-items:flex-start;font-size:13.5px}
+.check input{margin-top:4px;accent-color:var(--azul)}
+.hint{font-size:12.5px;color:var(--muted);margin:0}
+.results{display:flex;flex-direction:column;gap:18px;min-width:0}
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:16px 18px;min-width:0}
+.card h2{font-size:19px}
+.card h2 small{font-family:var(--f-body);font-weight:500;font-size:13px;color:var(--muted);margin-left:6px}
+.card>p{max-width:75ch}
+.hyp{display:flex;gap:10px 28px;flex-wrap:wrap;font-family:var(--f-mono);font-size:13.5px;margin:8px 0 2px}
+.hyp b{font-family:var(--f-body)}
+.verdict{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;align-items:center;padding:14px 18px;border-radius:8px;border:1px solid var(--rule);background:var(--surface)}
+.pill{display:inline-block}
+.alt .pill{font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:4px 9px;border-radius:999px}
+.verdict .pill{grid-row:span 2;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:6px 10px;border-radius:999px;white-space:nowrap}
+.pill.rech{background:var(--rojo-suave);color:var(--rojo)}
+.pill.norech{background:var(--azul-suave);color:var(--azul)}
+.verdict .stat{font-family:var(--f-mono);font-size:15px;font-variant-numeric:tabular-nums}
+.verdict .read{font-size:14px;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:18px}
+.scroll{overflow-x:auto}
+table.bt{border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:14px;width:100%;margin-top:8px}
+table.bt caption{text-align:left;font-size:13px;font-weight:600;color:var(--muted);padding-bottom:4px}
+table.bt th,table.bt td{padding:5px 7px;text-align:right;white-space:nowrap}
+table.bt th:first-child,table.bt td:first-child{text-align:left}
+table.bt thead th{border-top:2px solid var(--ink);border-bottom:1px solid var(--ink);font-weight:600}
+table.bt tbody tr:last-child td{border-bottom:2px solid var(--ink)}
+table.bt td.num{font-family:var(--f-mono);font-size:13px}
+table.bt tr.tot td{border-top:1px solid var(--rule)}
+table.bt tr.sig td{color:var(--rojo)}
+.cell-in{width:74px;text-align:right;font-family:var(--f-mono);font-size:13px;padding:4px 6px}
+svg{display:block;width:100%;height:auto;overflow:visible}
+svg text{fill:var(--muted);font-family:var(--f-body);font-size:12px}
+svg .ax{stroke:var(--rule)}
+svg .ink{fill:var(--ink)}
+pre.r{font-family:var(--f-mono);font-size:12.5px;background:var(--sunk);border-radius:6px;padding:10px 12px;margin:8px 0 0;overflow-x:auto;line-height:1.5}
+pre.r .c{color:var(--muted)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:6px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.sc-bar{display:flex;height:26px;border-radius:4px;overflow:hidden;margin:10px 0 6px}
+.sc-bar div{display:flex;align-items:center;padding:0 8px;font-size:12.5px;font-weight:600;color:#fff;white-space:nowrap;min-width:0;overflow:hidden}
+.note{font-size:13.5px;color:var(--muted);border-left:3px solid var(--rule);padding:2px 0 2px 12px;margin:10px 0 0;max-width:75ch}
+.note.warn{border-left-color:var(--warn);color:var(--ink)}
+.alt{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:10px}
+.alt>div{border:1px solid var(--rule);border-radius:6px;padding:10px 12px}
+.alt h3{font-size:15px}
+.alt .when{font-size:12.5px;color:var(--muted);margin:2px 0 6px}
+.alt .stat{font-family:var(--f-mono);font-size:13.5px}
+.meter{display:grid;grid-template-columns:130px 1fr 60px;gap:8px;align-items:center;font-size:13.5px;margin-top:6px}
+.meter .track{height:14px;background:var(--sunk);border-radius:3px;position:relative;overflow:hidden}
+.meter .fill{height:100%;border-radius:3px}
+.meter .five{position:absolute;top:-2px;bottom:-2px;width:0;border-left:1.5px dashed var(--ink);opacity:.6}
+.meter span.v{font-family:var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
+.heat td.h{font-family:var(--f-mono);font-weight:600;text-align:center;min-width:84px}
+.prof{display:grid;grid-template-columns:170px 1fr;gap:6px 10px;align-items:center;font-size:13px;margin-top:8px}
+.prof .bar{display:flex;height:22px;border-radius:3px;overflow:hidden}
+.prof .bar div{color:#fff;font-size:11.5px;font-weight:600;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.grp-means{display:flex;flex-direction:column;gap:10px}
+[hidden]{display:none!important}
+footer{color:var(--muted);font-size:12.5px;padding:0 0 30px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<header class="top">
+  <div class="curso">Ciencia de Datos para Economía y Negocios · FCE-UBA · Clase 9</div>
+  <h1>Laboratorio de tests</h1>
+  <p>Mové los controles y mirá cómo cambian el estadístico, el p-valor y la decisión. Todo se recalcula al instante en el navegador, con las mismas fórmulas que usa R.</p>
+  <nav class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-tab="anova"><b>ANOVA</b><span>¿Difieren las medias de k grupos?</span></button>
+    <button role="tab" aria-selected="false" data-tab="tukey"><b>Tukey HSD</b><span>¿Qué pares difieren?</span></button>
+    <button role="tab" aria-selected="false" data-tab="chi"><b>Chi-cuadrado</b><span>¿Dos categóricas están asociadas?</span></button>
+    <button role="tab" aria-selected="false" data-tab="dos" class="sec"><b>Dos grupos</b><span>t-test y Mann-Whitney</span></button>
+  </nav>
+</header>
+
+<!-- ===================== ANOVA ===================== -->
+<section class="panel" id="tab-anova">
+  <aside class="ctrl">
+    <h3>Población</h3>
+    <div class="field"><span class="lbl">Cantidad de grupos</span>
+      <div class="seg" id="a-k"><button data-v="2">2</button><button data-v="3" aria-pressed="true">3</button><button data-v="4">4</button><button data-v="5">5</button></div>
+    </div>
+    <div class="grp-means" id="a-means"></div>
+    <div class="field"><label for="a-sd">Desvío dentro de cada grupo <output id="a-sd-o"></output></label><input type="range" id="a-sd" min="0.5" max="6" step="0.1" value="2"></div>
+    <label class="check"><input type="checkbox" id="a-hetero"><span>Varianzas distintas: cada grupo tiene un desvío mayor que el anterior</span></label>
+    <div class="field"><label for="a-n">Observaciones por grupo <output id="a-n-o"></output></label><input type="range" id="a-n" min="4" max="100" step="1" value="15"></div>
+    <div class="field"><span class="lbl">Forma de los datos</span>
+      <div class="seg" id="a-dist"><button data-v="normal" aria-pressed="true">Normal</button><button data-v="lognormal">Asimétrica</button><button data-v="t3">Outliers</button></div>
+    </div>
+    <div class="btnrow"><button class="btn" id="a-new">Nueva muestra</button><button class="btn ghost" id="a-h0">Igualar medias (H₀)</button></div>
+    <p class="hint">Mover los controles no cambia el "ruido" de la muestra: solo cambia la señal. "Nueva muestra" sortea datos nuevos.</p>
+    <h3>Vista del gráfico</h3>
+    <div class="seg" id="a-view"><button data-v="datos" aria-pressed="true">Datos</button><button data-v="dentro">Dentro</button><button data-v="entre">Entre</button></div>
+  </aside>
+  <div class="results">
+    <div class="verdict" id="a-verdict"></div>
+    <div class="card">
+      <h2>Los datos <small id="a-sub"></small></h2>
+      <div class="hyp"><span><b>H₀:</b> μ₁ = μ₂ = … = μₖ</span><span><b>H₁:</b> al menos una media es diferente</span></div>
+      <div id="a-strip"></div>
+      <div class="legend"><span><i style="background:var(--azul)"></i>observaciones</span><span><i style="background:var(--rojo)"></i>media de cada grupo</span><span><i style="background:var(--ink);height:2px;vertical-align:3px"></i>media general (punteada)</span></div>
+      <p class="note" id="a-viewnote"></p>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h2>Descomposición de la variabilidad</h2>
+        <div class="sc-bar" id="a-scbar"></div>
+        <div class="scroll"><table class="bt" id="a-table"></table></div>
+        <p class="note">F = CM<sub>entre</sub> / CM<sub>dentro</sub>. Si H₀ es cierta, los dos cuadrados medios estiman la misma varianza y F ronda 1.</p>
+      </div>
+      <div class="card">
+        <h2>¿Qué tan raro es este F bajo H₀?</h2>
+        <div id="a-fcurve"></div>
+        <div class="legend"><span><i style="background:var(--rojo);opacity:.55"></i>área = p-valor</span><span><i style="background:var(--muted);height:2px;vertical-align:3px"></i>valor crítico al 5% (punteado)</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Si los supuestos fallan</h2>
+      <p class="hint">Mismos datos, dos alternativas. Probá "Asimétrica" u "Outliers" en la forma de los datos, o activá "Varianzas distintas".</p>
+      <div class="alt" id="a-alt"></div>
+    </div>
+    <div class="card">
+      <h2>Repetir el experimento muchas veces</h2>
+      <p class="hint">Sortea 1.000 muestras con la población de la izquierda y cuenta en qué porcentaje cada test rechaza H₀ al 5%. Con medias iguales, eso es la tasa de falsos positivos (debería rondar 5%). Con medias distintas, es la potencia.</p>
+      <div class="btnrow" style="margin-top:8px"><button class="btn ghost" id="a-sim">Simular 1.000 muestras</button></div>
+      <div id="a-simres"></div>
+    </div>
+    <div class="card">
+      <h2>En R</h2>
+      <pre class="r" id="a-code"></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TUKEY ===================== -->
+<section class="panel" id="tab-tukey" hidden>
+  <aside class="ctrl">
+    <h3>Datos</h3>
+    <p class="hint">Tukey usa <b>los mismos datos de la pestaña ANOVA</b>. Cambiá las medias allá (o acá abajo) y volvé.</p>
+    <div class="grp-means" id="t-means"></div>
+    <div class="field"><label for="t-alpha">Nivel de significación α <output id="t-alpha-o"></output></label>
+      <div class="seg" id="t-alpha"><button data-v="0.1">10%</button><button data-v="0.05" aria-pressed="true">5%</button><button data-v="0.01">1%</button></div>
+    </div>
+    <div class="btnrow"><button class="btn" id="t-new">Nueva muestra</button></div>
+    <h3>Error de familia</h3>
+    <div class="field"><label for="t-fk">Grupos en la simulación <output id="t-fk-o"></output></label><input type="range" id="t-fk" min="2" max="8" step="1" value="6"></div>
+    <button class="btn ghost" id="t-fsim">Simular 1.000 estudios bajo H₀</button>
+  </aside>
+  <div class="results">
+    <div class="verdict" id="t-verdict"></div>
+    <div class="card">
+      <h2>Intervalos de confianza simultáneos <small id="t-sub"></small></h2>
+      <p class="hint">Cada línea es la diferencia de medias de un par con su IC. Si el intervalo <b>cruza el cero</b>, no podemos distinguir ese par del azar.</p>
+      <div id="t-forest"></div>
+      <div class="legend"><span><i style="background:var(--rojo)"></i>difieren (p ajustado &lt; α)</span><span><i style="background:var(--azul)"></i>no se distinguen</span></div>
+    </div>
+    <div class="card">
+      <h2>Tabla de comparaciones</h2>
+      <div class="scroll"><table class="bt" id="t-table"></table></div>
+      <p class="note" id="t-hsdnote"></p>
+    </div>
+    <div class="card">
+      <h2>¿Por qué no hacer t-tests de a pares?</h2>
+      <p class="hint">Simula 1.000 estudios donde <b>todas las medias son iguales</b> (n = 20 por grupo) y cuenta en cuántos aparece al menos una diferencia "significativa" al 5%.</p>
+      <div id="t-fres"></div>
+    </div>
+    <div class="card">
+      <h2>En R</h2>
+      <pre class="r" id="t-code"></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CHI ===================== -->
+<section class="panel" id="tab-chi" hidden>
+  <aside class="ctrl">
+    <h3>Generar una muestra</h3>
+    <p class="hint">Nivel educativo × condición de actividad, personas de 18 a 65 años. Los números son de ejemplo, no de la EPH.</p>
+    <div class="field"><label for="c-n">Tamaño de muestra <output id="c-n-o"></output></label><input type="range" id="c-n" min="0" max="100" step="1" value="50"></div>
+    <div class="field"><label for="c-a">Intensidad de la asociación <output id="c-a-o"></output></label><input type="range" id="c-a" min="0" max="1" step="0.05" value="0.6"></div>
+    <p class="hint">0 = independencia perfecta en la población: cualquier diferencia en la muestra es azar.</p>
+    <div class="btnrow"><button class="btn" id="c-gen">Generar muestra</button><button class="btn ghost" id="c-x10">Mismas proporciones, n × 10</button></div>
+    <h3>O escribí tus conteos</h3>
+    <p class="hint">Editá cualquier celda de la tabla de observados. Solo conteos enteros, nunca porcentajes.</p>
+  </aside>
+  <div class="results">
+    <div class="verdict" id="c-verdict"></div>
+    <div class="card">
+      <h2>Observados y esperados</h2>
+      <div class="hyp"><span><b>H₀:</b> nivel educativo y condición de actividad son independientes</span><span><b>H₁:</b> están asociadas</span></div>
+      <div class="grid2">
+        <div class="scroll"><table class="bt" id="c-obs"></table></div>
+        <div class="scroll"><table class="bt" id="c-esp"></table></div>
+      </div>
+      <p class="note" id="c-ejemplo"></p>
+      <p class="note warn" id="c-warn" hidden></p>
+    </div>
+    <div class="card">
+      <h2>Perfiles por fila</h2>
+      <p class="hint">Bajo independencia, las tres barras serían iguales a la del total.</p>
+      <div class="prof" id="c-prof"></div>
+      <div class="legend"><span><i style="background:var(--azul)"></i>Ocupado</span><span><i style="background:var(--rojo)"></i>Desocupado</span><span><i style="background:var(--gris)"></i>Inactivo</span></div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h2>Aporte de cada celda a χ²</h2>
+        <div class="scroll"><table class="bt" id="c-contrib"></table></div>
+        <p class="note">(O − E)² / E. Dividir por E pone las celdas en la misma escala.</p>
+      </div>
+      <div class="card">
+        <h2>¿Dónde está la asociación?</h2>
+        <div class="scroll"><table class="bt heat" id="c-res"></table></div>
+        <p class="note">Residuos estandarizados. <b style="color:var(--rojo)">Rojo</b>: más casos que los esperados. <b style="color:var(--azul)">Azul</b>: menos. |res| &gt; 2 marca las celdas que se apartan de H₀.</p>
+      </div>
+    </div>
+    <div class="card">
+      <h2>¿Qué tan raro es este χ² bajo H₀?</h2>
+      <div id="c-curve"></div>
+      <div class="legend"><span><i style="background:var(--rojo);opacity:.55"></i>área = p-valor</span><span><i style="background:var(--muted);height:2px;vertical-align:3px"></i>valor crítico al 5% (punteado)</span></div>
+    </div>
+    <div class="card">
+      <h2>En R</h2>
+      <pre class="r" id="c-code"></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== DOS GRUPOS ===================== -->
+<section class="panel" id="tab-dos" hidden>
+  <aside class="ctrl">
+    <h3>Datos</h3>
+    <div class="field"><label for="d-a">Grupo A</label><textarea id="d-a">12 15 18 20 22</textarea></div>
+    <div class="field"><label for="d-b">Grupo B</label><textarea id="d-b">19 24 27 30 33</textarea></div>
+    <p class="hint">Valores separados por espacios. Probá cambiar el 33 por 330.</p>
+    <div class="btnrow"><button class="btn ghost" id="d-ej1">Ejemplo de clase</button><button class="btn ghost" id="d-ej2">Con outlier</button></div>
+    <h3>O simular</h3>
+    <div class="field"><label for="d-dif">Diferencia de medias (B − A) <output id="d-dif-o"></output></label><input type="range" id="d-dif" min="0" max="3" step="0.1" value="1"></div>
+    <div class="field"><label for="d-n">Observaciones por grupo <output id="d-n-o"></output></label><input type="range" id="d-n" min="5" max="80" step="1" value="20"></div>
+    <div class="field"><span class="lbl">Forma de los datos</span>
+      <div class="seg" id="d-dist"><button data-v="normal" aria-pressed="true">Normal</button><button data-v="lognormal">Asimétrica</button><button data-v="t3">Outliers</button></div>
+    </div>
+    <button class="btn" id="d-sim">Simular muestra</button>
+  </aside>
+  <div class="results">
+    <div class="card">
+      <h2>Los datos</h2>
+      <div class="hyp"><span><b>t-test:</b> H₀: μ<sub>A</sub> = μ<sub>B</sub></span><span><b>Mann-Whitney:</b> H₀: P(A &gt; B) = 0,5</span></div>
+      <div id="d-strip"></div>
+    </div>
+    <div class="grid2" id="d-res"></div>
+    <div class="card">
+      <h2>Los rangos</h2>
+      <p class="hint">Mann-Whitney ordena todas las observaciones juntas y trabaja con su posición. Un valor gigante sigue siendo "el más grande": su rango no cambia.</p>
+      <div class="scroll"><table class="bt" id="d-ranks"></table></div>
+    </div>
+    <div class="card">
+      <h2>En R</h2>
+      <pre class="r" id="d-code"></pre>
+    </div>
+  </div>
+</section>
+<footer>Fórmulas: ANOVA de un factor, ANOVA de Welch (<code>oneway.test</code>), Kruskal-Wallis con corrección por empates, Tukey-Kramer, chi-cuadrado sin corrección de continuidad, t de Welch y Mann-Whitney con aproximación normal. Los resultados pueden diferir de R en el último decimal.</footer>
+</div>
+<script>
+"use strict";
+/* ---------------- Formato (es-AR) ---------------- */
+const fmt = (x, d = 2) => (isFinite(x) ? Number(x).toLocaleString("es-AR", {minimumFractionDigits: d, maximumFractionDigits: d}) : "—");
+const fmtP = p => (p < 0.001 ? "< 0,001" : fmt(p, 3));
+const pTxt = p => (p < 0.001 ? "p < 0,001" : "p = " + fmt(p, 3));
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+
+/* ---------------- Aleatorios ---------------- */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+let rnd = mulberry32((Date.now() % 1e9) | 0);
+function rnorm(){let u=0,v=0;while(u===0)u=rnd();while(v===0)v=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+const LN_S = 0.8, LN_M = Math.exp(LN_S*LN_S/2), LN_SD = Math.sqrt((Math.exp(LN_S*LN_S)-1)*Math.exp(LN_S*LN_S));
+/* Ruido estandarizado (media 0, desvío 1) con distinta forma */
+function rnoise(dist){
+  if (dist === "lognormal") return (Math.exp(LN_S*rnorm()) - LN_M) / LN_SD;
+  if (dist === "t3"){const z=rnorm();const c=rnorm()**2+rnorm()**2+rnorm()**2;return z/Math.sqrt(c/3)/Math.sqrt(3);}
+  return rnorm();
+}
+
+/* ---------------- Funciones especiales ---------------- */
+function lgamma(x){
+  const g=7,c=[0.99999999999980993,676.5203681218851,-1259.1392167224028,771.32342877765313,-176.61503916999185,12.507343278686905,-0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];
+  if (x < 0.5) return Math.log(Math.PI/Math.abs(Math.sin(Math.PI*x))) - lgamma(1-x);
+  x -= 1; let a=c[0]; const t=x+g+0.5;
+  for (let i=1;i<9;i++) a += c[i]/(x+i);
+  return 0.5*Math.log(2*Math.PI) + (x+0.5)*Math.log(t) - t + Math.log(a);
+}
+function betacf(a,b,x){
+  const MAXIT=300,EPS=1e-14,FPMIN=1e-300;
+  let qab=a+b,qap=a+1,qam=a-1,c=1,d=1-qab*x/qap;
+  if (Math.abs(d)<FPMIN) d=FPMIN; d=1/d; let h=d;
+  for (let m=1;m<=MAXIT;m++){
+    const m2=2*m; let aa=m*(b-m)*x/((qam+m2)*(a+m2));
+    d=1+aa*d; if(Math.abs(d)<FPMIN)d=FPMIN; c=1+aa/c; if(Math.abs(c)<FPMIN)c=FPMIN; d=1/d; h*=d*c;
+    aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));
+    d=1+aa*d; if(Math.abs(d)<FPMIN)d=FPMIN; c=1+aa/c; if(Math.abs(c)<FPMIN)c=FPMIN; d=1/d;
+    const del=d*c; h*=del; if (Math.abs(del-1)<EPS) break;
+  }
+  return h;
+}
+/* Beta incompleta regularizada I_x(a,b) */
+function ibeta(x,a,b){
+  if (x<=0) return 0; if (x>=1) return 1;
+  const bt=Math.exp(lgamma(a+b)-lgamma(a)-lgamma(b)+a*Math.log(x)+b*Math.log(1-x));
+  return x < (a+1)/(a+b+2) ? bt*betacf(a,b,x)/a : 1-bt*betacf(b,a,1-x)/b;
+}
+/* Gamma incompleta regularizada superior Q(a,x) */
+function gammaQ(a,x){
+  if (x<=0) return 1;
+  if (x < a+1){
+    let ap=a,sum=1/a,del=sum;
+    for (let n=0;n<500;n++){ap+=1;del*=x/ap;sum+=del;if(Math.abs(del)<Math.abs(sum)*1e-15)break;}
+    return 1 - sum*Math.exp(-x+a*Math.log(x)-lgamma(a));
+  }
+  let b=x+1-a,c=1/1e-300,d=1/b,h=d;
+  for (let i=1;i<500;i++){const an=-i*(i-a);b+=2;d=an*d+b;if(Math.abs(d)<1e-300)d=1e-300;c=b+an/c;if(Math.abs(c)<1e-300)c=1e-300;d=1/d;const del=d*c;h*=del;if(Math.abs(del-1)<1e-15)break;}
+  return Math.exp(-x+a*Math.log(x)-lgamma(a))*h;
+}
+const pF_upper = (F,d1,d2) => F<=0 ? 1 : ibeta(d2/(d2+d1*F), d2/2, d1/2);
+const pChi_upper = (x,df) => gammaQ(df/2, x/2);
+const pT_two = (t,df) => ibeta(df/(df+t*t), df/2, 0.5);
+const dF = (x,d1,d2) => x<=0 ? 0 : Math.exp(0.5*d1*Math.log(d1)+0.5*d2*Math.log(d2)+(d1/2-1)*Math.log(x)-((d1+d2)/2)*Math.log(d2+d1*x)-(lgamma(d1/2)+lgamma(d2/2)-lgamma((d1+d2)/2)));
+const dChi = (x,df) => x<=0 ? 0 : Math.exp((df/2-1)*Math.log(x)-x/2-(df/2)*Math.log(2)-lgamma(df/2));
+function erfc(x){const z=Math.abs(x),t=1/(1+0.5*z);const r=t*Math.exp(-z*z-1.26551223+t*(1.00002368+t*(0.37409196+t*(0.09678418+t*(-0.18628806+t*(0.27886807+t*(-1.13520398+t*(1.48851587+t*(-0.82215223+t*0.17087277)))))))));return x>=0?r:2-r;}
+const pnorm = z => 0.5*erfc(-z/Math.SQRT2);
+const pNorm_two = z => erfc(Math.abs(z)/Math.SQRT2);
+function bisect(f, lo, hi, target, it=60){for(let i=0;i<it;i++){const m=(lo+hi)/2;if(f(m)<target)lo=m;else hi=m;}return (lo+hi)/2;}
+const qF = (prob,d1,d2) => bisect(x => 1-pF_upper(x,d1,d2), 0, 1000, prob);
+const qChi = (prob,df) => bisect(x => 1-pChi_upper(x,df), 0, 1000, prob);
+const qT = (prob,df) => bisect(x => x>=0 ? 1-0.5*pT_two(x,df) : 0.5*pT_two(x,df), -50, 50, prob);
+
+/* Rango studentizado: P(Q < q) para k medias y df grados de libertad */
+const SQ2PI = Math.sqrt(2*Math.PI);
+function wprob(w,k){
+  if (w<=0) return 0;
+  const a=-7,b=7,m=140,h=(b-a)/m; let s=0;
+  for (let i=0;i<=m;i++){
+    const z=a+i*h, g=Math.exp(-z*z/2)/SQ2PI*Math.pow(Math.max(0,pnorm(z)-pnorm(z-w)),k-1);
+    s += (i===0||i===m?1:(i%2?4:2))*g;
+  }
+  return Math.min(1, k*s*h/3);
+}
+function ptukey(q,k,df){
+  if (q<=0) return 0;
+  if (df>5000) return wprob(q,k);
+  const sd=1/Math.sqrt(2*df);
+  const lo=Math.max(1e-6, df<25 ? 1e-6 : 1-9*sd), hi = df<25 ? 3.5 : 1+9*sd;
+  const m=100,h=(hi-lo)/m, lc=Math.log(2)+(df/2)*Math.log(df/2)-lgamma(df/2); let s=0;
+  for (let i=0;i<=m;i++){
+    const x=lo+i*h, dens=Math.exp(lc+(df-1)*Math.log(x)-df*x*x/2);
+    s += (i===0||i===m?1:(i%2?4:2))*dens*wprob(q*x,k);
+  }
+  return Math.min(1, s*h/3);
+}
+const qtCache = {};
+function qtukey(prob,k,df){
+  const key=prob+"|"+k+"|"+df; if (qtCache[key]) return qtCache[key];
+  return (qtCache[key] = bisect(q => ptukey(q,k,df), 0, 40, prob, 34));
+}
+
+/* ---------------- Tests ---------------- */
+const mean = a => a.reduce((s,v)=>s+v,0)/a.length;
+const variance = a => {const m=mean(a);return a.reduce((s,v)=>s+(v-m)**2,0)/(a.length-1);};
+function ranks(vals){ // rangos promedio con empates; devuelve {r, tieSum}
+  const idx=vals.map((v,i)=>i).sort((i,j)=>vals[i]-vals[j]); const r=new Array(vals.length); let tie=0;
+  for (let i=0;i<idx.length;){let j=i;while(j+1<idx.length&&vals[idx[j+1]]===vals[idx[i]])j++;const rk=(i+j)/2+1;for(let t=i;t<=j;t++)r[idx[t]]=rk;const c=j-i+1;tie+=c*c*c-c;i=j+1;}
+  return {r, tie};
+}
+function anova(groups){
+  const k=groups.length, all=groups.flat(), N=all.length, gm=mean(all);
+  const ns=groups.map(g=>g.length), ms=groups.map(mean);
+  const sce=groups.reduce((s,g,j)=>s+ns[j]*(ms[j]-gm)**2,0);
+  const scd=groups.reduce((s,g,j)=>s+g.reduce((t,v)=>t+(v-ms[j])**2,0),0);
+  const gl1=k-1, gl2=N-k, cme=sce/gl1, cmd=scd/gl2, F=cme/cmd, p=pF_upper(F,gl1,gl2);
+  return {k,N,gm,ns,ms,sce,scd,sct:sce+scd,gl1,gl2,cme,cmd,F,p,eta2:sce/(sce+scd)};
+}
+function welchAnova(groups){
+  const k=groups.length, ns=groups.map(g=>g.length), ms=groups.map(mean), w=groups.map((g,j)=>ns[j]/variance(g));
+  const W=w.reduce((a,b)=>a+b,0), mw=w.reduce((s,wj,j)=>s+wj*ms[j],0)/W;
+  const A=w.reduce((s,wj,j)=>s+wj*(ms[j]-mw)**2,0)/(k-1);
+  const tmp=w.reduce((s,wj,j)=>s+(1-wj/W)**2/(ns[j]-1),0);
+  const F=A/(1+2*(k-2)/(k*k-1)*tmp), gl2=(k*k-1)/(3*tmp);
+  return {F, gl1:k-1, gl2, p:pF_upper(F,k-1,gl2)};
+}
+function kruskal(groups){
+  const all=groups.flat(), N=all.length, {r,tie}=ranks(all); let off=0, H=0; const rm=[];
+  groups.forEach(g=>{let s=0;for(let i=0;i<g.length;i++)s+=r[off+i];off+=g.length;rm.push(s/g.length);H+=g.length*(s/g.length-(N+1)/2)**2;});
+  H = H*12/(N*(N+1)); if (tie>0) H/= (1-tie/(N*N*N-N));
+  const gl=groups.length-1; return {H, gl, p:pChi_upper(H,gl), rm, eps2:H/(N-1)};
+}
+function tukey(groups, alpha){
+  const a=anova(groups), qc=qtukey(1-alpha,a.k,a.gl2), pares=[];
+  for (let i=0;i<a.k;i++) for (let j=i+1;j<a.k;j++){
+    const dif=a.ms[j]-a.ms[i], se=Math.sqrt(a.cmd/2*(1/a.ns[i]+1/a.ns[j])), hsd=qc*se;
+    const q=Math.abs(dif)/se, p=1-ptukey(q,a.k,a.gl2);
+    const tt=Math.abs(dif)/Math.sqrt(a.cmd*(1/a.ns[i]+1/a.ns[j])), pt=pT_two(tt,a.gl2);
+    pares.push({i,j,dif,hsd,lo:dif-hsd,hi:dif+hsd,p:Math.max(0,p),pt});
+  }
+  return {a, qc, pares};
+}
+function welchT(x,y){
+  const mx=mean(x),my=mean(y),vx=variance(x)/x.length,vy=variance(y)/y.length;
+  const t=(my-mx)/Math.sqrt(vx+vy), df=(vx+vy)**2/(vx*vx/(x.length-1)+vy*vy/(y.length-1));
+  return {t,df,p:pT_two(t,df),mx,my};
+}
+function mannWhitney(x,y){ // W = estadístico de R para wilcox.test(x, y)
+  const n1=x.length,n2=y.length,N=n1+n2,{r,tie}=ranks(x.concat(y));
+  const R1=r.slice(0,n1).reduce((a,b)=>a+b,0), W=R1-n1*(n1+1)/2, mu=n1*n2/2;
+  const sig=Math.sqrt(n1*n2/12*((N+1)-tie/(N*(N-1)))), d=W-mu, z=(d-Math.sign(d)*0.5)/sig;
+  return {W, z, p:Math.min(1,pNorm_two(z)), probBA:1-W/(n1*n2), r};
+}
+function chisq(O){
+  const R=O.length,C=O[0].length, rt=O.map(r=>r.reduce((a,b)=>a+b,0)), ct=O[0].map((_,j)=>O.reduce((s,r)=>s+r[j],0)), n=rt.reduce((a,b)=>a+b,0);
+  const E=O.map((r,i)=>r.map((_,j)=>rt[i]*ct[j]/n));
+  const contrib=O.map((r,i)=>r.map((o,j)=>E[i][j]>0?(o-E[i][j])**2/E[i][j]:0));
+  const res=O.map((r,i)=>r.map((o,j)=>(o-E[i][j])/Math.sqrt(E[i][j]*(1-rt[i]/n)*(1-ct[j]/n))));
+  const x2=contrib.flat().reduce((a,b)=>a+b,0), gl=(R-1)*(C-1);
+  return {rt,ct,n,E,contrib,res,x2,gl,p:pChi_upper(x2,gl),V:Math.sqrt(x2/(n*(Math.min(R,C)-1))),minE:Math.min(...E.flat()),pct5:E.flat().filter(e=>e>=5).length/(R*C)};
+}
+
+/* ---------------- Gráficos SVG ---------------- */
+function niceTicks(lo,hi,n=5){const span=hi-lo||1,step0=span/n,mag=Math.pow(10,Math.floor(Math.log10(step0))),err=step0/mag;const step=(err>=7.5?10:err>=3.5?5:err>=1.5?2:1)*mag;const t=[];for(let v=Math.ceil(lo/step)*step;v<=hi+1e-9;v+=step)t.push(+v.toFixed(10));return {t,step};}
+function decOf(step){return Math.max(0,-Math.floor(Math.log10(step)+1e-9));}
+
+/* Curva de densidad con área del p-valor y valor crítico */
+function densityChart(el, dens, obs, crit, xLabel, fmtObs){
+  const W=440,H=230,m={l:14,r:16,t:34,b:38};
+  let xmax=Math.max(crit*1.9, Math.min(obs*1.12, crit*4.5), 4);
+  const N=240, pts=[]; let ymax=0;
+  for (let i=0;i<=N;i++){const x=xmax*i/N+1e-9, y=dens(x); pts.push([x,y]); if (isFinite(y)&&x>xmax*0.03) ymax=Math.max(ymax,y);}
+  ymax*=1.1;
+  const X=x=>m.l+(W-m.l-m.r)*x/xmax, Y=y=>H-m.b-(H-m.t-m.b)*Math.min(y,ymax)/ymax;
+  const line=pts.map((p,i)=>(i?"L":"M")+X(p[0]).toFixed(1)+","+Y(p[1]).toFixed(1)).join("");
+  const off = obs>xmax;
+  const shade=pts.filter(p=>p[0]>=Math.min(obs,xmax)); let area="";
+  if (shade.length>1) area="M"+X(shade[0][0])+","+Y(0)+shade.map(p=>"L"+X(p[0]).toFixed(1)+","+Y(p[1]).toFixed(1)).join("")+"L"+X(xmax)+","+Y(0)+"Z";
+  const {t}=niceTicks(0,xmax,6);
+  const xo=X(Math.min(obs,xmax));
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Distribución bajo H0">
+    <line class="ax" x1="${m.l}" x2="${W-m.r}" y1="${Y(0)}" y2="${Y(0)}"/>
+    ${t.map(v=>`<text x="${X(v)}" y="${H-m.b+16}" text-anchor="middle">${fmt(v,decOf(t[1]-t[0]||1))}</text>`).join("")}
+    <text x="${(W)/2}" y="${H-4}" text-anchor="middle">${xLabel}</text>
+    ${area?`<path d="${area}" style="fill:var(--rojo);opacity:.5"/>`:""}
+    <path d="${line}" style="fill:none;stroke:var(--azul);stroke-width:2"/>
+    <line x1="${X(crit)}" x2="${X(crit)}" y1="${m.t+10}" y2="${Y(0)}" style="stroke:var(--muted);stroke-dasharray:4 3"/>
+    <text x="${X(crit)}" y="${m.t+4}" text-anchor="middle">crítico ${fmt(crit,2)}</text>
+    <line x1="${xo}" x2="${xo}" y1="${m.t-8}" y2="${Y(0)}" style="stroke:var(--ink);stroke-width:2"/>
+    <text class="ink" x="${Math.min(xo+6,W-m.r)}" y="${m.t-14}" text-anchor="${xo>W*0.6?"end":"start"}" style="font-weight:600">${fmtObs}${off?" (fuera del gráfico →)":""}</text>
+  </svg>`;
+}
+</script>
+<script>
+"use strict";
+const LETRAS = ["A","B","C","D","E"];
+
+/* Gráfico de puntos por grupo. view: datos | dentro | entre */
+function stripChart(el, groups, labels, view = "datos"){
+  const W=720,H=290,m={l:46,r:14,t:14,b:44};
+  const all=groups.flat(); let lo=Math.min(...all), hi=Math.max(...all); const pad=(hi-lo||1)*0.08; lo-=pad; hi+=pad;
+  const {t,step}=niceTicks(lo,hi,6), d=decOf(step);
+  const k=groups.length, band=(W-m.l-m.r)/k;
+  const X=j=>m.l+band*(j+0.5), Y=v=>H-m.b-(H-m.t-m.b)*(v-lo)/(hi-lo);
+  const ms=groups.map(mean), gm=mean(all);
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Observaciones por grupo">`;
+  t.forEach(v=>{s+=`<line class="ax" x1="${m.l}" x2="${W-m.r}" y1="${Y(v)}" y2="${Y(v)}" style="opacity:.6"/><text x="${m.l-8}" y="${Y(v)+4}" text-anchor="end">${fmt(v,d)}</text>`;});
+  const ptOp = view==="entre" ? 0.25 : 0.75;
+  groups.forEach((g,j)=>{
+    const w=Math.min(band*0.5,120);
+    g.forEach((v,i)=>{
+      const jx=X(j)+(((i*0.6180339887)%1)-0.5)*w;
+      if (view==="dentro") s+=`<line x1="${jx.toFixed(1)}" x2="${jx.toFixed(1)}" y1="${Y(v).toFixed(1)}" y2="${Y(ms[j]).toFixed(1)}" style="stroke:var(--azul);opacity:.45"/>`;
+      s+=`<circle cx="${jx.toFixed(1)}" cy="${Y(v).toFixed(1)}" r="${g.length>60?2.6:3.6}" style="fill:var(--azul);opacity:${ptOp}"/>`;
+    });
+    s+=`<line x1="${X(j)-w/2-8}" x2="${X(j)+w/2+8}" y1="${Y(ms[j])}" y2="${Y(ms[j])}" style="stroke:var(--rojo);stroke-width:3"/>`;
+    if (view==="entre" && Math.abs(Y(ms[j])-Y(gm))>3){
+      const up=ms[j]>gm, y2=Y(ms[j])+(up?5:-5);
+      s+=`<line x1="${X(j)}" x2="${X(j)}" y1="${Y(gm)}" y2="${y2}" style="stroke:var(--rojo);stroke-width:3"/><path d="M${X(j)-6},${y2+(up?4:-4)} L${X(j)},${Y(ms[j])} L${X(j)+6},${y2+(up?4:-4)}Z" style="fill:var(--rojo)"/>`;
+    }
+    s+=`<text class="ink" x="${X(j)}" y="${H-m.b+18}" text-anchor="middle" style="font-weight:600">${labels[j]}</text><text x="${X(j)}" y="${H-m.b+34}" text-anchor="middle">media ${fmt(ms[j],2)}</text>`;
+  });
+  s+=`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(gm)}" y2="${Y(gm)}" style="stroke:var(--ink);stroke-dasharray:6 4;opacity:.7"/></svg>`;
+  el.innerHTML=s;
+}
+function verdictHTML(p, alpha, stat, read){
+  const r=p<alpha;
+  return `<span class="pill ${r?"rech":"norech"}">${r?"Rechazamos H₀":"No rechazamos H₀"}</span><div class="stat">${stat}</div><div class="read">${read}</div>`;
+}
+function segInit(id, onChange){
+  const el=$(id);
+  el.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;el.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));onChange(b.dataset.v);});
+}
+function meterHTML(label, val, color){
+  return `<div class="meter"><span>${label}</span><div class="track"><div class="fill" style="width:${(val*100).toFixed(1)}%;background:${color}"></div><div class="five" style="left:5%"></div></div><span class="v">${fmt(val*100,1)}%</span></div>`;
+}
+
+/* ================= Estado compartido ANOVA / Tukey ================= */
+const A = {k:3, mus:[10,13,11,12,9], sd:2, hetero:false, n:15, dist:"normal", view:"datos", seed:0, noise:[], alpha:0.05};
+function genNoise(){const r0=rnd; rnd=mulberry32(A.seed); A.noise=[0,1,2,3,4].map(()=>Array.from({length:100},()=>rnoise(A.dist))); rnd=r0;}
+function newSeed(){A.seed=(rnd()*4294967296)>>>0; genNoise();}
+const sdFactor = j => A.hetero ? 1+0.75*j : 1;
+function aGroups(){return A.mus.slice(0,A.k).map((mu,j)=>A.noise[j].slice(0,A.n).map(z=>mu+A.sd*sdFactor(j)*z));}
+function aLabels(){return LETRAS.slice(0,A.k).map(l=>"Grupo "+l);}
+
+function buildMeans(containerId){
+  const c=$(containerId); c.innerHTML="";
+  for (let j=0;j<A.k;j++){
+    const f=document.createElement("div"); f.className="field";
+    f.innerHTML=`<label for="${containerId}-${j}">Media poblacional ${LETRAS[j]} <output>${fmt(A.mus[j],1)}</output></label><input type="range" id="${containerId}-${j}" min="0" max="20" step="0.1" value="${A.mus[j]}">`;
+    f.querySelector("input").addEventListener("input",e=>{A.mus[j]=+e.target.value; f.querySelector("output").textContent=fmt(A.mus[j],1); renderActive();});
+    c.appendChild(f);
+  }
+}
+function syncMeans(){["a-means","t-means"].forEach(id=>{for(let j=0;j<A.k;j++){const i=$(id+"-"+j);if(i){i.value=A.mus[j];i.previousElementSibling.querySelector("output").textContent=fmt(A.mus[j],1);}}});}
+
+const VIEWNOTE = {
+  datos:"Cada punto es una observación. La pregunta del ANOVA: ¿las rayas rojas están más separadas de lo que produciría el azar, dado cuánto se dispersan los puntos?",
+  dentro:"Dentro de grupos (ruido): distancia de cada punto a la media de su grupo. Sumando esas distancias al cuadrado se obtiene SC dentro.",
+  entre:"Entre grupos (señal): distancia de cada media de grupo a la media general, ponderada por n. Sumando al cuadrado se obtiene SC entre."
+};
+
+function renderAnova(){
+  const g=aGroups(), a=anova(g), w=welchAnova(g), kw=kruskal(g);
+  $("a-sub").textContent=`${A.k} grupos de ${A.n} · N = ${a.N}`;
+  stripChart($("a-strip"), g, aLabels(), A.view);
+  $("a-viewnote").textContent=VIEWNOTE[A.view];
+  const rej=a.p<0.05;
+  $("a-verdict").innerHTML=verdictHTML(a.p,0.05,
+    `F = ${fmt(a.F,2)} con ${a.gl1} y ${a.gl2} gl, ${pTxt(a.p)}`,
+    rej ? `Las medias están muy separadas respecto de la variabilidad interna: hay evidencia de que <b>al menos un grupo</b> difiere. ¿Cuáles? Mirá la pestaña Tukey.`
+        : `Las diferencias entre medias son compatibles con el azar muestral. No prueba que las medias sean iguales: puede faltar n o sobrar ruido.`);
+  const pe=(a.eta2*100);
+  $("a-scbar").innerHTML=`<div style="width:${pe}%;background:var(--rojo)" title="Entre">${pe>=12?"Entre "+fmt(pe,1)+"%":""}</div><div style="width:${100-pe}%;background:var(--azul)" title="Dentro">${100-pe>=14?"Dentro "+fmt(100-pe,1)+"%":""}</div>`;
+  $("a-table").innerHTML=`<thead><tr><th>Fuente</th><th>SC</th><th>gl</th><th>CM</th><th>F</th><th>p-valor</th></tr></thead><tbody>
+    <tr><td>Entre grupos</td><td class="num">${fmt(a.sce,1)}</td><td class="num">${a.gl1}</td><td class="num">${fmt(a.cme,2)}</td><td class="num">${fmt(a.F,2)}</td><td class="num">${fmtP(a.p)}</td></tr>
+    <tr><td>Dentro de grupos</td><td class="num">${fmt(a.scd,1)}</td><td class="num">${a.gl2}</td><td class="num">${fmt(a.cmd,2)}</td><td></td><td></td></tr>
+    <tr class="tot"><td>Total</td><td class="num">${fmt(a.sct,1)}</td><td class="num">${a.N-1}</td><td></td><td></td><td></td></tr></tbody>`
+    +`<caption>η² = SC entre / SC total = ${fmt(a.eta2,3)}: el grupo explica el ${fmt(pe,1)}% de la variabilidad</caption>`;
+  densityChart($("a-fcurve"), x=>dF(x,a.gl1,a.gl2), a.F, qF(0.95,a.gl1,a.gl2), `F(${a.gl1}, ${a.gl2}) si H₀ fuera cierta`, `F observado = ${fmt(a.F,2)}`);
+  const chip=p=>`<span class="pill ${p<0.05?"rech":"norech"}" style="display:inline-block;margin-top:6px">${p<0.05?"Rechaza H₀":"No rechaza H₀"}</span>`;
+  const sds=g.map(x=>Math.sqrt(variance(x))), ratio=Math.max(...sds)/Math.min(...sds);
+  $("a-alt").innerHTML=`
+    <div><h3>ANOVA clásico</h3><p class="when">Supone normalidad y varianzas parecidas.</p><div class="stat">F = ${fmt(a.F,2)}, ${pTxt(a.p)}</div>${chip(a.p)}</div>
+    <div><h3>ANOVA de Welch</h3><p class="when">Para varianzas distintas. Sigue comparando medias.</p><div class="stat">F = ${fmt(w.F,2)}, gl = ${w.gl1} y ${fmt(w.gl2,1)}, ${pTxt(w.p)}</div>${chip(w.p)}</div>
+    <div><h3>Kruskal-Wallis</h3><p class="when">Para asimetría u outliers. Compara rangos: si algún grupo tiende a tener valores más altos.</p><div class="stat">H = ${fmt(kw.H,2)}, ${kw.gl} gl, ${pTxt(kw.p)}</div>${chip(kw.p)}</div>`
+    +`<p class="note" style="grid-column:1/-1">Desvío muestral más grande / más chico = ${fmt(ratio,2)}${ratio>2?" (más de 2: conviene Welch)":""}. ε² de Kruskal-Wallis = ${fmt(kw.eps2,3)}, comparable al η² = ${fmt(a.eta2,3)}.</p>`;
+  $("a-code").innerHTML=`<span class="c"># d: data frame con una columna y (numérica) y grupo (factor)</span>
+modelo &lt;- aov(y ~ grupo, data = d)
+summary(modelo)                   <span class="c"># F = ${fmt(a.F,2)}, p = ${fmtP(a.p)}</span>
+oneway.test(y ~ grupo, data = d)  <span class="c"># Welch: F = ${fmt(w.F,2)}, p = ${fmtP(w.p)}</span>
+kruskal.test(y ~ grupo, data = d) <span class="c"># H = ${fmt(kw.H,2)}, p = ${fmtP(kw.p)}</span>`;
+}
+
+function simAnova(){
+  const btn=$("a-sim"); btn.disabled=true; btn.textContent="Simulando…";
+  setTimeout(()=>{
+    const B=1000; let ra=0,rw=0,rk=0;
+    for (let b=0;b<B;b++){
+      const g=A.mus.slice(0,A.k).map((mu,j)=>Array.from({length:A.n},()=>mu+A.sd*sdFactor(j)*rnoise(A.dist)));
+      if (anova(g).p<0.05) ra++; if (welchAnova(g).p<0.05) rw++; if (kruskal(g).p<0.05) rk++;
+    }
+    const iguales=A.mus.slice(0,A.k).every(v=>v===A.mus[0]);
+    const dn={normal:"normales",lognormal:"asimétricos",t3:"con outliers"}[A.dist];
+    $("a-simres").innerHTML=`<p class="note">${B} muestras, ${A.k} grupos de ${A.n}, datos ${dn}${A.hetero?", varianzas distintas":""}. ${iguales?"<b>Las medias poblacionales son iguales</b>: todo rechazo es un falso positivo. La línea punteada marca el 5%.":"<b>Las medias poblacionales difieren</b>: el porcentaje de rechazo es la potencia (más es mejor)."}</p>`
+      + meterHTML("ANOVA clásico", ra/B, "var(--azul)") + meterHTML("Welch", rw/B, "var(--gris)") + meterHTML("Kruskal-Wallis", rk/B, "var(--rojo)");
+    btn.disabled=false; btn.textContent="Simular 1.000 muestras";
+  }, 30);
+}
+
+/* ================= Tukey ================= */
+function renderTukey(){
+  const g=aGroups(), tk=tukey(g, A.alpha), a=tk.a, lab=LETRAS.slice(0,A.k);
+  $("t-alpha-o").textContent=fmt(A.alpha*100,0)+"%";
+  const nsig=tk.pares.filter(p=>p.p<A.alpha).length, nsigT=tk.pares.filter(p=>p.pt<A.alpha).length;
+  $("t-sub").textContent=`${fmt((1-A.alpha)*100,0)}% de confianza conjunta`;
+  $("t-verdict").innerHTML=`<span class="pill ${nsig?"rech":"norech"}">${nsig} de ${tk.pares.length} pares difieren</span><div class="stat">ANOVA: F = ${fmt(a.F,2)}, ${pTxt(a.p)} · q crítico = ${fmt(tk.qc,3)} (k = ${a.k}, ${a.gl2} gl)</div><div class="read">${nsig?"Los pares en rojo tienen una diferencia de medias mayor que su umbral HSD.":"Ningún par supera su umbral HSD: no podemos distinguir ninguna diferencia del azar."} Con t-tests sin corregir serían ${nsigT}.</div>`;
+  // Forest plot
+  const P=tk.pares, W=720, rowH=34, m={l:70,r:20,t:10,b:34}, H=m.t+m.b+rowH*P.length;
+  let lo=Math.min(0,...P.map(p=>p.lo)), hi=Math.max(0,...P.map(p=>p.hi)); const pad=(hi-lo)*0.05; lo-=pad; hi+=pad;
+  const {t,step}=niceTicks(lo,hi,7), d=decOf(step), X=v=>m.l+(W-m.l-m.r)*(v-lo)/(hi-lo);
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Intervalos de Tukey">`;
+  t.forEach(v=>{s+=`<line class="ax" x1="${X(v)}" x2="${X(v)}" y1="${m.t}" y2="${H-m.b}" style="opacity:.5"/><text x="${X(v)}" y="${H-m.b+16}" text-anchor="middle">${fmt(v,d)}</text>`;});
+  s+=`<line x1="${X(0)}" x2="${X(0)}" y1="${m.t}" y2="${H-m.b}" style="stroke:var(--ink);stroke-dasharray:5 4"/>`;
+  s+=`<text x="${(W+m.l)/2}" y="${H-2}" text-anchor="middle">Diferencia de medias (segundo grupo − primero)</text>`;
+  P.forEach((p,i)=>{
+    const y=m.t+rowH*(i+0.5), c=p.p<A.alpha?"var(--rojo)":"var(--azul)";
+    s+=`<text class="ink" x="${m.l-12}" y="${y+4}" text-anchor="end" style="font-weight:600">${lab[p.j]} − ${lab[p.i]}</text>
+      <line x1="${X(p.lo)}" x2="${X(p.hi)}" y1="${y}" y2="${y}" style="stroke:${c};stroke-width:2.5"/>
+      <line x1="${X(p.lo)}" x2="${X(p.lo)}" y1="${y-7}" y2="${y+7}" style="stroke:${c};stroke-width:2"/><line x1="${X(p.hi)}" x2="${X(p.hi)}" y1="${y-7}" y2="${y+7}" style="stroke:${c};stroke-width:2"/>
+      <circle cx="${X(p.dif)}" cy="${y}" r="5" style="fill:${c}"/>`;
+  });
+  $("t-forest").innerHTML=s+"</svg>";
+  $("t-table").innerHTML=`<thead><tr><th>Par</th><th>Diferencia</th><th>IC inferior</th><th>IC superior</th><th>Umbral HSD</th><th>p ajustado (Tukey)</th><th>p t-test sin corregir</th></tr></thead><tbody>`
+    + P.map(p=>`<tr class="${p.p<A.alpha?"sig":""}"><td>${lab[p.j]} − ${lab[p.i]}</td><td class="num">${fmt(p.dif,2)}</td><td class="num">${fmt(p.lo,2)}</td><td class="num">${fmt(p.hi,2)}</td><td class="num">${fmt(p.hsd,2)}</td><td class="num">${fmtP(p.p)}</td><td class="num">${fmtP(p.pt)}</td></tr>`).join("") + "</tbody>";
+  $("t-hsdnote").innerHTML=`Regla: el par difiere si |diferencia| &gt; HSD = q<sub>${fmt(1-A.alpha,2)}; ${a.k}, ${a.gl2}</sub> × √(CM<sub>dentro</sub>/2 × (1/n<sub>i</sub> + 1/n<sub>j</sub>)) = ${fmt(tk.qc,3)} × √(${fmt(a.cmd,2)}/2 × 2/${A.n}) = <b>${fmt(P[0].hsd,2)}</b>. El p ajustado de Tukey siempre es mayor que el del t-test sin corregir: ese es el precio de controlar el error de toda la familia.`;
+  $("t-code").innerHTML=`modelo &lt;- aov(y ~ grupo, data = d)
+summary(modelo)                          <span class="c"># F global</span>
+TukeyHSD(modelo, conf.level = ${fmt(1-A.alpha,2).replace(",",".")})   <span class="c"># diff, lwr, upr, p adj</span>
+plot(TukeyHSD(modelo))                   <span class="c"># los intervalos del gráfico</span>
+pairwise.t.test(d$y, d$grupo, p.adjust.method = "none")  <span class="c"># sin corregir, para comparar</span>`;
+}
+function simFwer(){
+  const btn=$("t-fsim"); btn.disabled=true; btn.textContent="Simulando…";
+  setTimeout(()=>{
+    const k=+$("t-fk").value, n=20, N=k*n, B=1000, qc=qtukey(0.95,k,N-k), tc=qT(0.975,N-k); let rt=0, rk=0;
+    for (let b=0;b<B;b++){
+      const ms=[]; let ss=0;
+      for (let j=0;j<k;j++){let s=0; const y=Array.from({length:n},()=>rnorm()); y.forEach(v=>s+=v); const m=s/n; ms.push(m); y.forEach(v=>ss+=(v-m)**2);}
+      const cmd=ss/(N-k), rango=Math.max(...ms)-Math.min(...ms);
+      if (rango/Math.sqrt(2*cmd/n)>tc) rt++; if (rango/Math.sqrt(cmd/n)>qc) rk++;
+    }
+    const pares=k*(k-1)/2;
+    $("t-fres").innerHTML=`<p class="note">${B} estudios con ${k} grupos iguales: ${pares} comparaciones de a pares en cada uno. Porcentaje de estudios con <b>al menos un falso positivo</b>:</p>`
+      + meterHTML("t de a pares", rt/B, "var(--rojo)") + meterHTML("Tukey HSD", rk/B, "var(--azul)")
+      + `<p class="note">Los t-tests sin corregir pierden el control a medida que crecen los pares. Tukey se mantiene cerca del 5% para cualquier cantidad de grupos.</p>`;
+    btn.disabled=false; btn.textContent="Simular 1.000 estudios bajo H₀";
+  }, 30);
+}
+
+function initAnova(){
+  A.seed=9; genNoise(); buildMeans("a-means"); buildMeans("t-means");
+  const setK=v=>{A.k=+v; buildMeans("a-means"); buildMeans("t-means"); renderActive();};
+  segInit("a-k", setK);
+  segInit("a-dist", v=>{A.dist=v; genNoise(); renderActive();});
+  segInit("a-view", v=>{A.view=v; renderActive();});
+  segInit("t-alpha", v=>{A.alpha=+v; renderActive();});
+  const sd=$("a-sd"), n=$("a-n");
+  const upd=()=>{A.sd=+sd.value; A.n=+n.value; $("a-sd-o").textContent=fmt(A.sd,1); $("a-n-o").textContent=A.n; renderActive();};
+  sd.addEventListener("input",upd); n.addEventListener("input",upd);
+  $("a-sd-o").textContent=fmt(A.sd,1); $("a-n-o").textContent=A.n;
+  $("a-hetero").addEventListener("change",e=>{A.hetero=e.target.checked; renderActive();});
+  $("a-new").addEventListener("click",()=>{newSeed(); renderActive();});
+  $("t-new").addEventListener("click",()=>{newSeed(); renderActive();});
+  $("a-h0").addEventListener("click",()=>{const m=mean(A.mus.slice(0,A.k)); for(let j=0;j<5;j++)A.mus[j]=Math.round(m*10)/10; syncMeans(); renderActive();});
+  $("a-sim").addEventListener("click",simAnova);
+  $("t-fk").addEventListener("input",e=>$("t-fk-o").textContent=e.target.value); $("t-fk-o").textContent=$("t-fk").value;
+  $("t-fsim").addEventListener("click",simFwer);
+}
+</script>
+<script>
+"use strict";
+/* ================= Chi-cuadrado ================= */
+const FILAS = ["Hasta sec. incompleto","Sec. comp. / univ. inc.","Univ. completo"];
+const COLS = ["Ocupado","Desocupado","Inactivo"];
+const COLCOL = ["var(--azul)","var(--rojo)","var(--gris)"];
+const ROWP = [0.38,0.44,0.18], COLP = [0.659,0.063,0.278];
+const PERFIL = [[0.55,0.07,0.38],[0.68,0.07,0.25],[0.84,0.03,0.13]];
+const C = {O:[[0,0,0],[0,0,0],[0,0,0]]};
+const cN = () => Math.round(50*Math.pow(400, +$("c-n").value/100));
+
+function genChi(){
+  const n=cN(), a=+$("c-a").value, probs=[];
+  for (let i=0;i<3;i++) for (let j=0;j<3;j++) probs.push(ROWP[i]*((1-a)*COLP[j]+a*PERFIL[i][j]));
+  const tot=probs.reduce((x,y)=>x+y,0), cum=[]; let s=0; probs.forEach(p=>{s+=p/tot;cum.push(s);});
+  const cnt=new Array(9).fill(0);
+  for (let t=0;t<n;t++){const u=rnd(); let k=0; while(k<8&&u>cum[k])k++; cnt[k]++;}
+  C.O=[0,1,2].map(i=>cnt.slice(3*i,3*i+3));
+  buildObs(); renderChi();
+}
+function buildObs(){
+  let h=`<caption>Observados (O)</caption><thead><tr><th></th>${COLS.map(c=>`<th>${c}</th>`).join("")}<th>Total</th></tr></thead><tbody>`;
+  C.O.forEach((r,i)=>{h+=`<tr><td>${FILAS[i]}</td>${r.map((v,j)=>`<td><input class="cell-in" type="number" min="0" step="1" value="${v}" data-i="${i}" data-j="${j}" aria-label="${FILAS[i]}, ${COLS[j]}"></td>`).join("")}<td class="num" id="c-rt${i}"></td></tr>`;});
+  h+=`<tr class="tot"><td>Total</td>${COLS.map((_,j)=>`<td class="num" id="c-ct${j}"></td>`).join("")}<td class="num" id="c-n-tot"></td></tr></tbody>`;
+  const t=$("c-obs"); t.innerHTML=h;
+  t.querySelectorAll("input").forEach(inp=>inp.addEventListener("input",()=>{const v=Math.max(0,Math.round(+inp.value||0)); C.O[+inp.dataset.i][+inp.dataset.j]=v; renderChi();}));
+}
+function renderChi(){
+  const O=C.O, rt=O.map(r=>r.reduce((a,b)=>a+b,0)), ct=[0,1,2].map(j=>O.reduce((s,r)=>s+r[j],0)), n=rt.reduce((a,b)=>a+b,0);
+  rt.forEach((v,i)=>$("c-rt"+i).textContent=fmt(v,0)); ct.forEach((v,j)=>$("c-ct"+j).textContent=fmt(v,0)); $("c-n-tot").textContent=fmt(n,0);
+  const warn=$("c-warn");
+  if (rt.some(v=>v===0)||ct.some(v=>v===0)){
+    warn.hidden=false; warn.textContent="Hay una fila o columna sin casos: no se pueden calcular los esperados. Cargá al menos un caso en cada fila y columna.";
+    return;
+  }
+  const r=chisq(O);
+  $("c-esp").innerHTML=`<caption>Esperados bajo independencia (E)</caption><thead><tr><th></th>${COLS.map(c=>`<th>${c}</th>`).join("")}<th>Total</th></tr></thead><tbody>`
+    + r.E.map((row,i)=>`<tr><td>${FILAS[i]}</td>${row.map(e=>`<td class="num">${fmt(e,1)}</td>`).join("")}<td class="num">${fmt(r.rt[i],0)}</td></tr>`).join("")
+    + `<tr class="tot"><td>Total</td>${r.ct.map(v=>`<td class="num">${fmt(v,0)}</td>`).join("")}<td class="num">${fmt(n,0)}</td></tr></tbody>`;
+  $("c-ejemplo").innerHTML=`De dónde sale un esperado: <b>Univ. completo × Desocupado</b> = (total fila × total columna) / total general = ${fmt(r.rt[2],0)} × ${fmt(r.ct[1],0)} / ${fmt(n,0)} = <b>${fmt(r.E[2][1],1)}</b> (observados: ${fmt(O[2][1],0)}). Los esperados mantienen los mismos totales: solo redistribuyen las celdas como si no hubiera asociación.`;
+  if (r.minE<1 || r.pct5<0.8){
+    warn.hidden=false;
+    warn.innerHTML=`Esperados chicos: el menor es ${fmt(r.minE,1)} y solo el ${fmt(r.pct5*100,0)}% de las celdas tiene E ≥ 5. La aproximación χ² no es confiable. Alternativas: <code>fisher.test(tabla)</code>, agrupar categorías o <code>chisq.test(tabla, simulate.p.value = TRUE)</code>.`;
+  } else warn.hidden=true;
+  $("c-verdict").innerHTML=verdictHTML(r.p,0.05,
+    `χ² = ${fmt(r.x2,2)} con ${r.gl} gl, ${pTxt(r.p)} · V de Cramér = ${fmt(r.V,3)}`,
+    (r.p<0.05 ? "Lo observado se aleja de lo esperado bajo independencia más de lo que explicaría el azar: las variables <b>están asociadas</b> (lo que no implica causalidad)."
+              : "Las diferencias entre observados y esperados son compatibles con el azar: no hay evidencia de asociación.")
+    + ` V va de 0 (independencia) a 1 (asociación perfecta) y, a diferencia de χ², no crece con n.`);
+  const prof=(row,tot)=>`<div class="bar">${row.map((v,j)=>{const p=tot?v/tot*100:0;return `<div style="width:${p}%;background:${COLCOL[j]}" title="${COLS[j]}: ${fmt(p,1)}%">${p>=7?fmt(p,0):""}</div>`;}).join("")}</div>`;
+  $("c-prof").innerHTML=O.map((row,i)=>`<span>${FILAS[i]}</span>${prof(row,r.rt[i])}`).join("") + `<span><b>Total</b></span>${prof(r.ct,n)}`;
+  $("c-contrib").innerHTML=`<thead><tr><th></th>${COLS.map(c=>`<th>${c}</th>`).join("")}</tr></thead><tbody>`
+    + r.contrib.map((row,i)=>`<tr><td>${FILAS[i]}</td>${row.map(v=>`<td class="num">${fmt(v,2)}</td>`).join("")}</tr>`).join("")
+    + `</tbody><caption>Suma de las 9 celdas = χ² = ${fmt(r.x2,2)}</caption>`;
+  $("c-res").innerHTML=`<thead><tr><th></th>${COLS.map(c=>`<th style="text-align:center">${c}</th>`).join("")}</tr></thead><tbody>`
+    + r.res.map((row,i)=>`<tr><td>${FILAS[i]}</td>${row.map(v=>{const a=Math.min(Math.abs(v)/6,1)*80;return `<td class="h" style="background:color-mix(in srgb, ${v>0?"var(--rojo)":"var(--azul)"} ${a.toFixed(0)}%, transparent)">${fmt(v,1)}</td>`;}).join("")}</tr>`).join("") + "</tbody>";
+  densityChart($("c-curve"), x=>dChi(x,r.gl), r.x2, qChi(0.95,r.gl), `χ² con ${r.gl} gl si H₀ fuera cierta`, `χ² observado = ${fmt(r.x2,2)}`);
+  $("c-code").innerHTML=`tabla &lt;- matrix(c(${O.map(x=>x.join(", ")).join(",\n                  ")}),
+                nrow = 3, byrow = TRUE)
+prueba &lt;- chisq.test(tabla)
+prueba              <span class="c"># X-squared = ${fmt(r.x2,2)}, df = ${r.gl}, p = ${fmtP(r.p)}</span>
+prueba$expected     <span class="c"># chequear que no haya esperados chicos</span>
+prueba$stdres       <span class="c"># residuos estandarizados</span>
+sqrt(prueba$statistic / (sum(tabla) * (min(dim(tabla)) - 1)))  <span class="c"># V de Cramér = ${fmt(r.V,3)}</span>`;
+}
+function initChi(){
+  const on=()=>$("c-n-o").textContent=fmt(cN(),0), oa=()=>$("c-a-o").textContent=fmt(+$("c-a").value,2);
+  $("c-n").addEventListener("input",on); $("c-a").addEventListener("input",oa); on(); oa();
+  $("c-gen").addEventListener("click",genChi);
+  $("c-x10").addEventListener("click",()=>{C.O=C.O.map(r=>r.map(v=>v*10)); buildObs(); renderChi();});
+  C.O=[[228,24,140],[304,29,107],[146,4,18]]; buildObs();
+}
+
+/* ================= Dos grupos ================= */
+const D = {dist:"normal"};
+const parseVals = s => s.trim().split(/[\s;]+/).map(v=>parseFloat(v.replace(",","."))).filter(v=>isFinite(v));
+function renderDos(){
+  const a=parseVals($("d-a").value), b=parseVals($("d-b").value);
+  if (a.length<2||b.length<2){ $("d-res").innerHTML=`<div class="card"><p class="note warn">Cada grupo necesita al menos 2 valores numéricos.</p></div>`; return; }
+  stripChart($("d-strip"), [a,b], ["Grupo A","Grupo B"], "datos");
+  const t=welchT(a,b), w=mannWhitney(a,b);
+  const pill=p=>`<span class="pill ${p<0.05?"rech":"norech"}">${p<0.05?"Rechaza H₀":"No rechaza H₀"}</span>`;
+  $("d-res").innerHTML=`
+   <div class="card"><h2>t-test de Welch <small>paramétrico</small></h2>
+     <p class="hint">Compara medias. Sensible a outliers: un valor extremo infla la varianza.</p>
+     <div class="verdict" style="margin-top:8px">${pill(t.p)}<div class="stat">t = ${fmt(t.t,2)}, gl = ${fmt(t.df,1)}, ${pTxt(t.p)}</div><div class="read">Medias: A = ${fmt(t.mx,2)}, B = ${fmt(t.my,2)}</div></div></div>
+   <div class="card"><h2>Mann-Whitney <small>no paramétrico</small></h2>
+     <p class="hint">Compara rangos. Pregunta si un grupo tiende a tener valores más altos.</p>
+     <div class="verdict" style="margin-top:8px">${pill(w.p)}<div class="stat">W = ${fmt(w.W,1)}, ${pTxt(w.p)}</div><div class="read">P(B &gt; A) estimada = ${fmt(w.probBA,3)} (0,5 si no hay diferencia)</div></div></div>`;
+  const n1=a.length, fmtV=v=>fmt(v, Number.isInteger(v)?0:2);
+  $("d-ranks").innerHTML=`<thead><tr><th></th><th style="text-align:left">Valores</th><th style="text-align:left">Rangos</th><th>Suma de rangos</th></tr></thead><tbody>`
+    + [[a,w.r.slice(0,n1),"Grupo A"],[b,w.r.slice(n1),"Grupo B"]].map(([v,r,l])=>`<tr><td>${l}</td><td class="num" style="text-align:left;white-space:normal">${v.map(fmtV).join("  ")}</td><td class="num" style="text-align:left;white-space:normal">${r.map(x=>fmt(x,Number.isInteger(x)?0:1)).join("  ")}</td><td class="num">${fmt(r.reduce((s,x)=>s+x,0),1)}</td></tr>`).join("") + "</tbody>";
+  const rv=v=>v.map(x=>String(x)).join(", ");
+  $("d-code").innerHTML=`a &lt;- c(${esc(rv(a))})
+b &lt;- c(${esc(rv(b))})
+t.test(b, a)        <span class="c"># Welch: t = ${fmt(t.t,2)}, p = ${fmtP(t.p)}</span>
+wilcox.test(b, a)   <span class="c"># Mann-Whitney, p = ${fmtP(w.p)}</span>`;
+}
+function initDos(){
+  ["d-a","d-b"].forEach(id=>$(id).addEventListener("input",renderDos));
+  $("d-ej1").addEventListener("click",()=>{$("d-a").value="12 15 18 20 22"; $("d-b").value="19 24 27 30 33"; renderDos();});
+  $("d-ej2").addEventListener("click",()=>{$("d-a").value="12 15 18 20 22"; $("d-b").value="19 24 27 30 330"; renderDos();});
+  segInit("d-dist", v=>D.dist=v);
+  const od=()=>$("d-dif-o").textContent=fmt(+$("d-dif").value,1)+" desvíos", on=()=>$("d-n-o").textContent=$("d-n").value;
+  $("d-dif").addEventListener("input",od); $("d-n").addEventListener("input",on); od(); on();
+  $("d-sim").addEventListener("click",()=>{
+    const n=+$("d-n").value, dif=+$("d-dif").value, gen=mu=>Array.from({length:n},()=>Math.round((mu+4*rnoise(D.dist))*10)/10);
+    $("d-a").value=gen(20).join(" "); $("d-b").value=gen(20+4*dif).join(" "); renderDos();
+  });
+}
+
+/* ================= Pestañas ================= */
+let active="anova";
+function renderActive(){ ({anova:renderAnova, tukey:renderTukey, chi:renderChi, dos:renderDos})[active](); }
+document.querySelectorAll("nav.tabs button").forEach(b=>b.addEventListener("click",()=>{
+  active=b.dataset.tab;
+  document.querySelectorAll("nav.tabs button").forEach(x=>x.setAttribute("aria-selected",x===b?"true":"false"));
+  document.querySelectorAll("section.panel").forEach(s=>s.hidden=(s.id!=="tab-"+active));
+  renderActive();
+}));
+initAnova(); initChi(); initDos(); renderActive();
+</script>
+</body>
+</html>
