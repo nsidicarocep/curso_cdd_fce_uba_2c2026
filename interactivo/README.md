@@ -20,6 +20,7 @@ Este es un material nuevo y de prueba, por lo que si encuentran errores o proble
 | Práctica de R | Escribir código de R base y Tidyverse: completar funciones, argumentos y expresiones, encontrar errores y armar pipelines completos, con pistas y puntaje | [Práctica de R](./practica_r/) |
 | Muestreo, bootstrap y permutación | Distinguir población, muestra y distribución muestral; ver la ley de los grandes números y sus límites; construir remuestras bootstrap, intervalos de confianza y tests de permutación | [De la muestra a la conclusión](./remuestreo/) |
 | ANOVA, Tukey y chi-cuadrado | Simular tests y ver cómo cambian el estadístico, el p-valor y la decisión: ANOVA de un factor (con Welch y Kruskal-Wallis cuando fallan los supuestos), comparaciones de a pares con Tukey HSD, chi-cuadrado de independencia con esperados y residuos, y t-test vs. Mann-Whitney para dos grupos | [Laboratorio de tests](./anova_chicuadrado/) |
+| Datos faltantes, outliers y transformaciones | Elegir la forma de una variable (normal, asimétrica, colas pesadas, bimodal, con ceros) y comparar: imputación con media, mediana, por grupo, regresión y PMM bajo MCAR, MAR y MNAR; detección de outliers con IQR, z-score y z robusto, efecto masking y winsorización; y cómo log, z-score y min-max cambian (o no) la forma. Cierra con casos para decidir qué harías | [Laboratorio de limpieza](./faltantes_outliers/) |
 
 
 ## Cómo se usan

@@ -1,0 +1,1058 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laboratorio de limpieza</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,650&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --ground:#F3F6F8; --surface:#FFFFFF; --sunk:#EAF0F4; --ink:#15212B; --muted:#586977; --rule:#D3DDE4;
+  --azul:#2C6E9B; --rojo:#C1553B; --gris:#8C9AA5; --azul-suave:#DCE9F2; --rojo-suave:#F6E1DA;
+  --ok:#2E7D4F; --warn:#B7791F; --vio:#7A5AA6; --ok-suave:#DDEFE3;
+  --f-display:"Literata", Georgia, "Times New Roman", serif;
+  --f-body:"Public Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", Consolas, "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0F161C; --surface:#16202A; --sunk:#1C2934; --ink:#E4EBF0; --muted:#95A5B1; --rule:#2B3A46;
+    --azul:#6AA8D4; --rojo:#E27F63; --gris:#7D8C97; --azul-suave:#1D3446; --rojo-suave:#43271F;
+    --ok:#5DBB84; --warn:#E0A74A; --vio:#B59BE0; --ok-suave:#1B3526;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0F161C; --surface:#16202A; --sunk:#1C2934; --ink:#E4EBF0; --muted:#95A5B1; --rule:#2B3A46;
+  --azul:#6AA8D4; --rojo:#E27F63; --gris:#7D8C97; --azul-suave:#1D3446; --rojo-suave:#43271F;
+  --ok:#5DBB84; --warn:#E0A74A; --vio:#B59BE0; --ok-suave:#1B3526;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55;margin:0}
+h1,h2,h3{font-family:var(--f-display);font-weight:650;text-wrap:balance;margin:0;line-height:1.2}
+.wrap{max-width:1240px;margin:0 auto;padding:0 20px}
+@media (max-width:600px){.wrap{padding:0 16px}}
+header.top{padding:26px 0 0}
+.curso{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+header.top h1{font-size:30px;margin-top:4px}
+header.top p{margin:6px 0 0;color:var(--muted);max-width:74ch}
+nav.tabs{display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--rule);margin-top:16px}
+nav.tabs button{font:inherit;background:none;border:0;border-bottom:3px solid transparent;padding:10px 14px 9px;cursor:pointer;color:var(--muted);text-align:left;display:flex;flex-direction:column;gap:1px}
+nav.tabs button b{font-weight:700;color:var(--ink);font-size:15px}
+nav.tabs button span{font-size:12.5px}
+nav.tabs button[aria-selected="true"]{border-bottom-color:var(--azul)}
+nav.tabs button[aria-selected="true"] b{color:var(--azul)}
+nav.tabs button.sec b{font-weight:600}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,tr:focus-visible{outline:2px solid var(--azul);outline-offset:2px}
+/* Barra de la variable (compartida) */
+.varbar{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:14px 16px;margin-top:18px}
+@media (max-width:860px){.varbar{grid-template-columns:1fr}}
+.varbar h3{font-size:13px;font-family:var(--f-body);font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.shapes{display:flex;flex-wrap:wrap;gap:6px}
+.shapes button{font:inherit;font-size:13.5px;padding:6px 11px;border:1px solid var(--rule);border-radius:999px;background:var(--sunk);color:var(--ink);cursor:pointer}
+.shapes button[aria-pressed="true"]{background:var(--azul);border-color:var(--azul);color:#fff;font-weight:600}
+.vb-row{display:flex;gap:18px;align-items:flex-end;flex-wrap:wrap;margin-top:12px}
+.vb-row .field{min-width:200px;flex:1;max-width:320px}
+.shape-desc{font-size:13.5px;color:var(--muted);margin:10px 0 0;max-width:80ch}
+.thumb .kv{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-top:4px}
+.thumb .kv b{font-family:var(--f-mono);font-weight:600;color:var(--ink)}
+.panel{display:grid;grid-template-columns:300px minmax(0,1fr);gap:24px;padding:22px 0 60px;align-items:start}
+@media (max-width:860px){.panel{grid-template-columns:1fr}}
+aside.ctrl{position:sticky;top:12px;background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:14px}
+@media (max-width:860px){aside.ctrl{position:static}}
+.ctrl h3{font-size:13px;font-family:var(--f-body);font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label,.lbl{font-size:13px;font-weight:600;display:flex;justify-content:space-between;gap:8px}
+.field label output{font-family:var(--f-mono);font-weight:400;color:var(--muted);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--azul)}
+.seg{display:flex;border:1px solid var(--rule);border-radius:6px;overflow:hidden}
+.seg button{flex:1;font:inherit;font-size:13px;padding:6px 4px;border:0;background:var(--sunk);color:var(--muted);cursor:pointer}
+.seg button+button{border-left:1px solid var(--rule)}
+.seg button[aria-pressed="true"]{background:var(--azul);color:#fff;font-weight:600}
+.seg button:disabled{opacity:.45;cursor:not-allowed}
+.seg.col{flex-direction:column}
+.seg.col button{text-align:left;padding:7px 10px}
+.seg.col button+button{border-left:0;border-top:1px solid var(--rule)}
+.btn{font:inherit;font-weight:600;font-size:14px;border-radius:6px;padding:8px 12px;cursor:pointer;border:1px solid var(--azul);background:var(--azul);color:#fff}
+.btn.ghost{background:transparent;color:var(--azul)}
+.btn:disabled{opacity:.55;cursor:progress}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap}
+.check{display:flex;gap:8px;align-items:flex-start;font-size:13.5px}
+.check input{margin-top:4px;accent-color:var(--azul)}
+.hint{font-size:12.5px;color:var(--muted);margin:0}
+.results{display:flex;flex-direction:column;gap:18px;min-width:0}
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:16px 18px;min-width:0}
+.card h2{font-size:19px}
+.card h2 small{font-family:var(--f-body);font-weight:500;font-size:13px;color:var(--muted);margin-left:6px}
+.card>p{max-width:75ch}
+.card-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.card-head .seg{min-width:150px}
+.verdict{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;align-items:center;padding:14px 18px;border-radius:8px;border:1px solid var(--rule);background:var(--surface)}
+.verdict .pill{grid-row:span 2;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:6px 10px;border-radius:999px;white-space:nowrap}
+@media (max-width:600px){.verdict{grid-template-columns:1fr}.verdict .pill{grid-row:auto;justify-self:start}}
+.pill.rech{background:var(--rojo-suave);color:var(--rojo)}
+.pill.norech{background:var(--azul-suave);color:var(--azul)}
+.pill.okp{background:var(--ok-suave);color:var(--ok)}
+.verdict .stat{font-family:var(--f-mono);font-size:14.5px;font-variant-numeric:tabular-nums}
+.verdict .read{font-size:14px;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:18px}
+@media (max-width:600px){.grid2{grid-template-columns:1fr}}
+.scroll{overflow-x:auto}
+table.bt{border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:14px;width:100%;margin-top:8px}
+table.bt caption{text-align:left;font-size:13px;font-weight:600;color:var(--muted);padding-bottom:4px}
+table.bt th,table.bt td{padding:5px 7px;text-align:right;white-space:nowrap}
+table.bt th:first-child,table.bt td:first-child{text-align:left}
+table.bt thead th{border-top:2px solid var(--ink);border-bottom:1px solid var(--ink);font-weight:600}
+table.bt tbody tr:last-child td{border-bottom:2px solid var(--ink)}
+table.bt td.num{font-family:var(--f-mono);font-size:13px}
+table.bt tr.ref td{color:var(--muted);font-style:italic}
+table.bt tr.sel td{background:var(--azul-suave)}
+table.bt tr.sel td:first-child{font-weight:700;color:var(--azul)}
+table.bt tr.pick{cursor:pointer}
+table.bt tr.pick:hover td{background:var(--sunk)}
+table.bt tr.pick.sel:hover td{background:var(--azul-suave)}
+table.bt td.bad{color:var(--rojo);font-weight:600}
+table.bt td.good{color:var(--ok)}
+svg{display:block;width:100%;height:auto;overflow:visible}
+svg text{fill:var(--muted);font-family:var(--f-body);font-size:12px}
+svg .ax{stroke:var(--rule)}
+svg .ink{fill:var(--ink)}
+pre.r{font-family:var(--f-mono);font-size:12.5px;background:var(--sunk);border-radius:6px;padding:10px 12px;margin:8px 0 0;overflow-x:auto;line-height:1.5}
+pre.r .c{color:var(--muted)}
+.legend{display:flex;gap:6px 16px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:6px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.legend i.o{background:transparent!important;border:1.5px solid var(--gris);border-radius:50%}
+.legend i.ln{height:0;border-top:2px dashed var(--ink);border-radius:0;vertical-align:3px;background:none}
+.note{font-size:13.5px;color:var(--muted);border-left:3px solid var(--rule);padding:2px 0 2px 12px;margin:10px 0 0;max-width:78ch}
+.note.warn{border-left-color:var(--warn);color:var(--ink)}
+.note.good{border-left-color:var(--ok);color:var(--ink)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.chips span{font-family:var(--f-mono);font-size:13px;background:var(--sunk);border-radius:6px;padding:5px 9px}
+.chips span.real{background:transparent;border:1px dashed var(--ink)}
+.minis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:10px}
+.minis>div{border:1px solid var(--rule);border-radius:6px;padding:8px 10px}
+.minis>div.sel{border-color:var(--azul);box-shadow:0 0 0 1px var(--azul)}
+.minis h3{font-family:var(--f-body);font-size:13.5px;font-weight:700}
+.minis .sk{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.recs{margin:8px 0 0;padding-left:20px;max-width:80ch}
+.recs li{margin:6px 0}
+/* Quiz */
+.quiz-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.score{font-family:var(--f-mono);font-size:14px}
+.q{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:16px 18px}
+.q .num{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.q h3{font-size:17px;margin:4px 0 10px;max-width:80ch}
+.q .ops{display:flex;flex-direction:column;gap:8px}
+.q .ops button{font:inherit;font-size:14px;text-align:left;padding:9px 12px;border:1px solid var(--rule);border-radius:6px;background:var(--sunk);color:var(--ink);cursor:pointer}
+.q .ops button:hover:not(:disabled){border-color:var(--azul)}
+.q .ops button:disabled{cursor:default}
+.q .ops button.right{background:var(--ok-suave);border-color:var(--ok);color:var(--ink)}
+.q .ops button.wrong{background:var(--rojo-suave);border-color:var(--rojo);color:var(--ink)}
+.q .ops button.faded{opacity:.6}
+.q .fb{font-size:14px;margin:10px 0 0;padding:8px 12px;border-radius:6px;border-left:3px solid var(--rule);background:var(--sunk);max-width:80ch}
+.q .fb.ok{border-left-color:var(--ok)}
+.q .fb.no{border-left-color:var(--rojo)}
+.q .hintbtn{font:inherit;font-size:13px;background:none;border:0;color:var(--azul);cursor:pointer;padding:0;margin-top:8px;text-decoration:underline}
+.qlist{display:flex;flex-direction:column;gap:14px;padding:22px 0 60px;max-width:900px}
+[hidden]{display:none!important}
+footer{color:var(--muted);font-size:12.5px;padding:0 0 30px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<header class="top">
+  <div class="curso">Ciencia de Datos para Economía y Negocios · FCE-UBA · Clase 12</div>
+  <h1>Laboratorio de limpieza</h1>
+  <p>Elegí la forma de la variable y mirá qué pasa al imputar faltantes, al buscar outliers y al transformarla. Los datos son simulados y se recalculan en el navegador con las mismas fórmulas que usa R.</p>
+  <nav class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-tab="imp"><b>Faltantes</b><span>MCAR, MAR, MNAR e imputación</span></button>
+    <button role="tab" aria-selected="false" data-tab="out"><b>Outliers</b><span>IQR vs. z-score, winsorizar</span></button>
+    <button role="tab" aria-selected="false" data-tab="tr"><b>Transformaciones</b><span>log, z-score, min-max</span></button>
+    <button role="tab" aria-selected="false" data-tab="dec" class="sec"><b>¿Qué harías?</b><span>Casos para decidir</span></button>
+  </nav>
+</header>
+
+<!-- ===================== VARIABLE COMPARTIDA ===================== -->
+<div class="varbar" id="varbar">
+  <div>
+    <h3>La variable: ventas de <span id="vb-n"></span> empresas (millones de $)</h3>
+    <div class="shapes" id="shapes" role="group" aria-label="Forma de la distribución"></div>
+    <p class="shape-desc" id="shape-desc"></p>
+    <div class="vb-row">
+      <div class="field"><label for="n">Cantidad de empresas <output id="n-o"></output></label><input type="range" id="n" min="50" max="500" step="10" value="200"></div>
+      <button class="btn ghost" id="new">Nueva muestra</button>
+    </div>
+  </div>
+  <div class="thumb"><div id="thumb"></div><div class="kv" id="thumb-kv"></div></div>
+</div>
+
+<!-- ===================== FALTANTES ===================== -->
+<section class="panel" id="tab-imp">
+  <aside class="ctrl">
+    <h3>Cómo faltan los datos</h3>
+    <div class="field"><label for="i-pct">Porcentaje de NA en ventas <output id="i-pct-o"></output></label><input type="range" id="i-pct" min="0" max="0.6" step="0.01" value="0.2"></div>
+    <div class="field"><span class="lbl">Mecanismo</span>
+      <div class="seg" id="i-mech"><button data-v="MCAR">MCAR</button><button data-v="MAR" aria-pressed="true">MAR</button><button data-v="MNAR">MNAR</button></div>
+    </div>
+    <p class="hint" id="i-mech-desc"></p>
+    <h3>Qué hacemos</h3>
+    <div class="seg col" id="i-method">
+      <button data-v="elim">Eliminar filas con NA</button>
+      <button data-v="media">Imputar con la media</button>
+      <button data-v="mediana">Imputar con la mediana</button>
+      <button data-v="grupo" aria-pressed="true">Mediana por sector</button>
+      <button data-v="reg">Regresión (tamaño + sector)</button>
+      <button data-v="pmm">PMM, como <code>mice</code></button>
+    </div>
+    <p class="hint">Las otras variables (sector y empleados) están completas: son las que usan la imputación por grupo, la regresión y PMM.</p>
+  </aside>
+  <div class="results">
+    <div class="verdict" id="i-verdict"></div>
+    <div class="card">
+      <div class="card-head"><h2>La distribución después de tratar los NA</h2>
+        <div class="seg" id="i-axis" aria-label="Escala del eje"><button data-v="lin" aria-pressed="true">Eje lineal</button><button data-v="log">Eje log</button></div></div>
+      <div id="i-hist"></div>
+      <div class="legend"><span><i style="background:var(--azul)"></i>valores observados</span><span><i style="background:var(--rojo)"></i>valores imputados</span><span><i style="background:none;border:1.5px solid var(--ink)"></i>distribución real completa (en la práctica no la vemos)</span></div>
+      <p class="note" id="i-histnote"></p>
+    </div>
+    <div class="card">
+      <h2>Ventas vs. tamaño de la empresa</h2>
+      <p class="hint">Cada punto es una empresa. La imputación debería caer cerca del valor real: si todos los imputados forman una línea horizontal, se perdió la relación con el tamaño.</p>
+      <div id="i-scatter"></div>
+      <div class="legend"><span><i style="background:var(--azul)"></i>observada</span><span><i class="o"></i>valor real de una empresa con NA</span><span><i style="background:var(--rojo)"></i>valor imputado</span></div>
+    </div>
+    <div class="card">
+      <h2>Todos los métodos, mismos datos</h2>
+      <p class="hint">Hacé clic en una fila para verla en los gráficos. La primera fila es la verdad que en la práctica nunca conocemos.</p>
+      <div class="scroll"><table class="bt" id="i-table"></table></div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h2>Diagnóstico: ¿dónde faltan?</h2>
+        <p class="hint">Lo que sí se puede mirar con datos reales. Si el % de NA cambia mucho entre sectores o tamaños, no es MCAR.</p>
+        <div class="scroll"><table class="bt" id="i-diag"></table></div>
+        <p class="note" id="i-diagnote"></p>
+      </div>
+      <div class="card">
+        <h2>Imputación múltiple</h2>
+        <p class="hint">PMM sortea un donante entre las 5 empresas observadas más parecidas. Correrlo 5 veces da 5 datasets distintos: la dispersión entre ellos es la incertidumbre que una imputación única esconde.</p>
+        <div class="chips" id="i-mi"></div>
+        <p class="note" id="i-minote"></p>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Repetir el experimento muchas veces</h2>
+      <p class="hint">Sortea 300 muestras nuevas con la misma forma, porcentaje y mecanismo, aplica cada método y promedia los resultados. Así se separa el sesgo sistemático de la suerte de una muestra.</p>
+      <div class="btnrow" style="margin-top:8px"><button class="btn ghost" id="i-sim">Simular 300 muestras</button></div>
+      <div id="i-simres"></div>
+    </div>
+    <div class="card">
+      <h2>En R</h2>
+      <pre class="r" id="i-code"></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== OUTLIERS ===================== -->
+<section class="panel" id="tab-out" hidden>
+  <aside class="ctrl">
+    <h3>Errores de carga</h3>
+    <div class="field"><label for="o-err">Valores con "dos ceros de más" <output id="o-err-o"></output></label><input type="range" id="o-err" min="0" max="5" step="1" value="0"></div>
+    <p class="hint">Multiplica por 100 las ventas de algunas empresas, como un error de tipeo. Empezá en 0 para ver qué marcan los métodos cuando todos los datos son genuinos.</p>
+    <h3>Métodos</h3>
+    <div class="field"><span class="lbl">Comparar</span>
+      <div class="seg" id="o-pair"><button data-v="iqr-z" aria-pressed="true">IQR vs. z</button><button data-v="iqr-rz">IQR vs. z rob.</button><button data-v="z-rz">z vs. z rob.</button></div>
+    </div>
+    <div class="field"><span class="lbl">Multiplicador del IQR</span>
+      <div class="seg" id="o-k"><button data-v="1.5" aria-pressed="true">1,5 (Tukey)</button><button data-v="3">3 (extremos)</button></div>
+    </div>
+    <div class="field"><span class="lbl">Umbral del z-score |z| &gt;</span>
+      <div class="seg" id="o-thr"><button data-v="2">2</button><button data-v="2.5">2,5</button><button data-v="3" aria-pressed="true">3</button></div>
+    </div>
+    <p class="hint">El <b>z robusto</b> no está en las diapositivas: es el mismo z-score pero con mediana y MAD en lugar de media y desvío, y umbral 3,5. Sirve para ver el efecto masking.</p>
+    <div class="field"><span class="lbl">Detectar sobre</span>
+      <div class="seg" id="o-scale"><button data-v="lin" aria-pressed="true">x original</button><button data-v="log">log(x)</button></div>
+    </div>
+    <p class="hint" id="o-scalehint"></p>
+  </aside>
+  <div class="results">
+    <div class="verdict" id="o-verdict"></div>
+    <div class="card">
+      <h2>Qué marca cada método <small id="o-sub"></small></h2>
+      <div id="o-strip"></div>
+      <div class="legend" id="o-legend"></div>
+      <p class="note" id="o-mask" hidden></p>
+    </div>
+    <div class="card">
+      <h2>El histograma, coloreado</h2>
+      <div id="o-hist"></div>
+    </div>
+    <div class="card">
+      <h2>Límites y conteos</h2>
+      <div class="scroll"><table class="bt" id="o-table"></table></div>
+      <p class="note">"En la población" es el porcentaje que el método marcaría en 20.000 empresas con esta misma forma y <b>sin ningún error</b>. Si es alto, el método está marcando la forma de la distribución, no errores.</p>
+    </div>
+    <div class="card">
+      <h2>Eliminar, winsorizar o mantener: antes vs. después</h2>
+      <p class="hint">Así se reporta el impacto de una decisión de limpieza. Mirá cuánto cambian la media y el desvío comparado con la mediana.</p>
+      <div class="scroll"><table class="bt" id="o-treat"></table></div>
+      <p class="note" id="o-treatnote"></p>
+    </div>
+    <div class="card">
+      <h2>En R</h2>
+      <pre class="r" id="o-code"></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TRANSFORMACIONES ===================== -->
+<section class="panel" id="tab-tr" hidden>
+  <aside class="ctrl">
+    <h3>Transformación</h3>
+    <div class="seg col" id="t-tr">
+      <button data-v="log" aria-pressed="true">log(x)</button>
+      <button data-v="log1p">log(x + 1)</button>
+      <button data-v="z">Estandarización (z-score)</button>
+      <button data-v="mm">Normalización min-max</button>
+    </div>
+    <p class="hint" id="t-formula"></p>
+    <label class="check"><input type="checkbox" id="t-ext"><span>Agregar una empresa gigante (20 veces el máximo)</span></label>
+    <p class="hint">Probá el efecto de un solo valor extremo sobre min-max y z-score.</p>
+  </aside>
+  <div class="results">
+    <div class="verdict" id="t-verdict"></div>
+    <div class="grid2">
+      <div class="card"><h2>Original</h2><div id="t-h0"></div></div>
+      <div class="card"><h2 id="t-h1title">Transformada</h2><div id="t-h1"></div></div>
+    </div>
+    <div class="legend" style="margin-top:-8px"><span><i style="background:var(--rojo);height:3px;vertical-align:3px"></i>media</span><span><i class="ln"></i>mediana</span></div>
+    <p class="note warn" id="t-warn" hidden></p>
+    <div class="card">
+      <h2>Cómo se mueve cada valor</h2>
+      <p class="hint">Eje horizontal: valor original. Eje vertical: valor transformado. Una recta mueve y estira sin cambiar la forma; una curva comprime la cola y sí la cambia. En ningún caso cambia el orden.</p>
+      <div id="t-map"></div>
+    </div>
+    <div class="card">
+      <h2>Las transformaciones lado a lado</h2>
+      <div class="minis" id="t-minis"></div>
+      <div class="scroll"><table class="bt" id="t-table"></table></div>
+      <p class="note">Asimetría: 0 es simétrica, positiva es cola a la derecha, negativa es cola a la izquierda. Fijate que z-score y min-max tienen <b>exactamente</b> la misma asimetría que la original.</p>
+    </div>
+    <div class="card">
+      <h2>¿Qué conviene para esta forma?</h2>
+      <ul class="recs" id="t-recs"></ul>
+    </div>
+    <div class="card">
+      <h2>En R</h2>
+      <pre class="r" id="t-code"></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== DECIDIR ===================== -->
+<section id="tab-dec" hidden>
+  <div class="qlist">
+    <div class="quiz-top">
+      <p class="hint" style="max-width:62ch">Diez situaciones de datos reales. Elegí qué harías. No hay una única respuesta posible en la vida real, pero sí una que el framework de la clase justifica mejor. Tu progreso se guarda solo en este navegador.</p>
+      <div class="btnrow"><span class="score" id="q-score"></span><button class="btn ghost" id="q-reset">Empezar de nuevo</button></div>
+    </div>
+    <div id="q-list" style="display:flex;flex-direction:column;gap:14px"></div>
+  </div>
+</section>
+
+<footer>Datos simulados: las ventas se generan con la forma elegida y se asignan a las empresas de modo que las más grandes (en empleados) y de ciertos sectores tiendan a vender más. Cuantiles tipo 7 (el default de R), desvío con n − 1, asimetría como tercer momento estandarizado. Los resultados pueden diferir de R en el último decimal.</footer>
+</div>
+
+<script>
+"use strict";
+/* ---------------- Formato (es-AR) ---------------- */
+const fmt = (x, d = 2) => (isFinite(x) ? Number(x).toLocaleString("es-AR", {minimumFractionDigits: d, maximumFractionDigits: d}) : "—");
+const $ = id => document.getElementById(id);
+/* Decimales según magnitud */
+function fv(v){const a=Math.abs(v); return fmt(v, a>=1000?0:a>=10?1:a>=1?2:3);}
+const pct = (v, d = 1) => fmt(v*100, d) + "%";
+const sgnPct = v => (v>0?"+":"") + fmt(v*100,1) + "%";
+const rNum = v => { const a=Math.abs(v); return String(Math.round(v*(a>=100?10:a>=1?100:1000))/(a>=100?10:a>=1?100:1000)); };
+
+/* ---------------- Aleatorios ---------------- */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+let rnd = mulberry32((Date.now() % 1e9) | 0);
+function rnorm(){let u=0,v=0;while(u===0)u=rnd();while(v===0)v=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function t3(){const z=rnorm();const c=rnorm()**2+rnorm()**2+rnorm()**2;return z/Math.sqrt(c/3);}
+function withSeed(seed, fn){const r0=rnd; rnd=mulberry32(seed); try{return fn();} finally{rnd=r0;}}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function hashStr(s){let h=2166136261;for(const c of s){h^=c.charCodeAt(0);h=Math.imul(h,16777619);}return h>>>0;}
+
+/* ---------------- Estadística descriptiva ---------------- */
+const sum = a => {let s=0; for (const v of a) s+=v; return s;};
+const mean = a => sum(a)/a.length;
+const sdv = a => {const m=mean(a); let s=0; for (const v of a) s+=(v-m)**2; return Math.sqrt(s/(a.length-1));};
+const sortN = a => Float64Array.from(a).sort();
+function quant(s, p){const h=(s.length-1)*p, lo=Math.floor(h), hi=Math.min(lo+1, s.length-1); return s[lo]+(h-lo)*(s[hi]-s[lo]);}
+const median = a => quant(sortN(a), 0.5);
+function skew(a){const m=mean(a), n=a.length; let m2=0,m3=0; for (const v of a){const d=v-m; m2+=d*d; m3+=d*d*d;} m2/=n; m3/=n; return m2>0 ? m3/Math.pow(m2,1.5) : 0;}
+function corr(a,b){const ma=mean(a), mb=mean(b); let sab=0,saa=0,sbb=0; for (let i=0;i<a.length;i++){const x=a[i]-ma,y=b[i]-mb; sab+=x*y; saa+=x*x; sbb+=y*y;} return saa>0&&sbb>0 ? sab/Math.sqrt(saa*sbb) : 0;}
+function minmax(a){let lo=Infinity,hi=-Infinity; for (const v of a){if(v<lo)lo=v; if(v>hi)hi=v;} return [lo,hi];}
+function stats(a){const s=sortN(a); return {n:a.length, media:mean(a), mediana:quant(s,.5), desvio:sdv(a), p05:quant(s,.05), p95:quant(s,.95), min:s[0], max:s[s.length-1], asim:skew(a)};}
+
+/* ---------------- Gráficos SVG ---------------- */
+function niceTicks(lo,hi,n=5){const span=hi-lo||1,step0=span/n,mag=Math.pow(10,Math.floor(Math.log10(step0))),err=step0/mag;const step=(err>=7.5?10:err>=3.5?5:err>=1.5?2:1)*mag;const t=[];for(let v=Math.ceil(lo/step)*step;v<=hi+1e-9;v+=step)t.push(+v.toFixed(10));return {t,step};}
+function decOf(step){return Math.max(0,-Math.floor(Math.log10(step)+1e-9));}
+function fAx(v, step){return Math.abs(v)>=1000 ? fmt(v,0) : fmt(v, decOf(step));}
+/* Ticks para un eje en log10: 1, 2, 5 × 10^k */
+function logTicks(a,b){const out=[]; for (let e=Math.floor(a); e<=Math.ceil(b); e++) for (const m of [1,2,5]){const t=e+Math.log10(m); if (t>=a-1e-9 && t<=b+1e-9) out.push(t);} return out.length>7 ? out.filter(t=>Math.abs(t-Math.round(t))<1e-9) : out;}
+function fPow(t){const v=Math.pow(10,t); return fmt(v, v>=1?0:v>=0.1?1:2);}
+function xTicks(a,b,log10,n=7){
+  if (log10){const t=logTicks(a,b); return t.map(v=>({v, l:fPow(v)}));}
+  const {t,step}=niceTicks(a,b,n); return t.map(v=>({v, l:fAx(v,step)}));
+}
+
+/* Histograma apilado.
+   layers: [{vals, color}] · outline: vals para el contorno · vlines: [{v, color, dash, label}]
+   log10: los valores ya vienen en log10 y los ticks se rotulan en la escala original */
+function histChart(el, o){
+  const nLab=(o.vlines||[]).filter(L=>L.label).length, W=o.W||720, H=(o.H||240)+14*Math.max(0,nLab-1), m={l:40,r:14,t:nLab?14+14*nLab:12,b:o.xlab?40:26}, bins=o.bins||36;
+  const all=o.layers.flatMap(l=>l.vals).concat(o.outline||[]);
+  let [a,b]=o.range||minmax(all); if (!(b>a)){a-=1;b+=1;}
+  const bw=(b-a)/bins, count=vals=>{const c=new Array(bins).fill(0); for (const v of vals){let k=Math.floor((v-a)/bw); if(k>=bins)k=bins-1; if(k<0)k=0; c[k]++;} return c;};
+  const cs=o.layers.map(l=>count(l.vals)), oc=o.outline?count(o.outline):null;
+  let ymax=1; for (let k=0;k<bins;k++){ymax=Math.max(ymax, cs.reduce((s,c)=>s+c[k],0), oc?oc[k]:0);} ymax*=1.08;
+  const X=v=>m.l+(W-m.l-m.r)*(v-a)/(b-a), Y=c=>H-m.b-(H-m.t-m.b)*c/ymax;
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${o.aria||"Histograma"}">`;
+  const yt=niceTicks(0,ymax,4);
+  yt.t.forEach(v=>{s+=`<line class="ax" x1="${m.l}" x2="${W-m.r}" y1="${Y(v)}" y2="${Y(v)}" style="opacity:.5"/><text x="${m.l-6}" y="${Y(v)+4}" text-anchor="end">${fmt(v,0)}</text>`;});
+  for (let k=0;k<bins;k++){
+    let acc=0; const x0=X(a+k*bw)+0.5, w=Math.max(0.5, X(a+(k+1)*bw)-X(a+k*bw)-1);
+    cs.forEach((c,li)=>{ if(!c[k]) return; s+=`<rect x="${x0.toFixed(1)}" y="${Y(acc+c[k]).toFixed(1)}" width="${w.toFixed(1)}" height="${(Y(acc)-Y(acc+c[k])).toFixed(1)}" style="fill:${o.layers[li].color};opacity:${o.layers[li].op??0.85}"/>`; acc+=c[k]; });
+  }
+  if (oc){let d=`M${X(a)},${Y(0)}`; for (let k=0;k<bins;k++){d+=`L${X(a+k*bw).toFixed(1)},${Y(oc[k]).toFixed(1)}L${X(a+(k+1)*bw).toFixed(1)},${Y(oc[k]).toFixed(1)}`;} d+=`L${X(b)},${Y(0)}`; s+=`<path d="${d}" style="fill:none;stroke:var(--ink);stroke-width:1.5;opacity:.8"/>`;}
+  s+=`<line class="ax" x1="${m.l}" x2="${W-m.r}" y1="${Y(0)}" y2="${Y(0)}" style="stroke:var(--muted)"/>`;
+  xTicks(a,b,o.log10,W<500?5:7).forEach(t=>{s+=`<text x="${X(t.v)}" y="${H-m.b+15}" text-anchor="middle">${t.l}</text>`;});
+  if (o.xlab) s+=`<text x="${(W+m.l)/2}" y="${H-4}" text-anchor="middle">${o.xlab}</text>`;
+  (o.vlines||[]).forEach((L,i)=>{
+    if (!isFinite(L.v) || L.v<a-1e-9 || L.v>b+1e-9) return; const x=X(L.v);
+    s+=`<line x1="${x}" x2="${x}" y1="${m.t-4}" y2="${Y(0)}" style="stroke:${L.color};stroke-width:${L.w||2};${L.dash?"stroke-dasharray:5 4":""}"/>`;
+    if (L.label) s+=`<text x="${x+(x>W*0.7?-4:4)}" y="${12+i*14}" text-anchor="${x>W*0.7?"end":"start"}" style="fill:${L.color};font-weight:600">${L.label}</text>`;
+  });
+  el.innerHTML=s+"</svg>";
+}
+function segInit(id, onChange){
+  const el=$(id);
+  el.addEventListener("click",e=>{const b=e.target.closest("button"); if(!b||b.disabled) return; el.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false")); onChange(b.dataset.v);});
+}
+function segSet(id, v){$(id).querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.v===v?"true":"false"));}
+function segDisable(id, v, dis){const b=$(id).querySelector(`button[data-v="${v}"]`); if (b) b.disabled=dis;}
+</script>
+
+<script>
+"use strict";
+/* ================= La variable simulada ================= */
+const SECT = ["Agro","Industria","Comercio","Servicios"], SEC_EF = [-0.9, 0.7, -0.1, 0.3];
+const SHAPES = {
+  normal: {lab:"Normal",        desc:"Simétrica y sin colas largas: media y mediana casi coinciden.", gen:()=>100+20*rnorm()},
+  leve:   {lab:"Asimétrica leve", desc:"Cola derecha moderada, como los salarios dentro de un mismo sector.", gen:()=>Math.exp(Math.log(80)+0.4*rnorm())},
+  fuerte: {lab:"Asimétrica fuerte", desc:"Cola derecha muy larga, como las ventas de empresas de la clase (rlnorm con meanlog = 2 y sdlog = 1,5): muchas chicas y unas pocas enormes.", gen:()=>Math.exp(2+1.5*rnorm())},
+  colas:  {lab:"Colas pesadas", desc:"Simétrica, pero con más valores extremos genuinos que una normal (t de Student con 3 gl).", gen:()=>100+12*t3()},
+  bimodal:{lab:"Bimodal",       desc:"Dos grupos mezclados, por ejemplo PyMEs y grandes empresas: dos jorobas.", gen:()=>rnd()<0.55 ? 60+10*rnorm() : 140+15*rnorm()},
+  ceros:  {lab:"Con ceros",     desc:"30% de ceros y el resto con cola derecha, como las exportaciones por empresa: la mayoría no exporta nada.", gen:()=>rnd()<0.3 ? 0 : Math.exp(3+rnorm())},
+  izq:    {lab:"Asimétrica izq.", desc:"Cola hacia la izquierda: casi todas cerca de un techo y unas pocas muy por debajo.", gen:()=>100-Math.exp(Math.log(12)+0.7*rnorm())}
+};
+const S = {shape:"fuerte", n:200, seed:139};
+let D = null;
+const drawShape = (shape, n, seed) => withSeed((seed ^ hashStr(shape))>>>0, ()=>Array.from({length:n}, SHAPES[shape].gen));
+
+/* Genera empresas con sector y empleados, y les asigna ventas con la forma elegida.
+   Cópula por rangos: la forma cambia, pero las empresas "grandes" siguen siendo las mismas. */
+function makeData(shape, n, seed){
+  const b = withSeed(seed, ()=>{
+    const o={sec:[],le:[],e:[],uM:[],nM:[]};
+    for (let i=0;i<n;i++){o.sec.push(Math.floor(rnd()*4)); o.le.push(rnorm()); o.e.push(rnorm()); o.uM.push(rnd()); o.nM.push(rnorm());}
+    o.perm = shuffle([...Array(n).keys()]); return o;
+  });
+  const w=b.le.map((l,i)=>SEC_EF[b.sec[i]]+0.8*l), mw=mean(w), sw=sdv(w);
+  const wstd=w.map(v=>(v-mw)/sw), z=wstd.map((v,i)=>0.8*v+0.6*b.e[i]);
+  const pool=drawShape(shape, n, seed).sort((p,q)=>p-q);
+  const x=new Array(n); [...Array(n).keys()].sort((i,j)=>z[i]-z[j]).forEach((i,r)=>{x[i]=pool[r];});
+  const emp=b.le.map(l=>Math.max(1, Math.round(Math.exp(3.5+1.2*l))));
+  return {n, shape, sec:b.sec, emp, lemp:emp.map(Math.log), wstd, z, x, uM:b.uM, nM:b.nM, perm:b.perm};
+}
+const popCache = {};
+const population = shape => popCache[shape] || (popCache[shape] = drawShape(shape, 20000, 777));
+
+function renderVarbar(){
+  const st=stats(D.x);
+  $("vb-n").textContent = S.n; $("n-o").textContent = S.n;
+  $("shape-desc").textContent = SHAPES[S.shape].desc;
+  histChart($("thumb"), {W:300, H:120, bins:28, layers:[{vals:D.x, color:"var(--azul)", op:0.7}],
+    vlines:[{v:st.media, color:"var(--rojo)", label:""},{v:st.mediana, color:"var(--ink)", dash:true, label:""}], aria:"Distribución de ventas"});
+  $("thumb-kv").innerHTML = `<span><span style="color:var(--rojo)">■</span> media <b>${fv(st.media)}</b></span><span>┆ mediana <b>${fv(st.mediana)}</b></span><span>asimetría <b>${fmt(st.asim,2)}</b></span>`;
+}
+function initVarbar(){
+  const c=$("shapes");
+  Object.entries(SHAPES).forEach(([k,v])=>{const b=document.createElement("button"); b.textContent=v.lab; b.dataset.v=k; b.setAttribute("aria-pressed", k===S.shape?"true":"false"); c.appendChild(b);});
+  c.addEventListener("click", e=>{const b=e.target.closest("button"); if(!b) return; S.shape=b.dataset.v; c.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed", x===b?"true":"false")); rebuild();});
+  $("n").addEventListener("input", e=>{S.n=+e.target.value; rebuild();});
+  $("new").addEventListener("click", ()=>{S.seed=(Math.random()*4294967296)>>>0; rebuild();});
+}
+function rebuild(){ D = makeData(S.shape, S.n, S.seed); renderVarbar(); renderActive(); }
+
+/* ================= FALTANTES ================= */
+const IMP = {elim:"Eliminar filas", media:"Media", mediana:"Mediana", grupo:"Mediana por sector", reg:"Regresión", pmm:"PMM (mice)"};
+const MECH_DESC = {
+  MCAR:"Faltan al azar: la probabilidad de NA es igual para todas las empresas.",
+  MAR:"Faltan más en empresas chicas y del Agro. Depende de variables que sí observamos (sector y empleados).",
+  MNAR:"Faltan más cuanto más alto es el propio valor de ventas: las empresas que más venden no lo declaran."
+};
+const I = {pct:0.2, mech:"MAR", method:"grupo", axis:"lin"};
+
+/* Marca exactamente round(pct·n) faltantes según el mecanismo */
+function missMask(Dd, mech, pct){
+  const n=Dd.n, k=Math.round(pct*n);
+  const sc = i => mech==="MCAR" ? Dd.uM[i] : mech==="MAR" ? -Dd.wstd[i]+0.6*Dd.nM[i] : Dd.z[i]+0.6*Dd.nM[i];
+  const idx=[...Array(n).keys()].sort((a,b)=>sc(b)-sc(a)), m=new Array(n).fill(false);
+  for (let j=0;j<k;j++) m[idx[j]]=true;
+  return m;
+}
+const design = (Dd,i) => [1, Dd.lemp[i], Dd.sec[i]===1?1:0, Dd.sec[i]===2?1:0, Dd.sec[i]===3?1:0];
+const dot = (a,b) => a.reduce((s,v,i)=>s+v*b[i],0);
+function olsFit(Dd, idx, y){
+  const p=5, A=Array.from({length:p},()=>new Array(p).fill(0)), r=new Array(p).fill(0);
+  idx.forEach((i,t)=>{const x=design(Dd,i); for (let a=0;a<p;a++){r[a]+=x[a]*y[t]; for (let b=0;b<p;b++) A[a][b]+=x[a]*x[b];}});
+  for (let a=0;a<p;a++) A[a][a]+=1e-8;
+  for (let c=0;c<p;c++){ // eliminación gaussiana con pivoteo
+    let piv=c; for (let q=c+1;q<p;q++) if (Math.abs(A[q][c])>Math.abs(A[piv][c])) piv=q;
+    [A[c],A[piv]]=[A[piv],A[c]]; [r[c],r[piv]]=[r[piv],r[c]];
+    for (let q=c+1;q<p;q++){const f=A[q][c]/A[c][c]; for (let b=c;b<p;b++) A[q][b]-=f*A[c][b]; r[q]-=f*r[c];}
+  }
+  const beta=new Array(p).fill(0);
+  for (let c=p-1;c>=0;c--){let s=r[c]; for (let b=c+1;b<p;b++) s-=A[c][b]*beta[b]; beta[c]=s/A[c][c];}
+  return beta;
+}
+/* Devuelve {vals, idx, imp}: idx son las filas que quedan, imp marca las imputadas */
+function imputar(Dd, miss, method, seed=1){
+  const n=Dd.n, oi=[]; for (let i=0;i<n;i++) if (!miss[i]) oi.push(i);
+  if (method==="elim" || oi.length===n) return {vals:oi.map(i=>Dd.x[i]), idx:oi, imp:oi.map(()=>false)};
+  const ox=oi.map(i=>Dd.x[i]); let fill;
+  if (method==="media"){const m=mean(ox); fill=()=>m;}
+  else if (method==="mediana"){const m=median(ox); fill=()=>m;}
+  else if (method==="grupo"){const md=median(ox), g=[0,1,2,3].map(s=>{const v=oi.filter(i=>Dd.sec[i]===s).map(i=>Dd.x[i]); return v.length?median(v):md;}); fill=i=>g[Dd.sec[i]];}
+  else {
+    const beta=olsFit(Dd, oi, ox), pr=i=>dot(beta, design(Dd,i));
+    if (method==="reg") fill=pr;
+    else { // predictive mean matching: 5 donantes más cercanos en la predicción
+      const po=oi.map(pr), r=mulberry32(seed);
+      fill=i=>{const p=pr(i), d=po.map((v,j)=>[Math.abs(v-p),j]).sort((a,b)=>a[0]-b[0]), k=Math.min(5,d.length); return ox[d[Math.floor(r()*k)][1]];};
+    }
+  }
+  const all=[...Array(n).keys()];
+  return {vals:all.map(i=>miss[i]?fill(i):Dd.x[i]), idx:all, imp:miss.slice()};
+}
+function impMetrics(Dd, res){const st=stats(res.vals); st.corr=corr(res.vals, res.idx.map(i=>Dd.lemp[i])); return st;}
+
+function scatterImp(el, miss, res, ylog){
+  const W=720,H=300,m={l:52,r:14,t:12,b:42};
+  const lx=D.lemp.map(v=>v/Math.LN10), [xa,xb0]=minmax(lx), xb=xb0+(xb0-xa)*0.02, xa2=xa-(xb0-xa)*0.02;
+  const tf=v=>ylog?(v>0?Math.log10(v):NaN):v;
+  const imps=res.idx.map((i,t)=>res.imp[t]?res.vals[t]:null);
+  const ys=D.x.map(tf).concat(imps.filter(v=>v!==null).map(tf)).filter(isFinite);
+  let [ya,yb]=minmax(ys); const pad=(yb-ya||1)*0.05; ya-=pad; yb+=pad;
+  const X=v=>m.l+(W-m.l-m.r)*(v-xa2)/(xb-xa2), Y=v=>H-m.b-(H-m.t-m.b)*(v-ya)/(yb-ya);
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Ventas contra empleados">`;
+  xTicks(ya,yb,ylog,5).forEach(t=>{s+=`<line class="ax" x1="${m.l}" x2="${W-m.r}" y1="${Y(t.v)}" y2="${Y(t.v)}" style="opacity:.5"/><text x="${m.l-6}" y="${Y(t.v)+4}" text-anchor="end">${t.l}</text>`;});
+  xTicks(xa2,xb,true).forEach(t=>{s+=`<text x="${X(t.v)}" y="${H-m.b+16}" text-anchor="middle">${t.l}</text>`;});
+  s+=`<text x="${(W+m.l)/2}" y="${H-4}" text-anchor="middle">Empleados (escala log)</text>`;
+  s+=`<text x="${m.l}" y="${m.t-2}" style="font-weight:600">Ventas${ylog?" (escala log)":""}</text>`;
+  const byRow={}; res.idx.forEach((i,t)=>{if(res.imp[t]) byRow[i]=res.vals[t];});
+  for (let i=0;i<D.n;i++){
+    const y=tf(D.x[i]); if (!isFinite(y)) continue;
+    if (!miss[i]) s+=`<circle cx="${X(lx[i]).toFixed(1)}" cy="${Y(y).toFixed(1)}" r="3" style="fill:var(--azul);opacity:.5"/>`;
+  }
+  for (let i=0;i<D.n;i++){
+    if (!miss[i]) continue; const y=tf(D.x[i]), cx=X(lx[i]).toFixed(1);
+    if (byRow[i]!==undefined){const yi=tf(byRow[i]); if (isFinite(yi)){ if (isFinite(y)) s+=`<line x1="${cx}" x2="${cx}" y1="${Y(y).toFixed(1)}" y2="${Y(yi).toFixed(1)}" style="stroke:var(--gris);opacity:.6"/>`; s+=`<circle cx="${cx}" cy="${Y(yi).toFixed(1)}" r="3.4" style="fill:var(--rojo);opacity:.85"/>`;}}
+    if (isFinite(y)) s+=`<circle cx="${cx}" cy="${Y(y).toFixed(1)}" r="3.6" style="fill:none;stroke:var(--gris);stroke-width:1.5"/>`;
+  }
+  el.innerHTML=s+"</svg>";
+}
+
+function impReading(stT, stM, miss, res){
+  const mt=I.method, mech=I.mech, bias=(stM.media-stT.media)/Math.abs(stT.media);
+  const nMiss=miss.filter(Boolean).length;
+  const parts=[];
+  if (!nMiss) return "No hay faltantes: todos los métodos dan lo mismo. Subí el porcentaje de NA.";
+  if (mt==="elim"){
+    parts.push(mech==="MCAR" ? `Con MCAR, eliminar casi no sesga: la muestra que queda es una versión más chica de la original. El costo es perder ${nMiss} empresas (de ${D.n} a ${D.n-nMiss}).`
+      : mech==="MAR" ? `Los NA se concentran en empresas chicas y del Agro. Al eliminarlas, quedan sobrerrepresentadas las grandes y la media ${bias>0?"sube":"cambia"} ${sgnPct(bias)}.`
+      : `Faltan justamente las ventas más altas: al eliminarlas, la media cae ${sgnPct(bias)} y nada en los datos observados avisa del problema.`);
+  } else if (mt==="media"||mt==="mediana"){
+    parts.push(`Las ${nMiss} empresas reciben todas el mismo valor (${fv(res.vals[res.imp.indexOf(true)])}). El desvío baja de ${fv(stT.desvio)} a ${fv(stM.desvio)} y la correlación con el tamaño cae de ${fmt(stT.corr,2)} a ${fmt(stM.corr,2)}: se inventa una empresa "típica" que no existe.`);
+    if (mt==="mediana" && Math.abs(skew(D.x))>1) parts.push("Con una variable asimétrica, la mediana queda bastante por debajo de la media, así que imputar con ella tira la media para abajo.");
+  } else if (mt==="grupo"){
+    parts.push(`Usa el sector: mejora respecto de la mediana general si el sector explica parte de las ventas${mech==="MAR"?" y de los faltantes":""}, pero dentro de cada sector todas las empresas imputadas reciben el mismo valor (hay 4 valores imputados distintos).`);
+  } else if (mt==="reg"){
+    const neg=res.vals.filter((v,t)=>res.imp[t]&&v<0).length;
+    parts.push(`Predice con empleados y sector, así que ${mech==="MAR"?"corrige buena parte del sesgo MAR":"aprovecha la relación con el tamaño"}. Pero todos los imputados caen sobre la recta: el desvío queda en ${fv(stM.desvio)} (real ${fv(stT.desvio)}) y la correlación se infla a ${fmt(stM.corr,2)} (real ${fmt(stT.corr,2)}).`);
+    if (neg) parts.push(`<b>${neg} predicciones son negativas</b>: la regresión lineal no sabe que las ventas no pueden ser menores a cero.`);
+  } else {
+    parts.push(`Toma ventas reales de empresas observadas parecidas en tamaño y sector: respeta la forma de la distribución y buena parte de la variabilidad (desvío ${fv(stM.desvio)}, real ${fv(stT.desvio)}).`);
+  }
+  if (mech==="MNAR" && mt!=="elim") parts.push("Con MNAR, ningún método que solo use lo observado corrige el sesgo: los valores altos que faltan no se parecen a nada que tengamos.");
+  if (I.pct>0.3) parts.push("Además, imputar más del 20-30% de una variable la vuelve poco confiable.");
+  return parts.join(" ");
+}
+
+function impCode(stM){
+  const r = I.method;
+  const head = `<span class="c"># empresas: ventas_mm con ${Math.round(I.pct*100)}% de NA (${I.mech}); sector y empleados completos</span>\nempresas |> summarise(pct_na = mean(is.na(ventas_mm)) * 100)\n\n`;
+  const tail = `\n<span class="c"># media resultante: ${fv(stM.media)} · desvío: ${fv(stM.desvio)}</span>`;
+  const body = {
+    elim:`empresas_limpio &lt;- empresas |>\n  filter(!is.na(ventas_mm))`,
+    media:`empresas_imp &lt;- empresas |>\n  mutate(ventas_imp = if_else(is.na(ventas_mm),\n                              mean(ventas_mm, na.rm = TRUE),\n                              ventas_mm))`,
+    mediana:`empresas_imp &lt;- empresas |>\n  mutate(ventas_imp = if_else(is.na(ventas_mm),\n                              median(ventas_mm, na.rm = TRUE),\n                              ventas_mm))`,
+    grupo:`empresas_imp &lt;- empresas |>\n  group_by(sector) |>\n  mutate(ventas_imp = if_else(is.na(ventas_mm),\n                              median(ventas_mm, na.rm = TRUE),\n                              ventas_mm)) |>\n  ungroup()`,
+    reg:`modelo &lt;- lm(ventas_mm ~ log(empleados) + sector, data = empresas)\nempresas_imp &lt;- empresas |>\n  mutate(ventas_imp = if_else(is.na(ventas_mm),\n                              predict(modelo, newdata = empresas),\n                              ventas_mm))`,
+    pmm:`library(mice)\nimp &lt;- mice(empresas |> select(ventas_mm, empleados, sector),\n            m = 5, method = "pmm", seed = 42)\nempresas_imp &lt;- complete(imp, 1)   <span class="c"># el primero de los 5 datasets</span>\n<span class="c"># para inferencia: with(imp, lm(...)) |> pool()</span>`
+  }[r];
+  return head + body + tail + `\n\n<span class="c"># siempre: dejar registro de qué filas se imputaron</span>\nempresas &lt;- empresas |> mutate(ventas_reportadas = !is.na(ventas_mm))`;
+}
+
+function renderImp(){
+  $("i-pct-o").textContent = Math.round(I.pct*100)+"%";
+  $("i-mech-desc").textContent = MECH_DESC[I.mech];
+  const allPos = minmax(D.x)[0] > 0;
+  segDisable("i-axis","log",!allPos); if (!allPos && I.axis==="log"){I.axis="lin"; segSet("i-axis","lin");}
+  const miss = missMask(D, I.mech, I.pct), nMiss = miss.filter(Boolean).length;
+  const stT = stats(D.x); stT.corr = corr(D.x, D.lemp);
+  const results = {}; Object.keys(IMP).forEach(k=>{const r=imputar(D, miss, k, S.seed%1000+1); results[k]={res:r, st:impMetrics(D,r)};});
+  const {res, st:stM} = results[I.method];
+  const bias = (stM.media-stT.media)/Math.abs(stT.media), sdr = stM.desvio/stT.desvio;
+  const bad = Math.abs(bias)>0.05;
+  $("i-verdict").innerHTML = `<span class="pill ${bad?"rech":"okp"}">${nMiss===0?"Sin faltantes":bad?"Media sesgada":"Media cerca de la real"}</span>
+    <div class="stat">${IMP[I.method]}: media ${fv(stM.media)} (real ${fv(stT.media)}, ${sgnPct(bias)}) · desvío ${fv(stM.desvio)} (${fmt(sdr*100,0)}% del real) · n = ${stM.n}</div>
+    <div class="read">${impReading(stT, stM, miss, res)}</div>`;
+  // Histograma
+  const lg = I.axis==="log", tf = v => lg ? Math.log10(v) : v, ok = v => isFinite(v);
+  const obs = res.vals.filter((v,t)=>!res.imp[t]).map(tf), imp = res.vals.filter((v,t)=>res.imp[t]).map(tf).filter(ok);
+  const truth = D.x.map(tf);
+  const [ta,tb] = minmax(truth.concat(imp));
+  histChart($("i-hist"), {layers:[{vals:obs,color:"var(--azul)"},{vals:imp,color:"var(--rojo)"}], outline:truth, range:[ta,tb], bins:40, log10:lg,
+    vlines:[{v:tf(stT.media), color:"var(--ink)", dash:true, label:"media real"},{v:tf(stM.media), color:"var(--rojo)", label:"media con el método"}], xlab:"Ventas (millones de $)"+(lg?", escala log":""), aria:"Histograma de ventas observadas e imputadas"});
+  const nImpDistinct = new Set(res.vals.filter((v,t)=>res.imp[t]).map(v=>v.toFixed(6))).size;
+  $("i-histnote").innerHTML = I.method==="elim"
+    ? `Quedan ${stM.n} de ${D.n} empresas. La línea negra muestra cómo sería la distribución con todas.`
+    : `Se imputaron ${nMiss} valores, de los cuales ${nImpDistinct} son distintos entre sí.` + (lg && res.vals.some((v,t)=>res.imp[t]&&v<=0) ? " Los imputados negativos no aparecen en escala log." : "");
+  scatterImp($("i-scatter"), miss, res, lg);
+  // Tabla de todos los métodos
+  const row=(lab, st, cls, key)=>{const b=(st.media-stT.media)/Math.abs(stT.media), sr=st.desvio/stT.desvio;
+    return `<tr class="${cls}" ${key?`data-k="${key}" tabindex="0"`:""}><td>${lab}</td><td class="num">${st.n}</td><td class="num">${fv(st.media)}</td><td class="num ${key&&Math.abs(b)>0.05?"bad":""}">${key?sgnPct(b):"—"}</td><td class="num">${fv(st.mediana)}</td><td class="num ${key&&sr<0.85?"bad":""}">${fv(st.desvio)}</td><td class="num">${fv(st.p05)}</td><td class="num">${fv(st.p95)}</td><td class="num">${fmt(st.corr,2)}</td></tr>`;};
+  $("i-table").innerHTML = `<thead><tr><th>Método</th><th>n</th><th>Media</th><th>Sesgo media</th><th>Mediana</th><th>Desvío</th><th>p05</th><th>p95</th><th>Corr. con log(empleados)</th></tr></thead><tbody>`
+    + row("Datos completos (real)", stT, "ref", null)
+    + Object.keys(IMP).map(k=>row(IMP[k], results[k].st, "pick"+(k===I.method?" sel":""), k)).join("") + "</tbody>";
+  $("i-table").querySelectorAll("tr.pick").forEach(tr=>{const go=()=>{I.method=tr.dataset.k; segSet("i-method",I.method); renderImp();}; tr.addEventListener("click",go); tr.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go();}});});
+  // Diagnóstico
+  const diag = SECT.map((s,j)=>{const ii=[...Array(D.n).keys()].filter(i=>D.sec[i]===j); return {s, n:ii.length, na:ii.filter(i=>miss[i]).length};});
+  const eNA = D.emp.filter((v,i)=>miss[i]), eOK = D.emp.filter((v,i)=>!miss[i]);
+  $("i-diag").innerHTML = `<thead><tr><th>Sector</th><th>Empresas</th><th>Con NA</th><th>% NA</th></tr></thead><tbody>`
+    + diag.map(d=>`<tr><td>${d.s}</td><td class="num">${d.n}</td><td class="num">${d.na}</td><td class="num">${d.n?pct(d.na/d.n):"—"}</td></tr>`).join("") + "</tbody>";
+  const xNA = D.x.filter((v,i)=>miss[i]), xOK = D.x.filter((v,i)=>!miss[i]);
+  $("i-diagnote").innerHTML = nMiss && eOK.length
+    ? `Mediana de empleados: <b>${fmt(median(eNA),0)}</b> en empresas con NA vs. <b>${fmt(median(eOK),0)}</b> sin NA. <br>Lo que en la vida real no se ve (solo porque es una simulación): la media real de las ventas que faltan es <b>${fv(mean(xNA))}</b> y la de las observadas, <b>${fv(mean(xOK))}</b>.`
+    : "No hay faltantes para diagnosticar.";
+  // Imputación múltiple
+  if (nMiss && nMiss<D.n){
+    const ms=[1,2,3,4,5].map(k=>mean(imputar(D, miss, "pmm", S.seed%1000+k*7919).vals));
+    const [lo,hi]=minmax(ms);
+    $("i-mi").innerHTML = ms.map((v,k)=>`<span>#${k+1}: ${fv(v)}</span>`).join("") + `<span class="real">real: ${fv(stT.media)}</span>`;
+    $("i-minote").innerHTML = `La media de ventas va de ${fv(lo)} a ${fv(hi)} según el sorteo. Con <code>pool()</code>, R promedia las 5 estimaciones (${fv(mean(ms))}) y suma esta variación entre imputaciones al error estándar, así los intervalos de confianza reflejan que no conocemos los valores faltantes.`;
+  } else { $("i-mi").innerHTML=""; $("i-minote").textContent="Subí el porcentaje de NA para ver la variación entre imputaciones."; }
+  $("i-code").innerHTML = impCode(stM);
+}
+
+function simImp(){
+  const btn=$("i-sim"); btn.disabled=true; btn.textContent="Simulando…";
+  setTimeout(()=>{
+    const B=300, keys=Object.keys(IMP), acc={}; keys.forEach(k=>acc[k]={b:0,sd:0,c:0}); let cT=0;
+    const base=(S.seed*7+13)>>>0;
+    for (let r=0;r<B;r++){
+      const Dd=makeData(S.shape, S.n, (base+r*2654435761)>>>0), miss=missMask(Dd, I.mech, I.pct);
+      const mT=mean(Dd.x), sT=sdv(Dd.x); cT+=corr(Dd.x, Dd.lemp);
+      keys.forEach(k=>{const res=imputar(Dd, miss, k, r+1); acc[k].b+=(mean(res.vals)-mT)/Math.abs(mT); acc[k].sd+=sdv(res.vals)/sT; acc[k].c+=corr(res.vals, res.idx.map(i=>Dd.lemp[i]));});
+    }
+    const dn=SHAPES[S.shape].lab.toLowerCase();
+    $("i-simres").innerHTML = `<p class="note">${B} muestras de ${S.n} empresas, forma ${dn}, ${Math.round(I.pct*100)}% de NA ${I.mech}. Correlación real promedio con log(empleados): ${fmt(cT/B,2)}.</p>
+      <div class="scroll"><table class="bt"><thead><tr><th>Método</th><th>Sesgo promedio de la media</th><th>Desvío / desvío real</th><th>Correlación promedio</th></tr></thead><tbody>`
+      + keys.map(k=>{const b=acc[k].b/B, sd=acc[k].sd/B, c=acc[k].c/B; return `<tr class="${k===I.method?"sel":""}"><td>${IMP[k]}</td><td class="num ${Math.abs(b)>0.05?"bad":Math.abs(b)<0.02?"good":""}">${sgnPct(b)}</td><td class="num ${sd<0.85||sd>1.15?"bad":"good"}">${fmt(sd,2)}</td><td class="num">${fmt(c,2)}</td></tr>`;}).join("")
+      + `</tbody></table></div><p class="note">Verde: sesgo menor al 2% o desvío dentro de ±15% del real. Rojo: sesgo mayor al 5% o variabilidad muy distorsionada. Probá cambiar el mecanismo: con MCAR casi todo anda bien para la media; con MAR ganan los métodos que usan sector y tamaño (la regresión lineal, solo si la variable no es muy asimétrica); con MNAR ninguno se salva.</p>`;
+    btn.disabled=false; btn.textContent="Simular 300 muestras";
+  }, 30);
+}
+function initImp(){
+  $("i-pct").addEventListener("input", e=>{I.pct=+e.target.value; renderImp();});
+  segInit("i-mech", v=>{I.mech=v; $("i-simres").innerHTML=""; renderImp();});
+  segInit("i-method", v=>{I.method=v; renderImp();});
+  segInit("i-axis", v=>{I.axis=v; renderImp();});
+  $("i-sim").addEventListener("click", simImp);
+}
+</script>
+
+<script>
+"use strict";
+/* ================= OUTLIERS ================= */
+const O = {err:0, pair:"iqr-z", k:1.5, thr:3, scale:"lin"};
+const OLAB = {iqr:"IQR", z:"z-score", rz:"z robusto"};
+function detIQR(v,k){const s=sortN(v), q1=quant(s,.25), q3=quant(s,.75), r=q3-q1; return {lo:q1-k*r, hi:q3+k*r, q1, q3};}
+function detZ(v,t){const m=mean(v), s=sdv(v); return {lo:m-t*s, hi:m+t*s, m, s};}
+function detRZ(v){const md=median(v), mad=1.4826*median(v.map(x=>Math.abs(x-md))); return {lo:md-3.5*mad, hi:md+3.5*mad, md, mad};}
+function detect(method, v){const d = method==="iqr" ? detIQR(v,O.k) : method==="z" ? detZ(v,O.thr) : detRZ(v); d.flag=v.map(x=>x<d.lo||x>d.hi); return d;}
+/* Escala de detección: log si todo es positivo, log(x+1) si hay ceros */
+function scaleFns(vals){
+  if (O.scale==="lin") return {f:v=>v, inv:v=>v, lab:"x", ok:true};
+  const lo=minmax(vals)[0];
+  if (lo>0) return {f:Math.log, inv:Math.exp, lab:"log(x)", ok:true};
+  if (lo>=0) return {f:Math.log1p, inv:Math.expm1, lab:"log(x + 1)", ok:true};
+  return {ok:false};
+}
+function withErrors(){
+  const x=D.x.slice(), pos=D.perm.filter(i=>D.x[i]>0).slice(0,O.err);
+  pos.forEach(i=>{x[i]=D.x[i]*100;}); return {x, errIdx:new Set(pos)};
+}
+function winsor(v,pl,ph){const s=sortN(v), lo=quant(s,pl), hi=quant(s,ph); return v.map(x=>x<lo?lo:x>hi?hi:x);}
+
+function outlierStrip(el, tv, catOf, colors, lims, sc){
+  const W=720,H=250,m={l:16,r:16,t:44,b:40};
+  const [a0,b0]=minmax(tv.concat(lims.flatMap(L=>[L.lo,L.hi]).filter(isFinite)));
+  const [da,db]=minmax(tv), span=(db-da)||1;
+  // incluir los límites solo si no aplastan los datos
+  let a=Math.max(a0, da-span*0.12), b=Math.min(b0, db+span*0.12); const pad=(b-a)*0.03; a-=pad; b+=pad;
+  const X=v=>m.l+(W-m.l-m.r)*(v-a)/(b-a);
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Valores y límites de cada método">`;
+  xTicks(a,b,false).forEach(t=>{s+=`<line class="ax" x1="${X(t.v)}" x2="${X(t.v)}" y1="${m.t}" y2="${H-m.b}" style="opacity:.45"/><text x="${X(t.v)}" y="${H-m.b+16}" text-anchor="middle">${t.l}</text>`;});
+  s+=`<text x="${(W)/2}" y="${H-4}" text-anchor="middle">${sc.lab==="x"?"Ventas (millones de $)":sc.lab+" de ventas"}</text>`;
+  // boxplot
+  const st=sortN(tv), q1=quant(st,.25), q2=quant(st,.5), q3=quant(st,.75), iq=q3-q1;
+  const wlo=st.find(v=>v>=q1-1.5*iq), whi=[...st].reverse().find(v=>v<=q3+1.5*iq), by=m.t+18;
+  s+=`<line x1="${X(wlo)}" x2="${X(q1)}" y1="${by}" y2="${by}" style="stroke:var(--ink)"/><line x1="${X(q3)}" x2="${X(whi)}" y1="${by}" y2="${by}" style="stroke:var(--ink)"/>
+      <rect x="${X(q1)}" y="${by-11}" width="${Math.max(1,X(q3)-X(q1))}" height="22" style="fill:var(--azul-suave);stroke:var(--ink)"/>
+      <line x1="${X(q2)}" x2="${X(q2)}" y1="${by-11}" y2="${by+11}" style="stroke:var(--ink);stroke-width:2.5"/>`;
+  // límites
+  // cada método en su renglón; "inf." se escribe a la izquierda de su línea y "sup." a la derecha
+  lims.forEach((L,j)=>{
+    const ty=m.t-12-j*14, lab=(txt,x,anchor)=>`<text x="${x}" y="${ty}" text-anchor="${anchor}" style="fill:${L.color};font-weight:600">${txt}</text>`;
+    const both = L.lo>=a && L.hi<=b && X(L.hi)-X(L.lo) < 150;
+    [L.lo,L.hi].forEach((v,h)=>{ if (v<a||v>b) return; const x=X(v);
+      s+=`<line x1="${x}" x2="${x}" y1="${ty+4}" y2="${H-m.b}" style="stroke:${L.color};stroke-width:2;stroke-dasharray:6 4"/>`;
+      if (!both) s+= h ? lab(`${L.lab} sup.`, Math.min(x+4, W-m.r), x>W-110?"end":"start") : lab(`${L.lab} inf.`, Math.max(x-4, m.l), x<110?"start":"end"); });
+    if (both){const xm=(X(L.lo)+X(L.hi))/2; s+=lab(`${L.lab} inf. y sup.`, Math.min(Math.max(xm, m.l+60), W-m.r-60), "middle");}
+    if (L.lo<a) s+=lab(`← ${L.lab} inf. fuera`, m.l, "start");
+    if (L.hi>b) s+=lab(`${L.lab} sup. fuera →`, W-m.r, "end");
+  });
+  // puntos
+  const y0=m.t+46, y1=H-m.b-10;
+  tv.forEach((v,i)=>{const c=catOf(i), jy=y0+((i*0.6180339887)%1)*(y1-y0);
+    s+=`<circle cx="${X(v).toFixed(1)}" cy="${jy.toFixed(1)}" r="${c===3?3:4.2}" style="fill:${colors[c]};opacity:${c===3?0.4:0.95}"/>`;});
+  el.innerHTML=s+"</svg>";
+}
+
+function renderOut(){
+  $("o-err-o").textContent=O.err;
+  const {x, errIdx}=withErrors();
+  const minX=minmax(x)[0];
+  segDisable("o-scale","log", minX<0);
+  if (minX<0 && O.scale==="log"){O.scale="lin"; segSet("o-scale","lin");}
+  $("o-scalehint").textContent = minX<0 ? "Hay valores negativos: log no está definido, así que solo se puede detectar sobre x." : minX===0 ? "Hay ceros: en lugar de log(x) se usa log(x + 1)." : "Con log(x), la regla se aplica a los logaritmos y los límites se traducen de vuelta a millones.";
+  const sc=scaleFns(x), tv=x.map(sc.f);
+  const [mA,mB]=O.pair.split("-"), A=detect(mA,tv), B=detect(mB,tv);
+  const colA="var(--warn)", colB="var(--vio)", colors=["var(--rojo)",colA,colB,"var(--azul)"];
+  const cat=i=>A.flag[i]&&B.flag[i]?0:A.flag[i]?1:B.flag[i]?2:3;
+  const nA=A.flag.filter(Boolean).length, nB=B.flag.filter(Boolean).length, nAB=A.flag.filter((f,i)=>f&&B.flag[i]).length;
+  $("o-sub").textContent=`${x.length} empresas · detección sobre ${sc.lab}`;
+  outlierStrip($("o-strip"), tv, cat, colors, [{lo:A.lo,hi:A.hi,color:colA,lab:OLAB[mA]},{lo:B.lo,hi:B.hi,color:colB,lab:OLAB[mB]}], sc);
+  $("o-legend").innerHTML=`<span><i style="background:var(--rojo)"></i>ambos (${nAB})</span><span><i style="background:${colA}"></i>solo ${OLAB[mA]} (${nA-nAB})</span><span><i style="background:${colB}"></i>solo ${OLAB[mB]} (${nB-nAB})</span><span><i style="background:var(--azul);opacity:.5"></i>ninguno</span><span>Caja: Q1, mediana y Q3; bigotes hasta 1,5 × IQR</span>`;
+  const cats=[0,1,2,3].map(c=>tv.filter((v,i)=>cat(i)===c));
+  histChart($("o-hist"), {layers:[{vals:cats[3],color:"var(--azul)",op:0.75},{vals:cats[1],color:colA},{vals:cats[2],color:colB},{vals:cats[0],color:"var(--rojo)"}], bins:40,
+    xlab:sc.lab==="x"?"Ventas (millones de $)":sc.lab+" de ventas", aria:"Histograma coloreado por método"});
+  // Población sin errores
+  const popT=population(S.shape).map(sc.f).filter(isFinite);
+  const popRate=mt=>{const d=detect(mt,popT); return d.flag.filter(Boolean).length/popT.length;};
+  const allM=["iqr","z","rz"], D3={iqr:mA==="iqr"?A:mB==="iqr"?B:detect("iqr",tv), z:mA==="z"?A:mB==="z"?B:detect("z",tv), rz:mA==="rz"?A:mB==="rz"?B:detect("rz",tv)};
+  const rates={}; allM.forEach(mt=>rates[mt]=popRate(mt));
+  const lab3={iqr:`IQR × ${fmt(O.k,1)}`, z:`z-score, |z| > ${fmt(O.thr,1)}`, rz:"z robusto, |z*| > 3,5"};
+  const fmtLim=v=>{const o=sc.inv(v); return isFinite(o)?fv(o):"—";};
+  $("o-table").innerHTML=`<thead><tr><th>Método</th><th>Límite inferior</th><th>Límite superior</th><th>Marcados</th><th>% de la muestra</th><th>En la población</th>${O.err?"<th>Errores detectados</th>":""}</tr></thead><tbody>`
+    + allM.map(mt=>{const d=D3[mt], nf=d.flag.filter(Boolean).length, ne=[...errIdx].filter(i=>d.flag[i]).length; const inPair=mt===mA||mt===mB;
+      return `<tr class="${inPair?"":"ref"}"><td>${lab3[mt]}</td><td class="num">${fmtLim(d.lo)}</td><td class="num">${fmtLim(d.hi)}</td><td class="num">${nf}</td><td class="num">${pct(nf/tv.length)}</td><td class="num ${rates[mt]>0.02?"bad":""}">${pct(rates[mt])}</td>${O.err?`<td class="num ${ne<O.err?"bad":"good"}">${ne} de ${O.err}</td>`:""}</tr>`;}).join("")+"</tbody>"
+    + `<caption>Límites expresados en millones de $${sc.lab!=="x"?" (calculados sobre "+sc.lab+" y vueltos a la escala original)":""}</caption>`;
+  // Veredicto
+  const sk=skew(tv);
+  let read;
+  if (Math.abs(sk)<0.5 && rates.iqr<0.02 && rates.z<0.01) read=`Con datos aproximadamente simétricos, los métodos coinciden bastante y en la población marcan muy poco (IQR ${pct(rates.iqr)}, z ${pct(rates.z)}).${O.err?" Los errores de carga aparecen claramente separados.":" Lo que marcan ahora son extremos del azar, no errores."}`;
+  else if (sk>=0.5) read=`La distribución tiene cola derecha (asimetría ${fmt(sk,2)}). IQR marca ${pct(rates.iqr)} de la población <b>aunque no haya ningún error</b>: está marcando la forma. El z-score marca menos porque la propia cola infla el desvío.${sc.lab==="x"?" Probá detectar sobre log(x).":""}`;
+  else if (sk<=-0.5) read=`Cola a la izquierda (asimetría ${fmt(sk,2)}): ahora los marcados están abajo. ${sc.lab!=="x"?"El log estira todavía más la cola izquierda: acá empeora las cosas.":"Pasar a log no ayuda: estira todavía más esa cola."}`;
+  else read=`Asimetría ${fmt(sk,2)}. En la población, IQR marca ${pct(rates.iqr)} y z ${pct(rates.z)}.`;
+  if (S.shape==="colas") read+=" Con colas pesadas, los extremos son genuinos y aparecen más que en una normal: eliminarlos sería borrar información real.";
+  if (S.shape==="bimodal") read+=" Con dos grupos, ningún método ve algo raro entre las dos jorobas: el problema no son los outliers sino la mezcla de poblaciones.";
+  $("o-verdict").innerHTML=`<span class="pill ${nA+nB?"rech":"norech"}">${OLAB[mA]}: ${nA} · ${OLAB[mB]}: ${nB}</span><div class="stat">${OLAB[mA]} [${fmtLim(A.lo)}; ${fmtLim(A.hi)}] · ${OLAB[mB]} [${fmtLim(B.lo)}; ${fmtLim(B.hi)}]</div><div class="read">${read}</div>`;
+  // Masking
+  const mk=$("o-mask");
+  if (O.err){
+    const clean=D.x.map(sc.f), zc=detZ(clean,O.thr), zd=D3.z, iqc=detIQR(clean,O.k), iqd=D3.iqr;
+    const lost=clean.filter(v=>v>zc.hi && v<=zd.hi).length;
+    mk.hidden=false;
+    mk.className="note warn";
+    mk.innerHTML=`<b>Efecto masking.</b> Sin errores, el desvío de ${sc.lab} es ${fv(zc.s)}; con ${O.err} error${O.err>1?"es":""}, ${fv(zd.s)}. El límite superior del z-score pasa de ${fmtLim(zc.hi)} a ${fmtLim(zd.hi)}${lost?`, y ${lost} valor${lost>1?"es":""} alto${lost>1?"s":""} que antes se marcaba${lost>1?"n":""} deja${lost>1?"n":""} de marcarse`:""}. El límite del IQR casi no se mueve (${fmtLim(iqc.hi)} → ${fmtLim(iqd.hi)}): los cuartiles no se enteran de unos pocos valores gigantes.`;
+  } else mk.hidden=true;
+  // Tratamientos (en la escala original)
+  const keep=d=>x.filter((v,i)=>!d.flag[i]);
+  const rows=[["Original",x,""]];
+  if (O.err) rows.push(["Sin los errores (referencia)", D.x, "ref"]);
+  rows.push([`Eliminar outliers (IQR × ${fmt(O.k,1)})`, keep(D3.iqr), ""],[`Eliminar outliers (|z| > ${fmt(O.thr,1)})`, keep(D3.z), ""],["Winsorizar p1–p99", winsor(x,.01,.99), ""],["Winsorizar p5–p95", winsor(x,.05,.95), ""]);
+  const s0=stats(x);
+  $("o-treat").innerHTML=`<thead><tr><th>Versión</th><th>n</th><th>Media</th><th>Δ media</th><th>Mediana</th><th>Δ mediana</th><th>Desvío</th><th>p05</th><th>p95</th></tr></thead><tbody>`
+    + rows.map(([lab,v,cls])=>{const st=stats(v), dm=(st.media-s0.media)/Math.abs(s0.media), dmd=(st.mediana-s0.mediana)/Math.abs(s0.mediana||1);
+      return `<tr class="${cls}"><td>${lab}</td><td class="num">${st.n}</td><td class="num">${fv(st.media)}</td><td class="num">${lab==="Original"?"—":sgnPct(dm)}</td><td class="num">${fv(st.mediana)}</td><td class="num">${lab==="Original"?"—":sgnPct(dmd)}</td><td class="num">${fv(st.desvio)}</td><td class="num">${fv(st.p05)}</td><td class="num">${fv(st.p95)}</td></tr>`;}).join("")+"</tbody>";
+  const kI=keep(D3.iqr), sI=stats(kI), lostI=(x.length-kI.length)/x.length;
+  const notes=[`Eliminar por IQR saca ${x.length-kI.length} empresas (${pct(lostI)}): la media pasa de ${fv(s0.media)} a ${fv(sI.media)} (${sgnPct((sI.media-s0.media)/Math.abs(s0.media))}) y la mediana de ${fv(s0.mediana)} a ${fv(sI.mediana)}.`];
+  if (lostI>0.05) notes.push("Se pierde más del 5% de la muestra: probablemente se están borrando datos genuinos de la cola. Considerá winsorizar o trabajar en log.");
+  if (Math.abs((sI.media-s0.media)/s0.media)>0.1 && Math.abs((sI.mediana-s0.mediana)/(s0.mediana||1))<0.05) notes.push("La media se movió mucho y la mediana casi nada: los valores eliminados eran los que tiraban de la media.");
+  notes.push("Winsorizar mantiene el n: ninguna empresa desaparece, solo se recortan sus valores extremos.");
+  $("o-treatnote").innerHTML=notes.join(" ");
+  // R
+  const lg=sc.lab!=="x", vv=lg?(sc.lab==="log(x)"?"log(ventas)":"log1p(ventas)"):"ventas";
+  $("o-code").innerHTML=`ventas &lt;- empresas$ventas_mm[!is.na(empresas$ventas_mm)]${lg?`\nv &lt;- ${vv}   <span class="c"># detectar en escala log</span>`:""}
+<span class="c"># IQR</span>
+q1 &lt;- quantile(${lg?"v":"ventas"}, 0.25); q3 &lt;- quantile(${lg?"v":"ventas"}, 0.75); iqr &lt;- q3 - q1
+lim_inf &lt;- q1 - ${rNum(O.k)} * iqr; lim_sup &lt;- q3 + ${rNum(O.k)} * iqr   <span class="c"># ${fmtLim(D3.iqr.lo)} a ${fmtLim(D3.iqr.hi)} millones</span>
+sum(${lg?"v":"ventas"} &lt; lim_inf | ${lg?"v":"ventas"} &gt; lim_sup)   <span class="c"># ${D3.iqr.flag.filter(Boolean).length}</span>
+<span class="c"># z-score</span>
+z &lt;- (${lg?"v":"ventas"} - mean(${lg?"v":"ventas"})) / sd(${lg?"v":"ventas"})
+sum(abs(z) &gt; ${rNum(O.thr)})   <span class="c"># ${D3.z.flag.filter(Boolean).length}</span>
+<span class="c"># z robusto (mediana y MAD; mad() ya multiplica por 1,4826)</span>
+z_rob &lt;- (${lg?"v":"ventas"} - median(${lg?"v":"ventas"})) / mad(${lg?"v":"ventas"})
+sum(abs(z_rob) &gt; 3.5)   <span class="c"># ${D3.rz.flag.filter(Boolean).length}</span>
+<span class="c"># winsorizar al p1-p99</span>
+lims &lt;- quantile(ventas, c(0.01, 0.99))
+ventas_wins &lt;- pmin(pmax(ventas, lims[1]), lims[2])`;
+}
+function initOut(){
+  $("o-err").addEventListener("input", e=>{O.err=+e.target.value; renderOut();});
+  segInit("o-pair", v=>{O.pair=v; renderOut();});
+  segInit("o-k", v=>{O.k=+v; renderOut();});
+  segInit("o-thr", v=>{O.thr=+v; renderOut();});
+  segInit("o-scale", v=>{O.scale=v; renderOut();});
+}
+</script>
+
+<script>
+"use strict";
+/* ================= TRANSFORMACIONES ================= */
+const T = {tr:"log", ext:false};
+const TR = {
+  orig:  {lab:"Original",   formula:"x"},
+  log:   {lab:"log(x)",     formula:"x' = log(x). Solo para x > 0. Comprime la cola derecha: pasar de 1 a 10 y de 10 a 100 es el mismo salto."},
+  log1p: {lab:"log(x + 1)", formula:"x' = log(x + 1). Admite ceros (log(0 + 1) = 0). Para valores grandes se parece mucho a log(x)."},
+  z:     {lab:"z-score",    formula:"z = (x − media) / desvío. Queda con media 0 y desvío 1. No cambia la forma."},
+  mm:    {lab:"Min-max",    formula:"x' = (x − mín) / (máx − mín). Queda entre 0 y 1. No cambia la forma y es muy sensible al máximo."}
+};
+/* Devuelve {vals (pares [x, x'] válidos), bad: cuántos quedan -Inf/NaN} */
+function applyTr(key, x){
+  if (key==="orig") return {pairs:x.map(v=>[v,v]), bad:0};
+  if (key==="log"||key==="log1p"){const f=key==="log"?Math.log:Math.log1p, p=[]; let bad=0; x.forEach(v=>{const y=f(v); if (isFinite(y)) p.push([v,y]); else bad++;}); return {pairs:p, bad};}
+  if (key==="z"){const m=mean(x), s=sdv(x); return {pairs:x.map(v=>[v,(v-m)/s]), bad:0};}
+  const [lo,hi]=minmax(x); return {pairs:x.map(v=>[v,(v-lo)/(hi-lo)]), bad:0};
+}
+function mapChart(el, pairs, key){
+  const W=720,H=260,m={l:52,r:14,t:14,b:40};
+  const xs=pairs.map(p=>p[0]), ys=pairs.map(p=>p[1]);
+  let [xa,xb]=minmax(xs), [ya,yb]=minmax(ys); const px=(xb-xa||1)*0.03, py=(yb-ya||1)*0.06; xa-=px; xb+=px; ya-=py; yb+=py;
+  const X=v=>m.l+(W-m.l-m.r)*(v-xa)/(xb-xa), Y=v=>H-m.b-(H-m.t-m.b)*(v-ya)/(yb-ya);
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Valor original contra valor transformado">`;
+  xTicks(ya,yb,false,5).forEach(t=>{s+=`<line class="ax" x1="${m.l}" x2="${W-m.r}" y1="${Y(t.v)}" y2="${Y(t.v)}" style="opacity:.5"/><text x="${m.l-6}" y="${Y(t.v)+4}" text-anchor="end">${t.l}</text>`;});
+  xTicks(xa,xb,false).forEach(t=>{s+=`<text x="${X(t.v)}" y="${H-m.b+16}" text-anchor="middle">${t.l}</text>`;});
+  s+=`<text x="${(W+m.l)/2}" y="${H-4}" text-anchor="middle">Ventas originales (millones de $)</text><text x="${m.l}" y="${m.t-2}" style="font-weight:600">${TR[key].lab}</text>`;
+  const sp=[...pairs].sort((a,b)=>a[0]-b[0]);
+  s+=`<path d="${sp.map((p,i)=>(i?"L":"M")+X(p[0]).toFixed(1)+","+Y(p[1]).toFixed(1)).join("")}" style="fill:none;stroke:var(--gris);stroke-width:1.5"/>`;
+  sp.forEach(p=>{s+=`<circle cx="${X(p[0]).toFixed(1)}" cy="${Y(p[1]).toFixed(1)}" r="3" style="fill:var(--azul);opacity:.6"/>`;});
+  el.innerHTML=s+"</svg>";
+}
+const vlMM = st => [{v:st.media,color:"var(--rojo)",w:2.5},{v:st.mediana,color:"var(--ink)",dash:true}];
+
+function renderTr(){
+  const x=D.x.slice(); if (T.ext) x.push(minmax(D.x)[1]*20);
+  const key=T.tr, R=applyTr(key,x), tv=R.pairs.map(p=>p[1]);
+  const s0=stats(x), s1=tv.length>2?stats(tv):null;
+  $("t-formula").textContent=TR[key].formula;
+  $("t-h1title").textContent=TR[key].lab;
+  histChart($("t-h0"), {W:440, H:230, bins:30, layers:[{vals:x,color:"var(--azul)"}], vlines:vlMM(s0), xlab:`asimetría ${fmt(s0.asim,2)}`, aria:"Histograma original"});
+  if (s1) histChart($("t-h1"), {W:440, H:230, bins:30, layers:[{vals:tv,color:"var(--azul)"}], vlines:vlMM(s1), xlab:`asimetría ${fmt(s1.asim,2)}`, aria:"Histograma transformado"});
+  else $("t-h1").innerHTML=`<p class="note warn">No quedan valores válidos para graficar.</p>`;
+  const w=$("t-warn");
+  if (R.bad){w.hidden=false; const nz=x.filter(v=>v===0).length, nn=x.filter(v=>v<0).length;
+    w.innerHTML=`<b>${R.bad} valores no se pueden transformar</b>${nz?`: ${nz} ceros dan log(0) = -Inf`:""}${nn?`${nz?" y":":"} ${nn} negativos dan NaN`:""}. R no avisa con un error: los devuelve como -Inf/NaN y después se pierden en gráficos y promedios. ${nz&&!nn?"Usá log(x + 1) o analizá los ceros aparte.":""}`;}
+  else w.hidden=true;
+  // Veredicto
+  const shapeChange = key==="log"||key==="log1p";
+  let read;
+  if (!s1) read="";
+  else if (shapeChange){
+    read = Math.abs(s1.asim)<Math.abs(s0.asim)-0.2 ? `El log comprimió la cola: la asimetría pasó de ${fmt(s0.asim,2)} a ${fmt(s1.asim,2)} y la media quedó mucho más cerca de la mediana.`
+         : s1.asim < -0.5 && s0.asim < 0.5 ? `La variable no tenía cola derecha y el log le creó una cola a la izquierda (asimetría ${fmt(s0.asim,2)} → ${fmt(s1.asim,2)}). Acá no conviene.`
+         : `La asimetría pasó de ${fmt(s0.asim,2)} a ${fmt(s1.asim,2)}: cambio chico, la variable no tenía una cola derecha para comprimir.`;
+  } else {
+    read = `La asimetría es exactamente la misma (${fmt(s0.asim,2)}): ${key==="z"?"la estandarización":"min-max"} solo desplaza y estira el eje. ${key==="z"?`Ahora media = ${fmt(s1.media,2)} y desvío = ${fmt(s1.desvio,2)}.`:`Ahora el mínimo es 0 y el máximo 1.`}`;
+    if (key==="mm"){const low=tv.filter(v=>v<0.05).length/tv.length; read+=` El ${pct(low,0)} de las empresas quedó entre 0 y 0,05${T.ext?": una sola empresa gigante aplastó a todas las demás contra el cero.":"."}`;}
+    if (key==="z" && T.ext) read+=` La empresa gigante tiene z = ${fmt(tv[tv.length-1],1)} y las demás quedan comprimidas cerca de ${fmt(median(tv),2)}.`;
+  }
+  $("t-verdict").innerHTML=`<span class="pill ${shapeChange?"rech":"norech"}">${shapeChange?"Cambia la forma":"Cambia solo la escala"}</span><div class="stat">${TR[key].lab}: asimetría ${fmt(s0.asim,2)} → ${s1?fmt(s1.asim,2):"—"} · rango [${fv(s1?s1.min:NaN)}; ${fv(s1?s1.max:NaN)}]</div><div class="read">${read}</div>`;
+  mapChart($("t-map"), R.pairs, key);
+  // Minis + tabla
+  const keys=["orig","log","log1p","z","mm"], all={};
+  keys.forEach(k=>{const r=applyTr(k,x); all[k]={vals:r.pairs.map(p=>p[1]), bad:r.bad};});
+  $("t-minis").innerHTML=keys.map(k=>`<div class="${k===key?"sel":""}"><h3>${TR[k].lab}</h3><div id="mini-${k}"></div><div class="sk">${all[k].vals.length>2?"asimetría "+fmt(skew(all[k].vals),2):"sin datos"}${all[k].bad?` · ${all[k].bad} inválidos`:""}</div></div>`).join("");
+  keys.forEach(k=>{if (all[k].vals.length>2) histChart($("mini-"+k), {W:260, H:120, bins:22, layers:[{vals:all[k].vals,color:k===key?"var(--azul)":"var(--gris)"}], aria:"Histograma "+TR[k].lab});});
+  $("t-table").innerHTML=`<thead><tr><th>Transformación</th><th>Mín.</th><th>Máx.</th><th>Media</th><th>Mediana</th><th>Desvío</th><th>Asimetría</th><th>Inválidos</th></tr></thead><tbody>`
+    + keys.map(k=>{const v=all[k].vals; if (v.length<3) return `<tr><td>${TR[k].lab}</td><td colspan="7" class="num">sin datos válidos</td></tr>`; const st=stats(v);
+      return `<tr class="${k===key?"sel":""}"><td>${TR[k].lab}</td><td class="num">${fv(st.min)}</td><td class="num">${fv(st.max)}</td><td class="num">${fv(st.media)}</td><td class="num">${fv(st.mediana)}</td><td class="num">${fv(st.desvio)}</td><td class="num">${fmt(st.asim,2)}</td><td class="num ${all[k].bad?"bad":""}">${all[k].bad}</td></tr>`;}).join("")+"</tbody>";
+  // Recomendaciones según la forma
+  const recs=[], nz=x.filter(v=>v===0).length, nn=x.filter(v=>v<0).length;
+  const skLog = all.log.vals.length>2 ? skew(all.log.vals) : NaN, skL1 = skew(all.log1p.vals.length>2?all.log1p.vals:[0,0,0]);
+  if (nn) recs.push(`<b>Hay ${nn} valores negativos:</b> ni log(x) ni log(x + 1) sirven para todos. Si la variable puede ser negativa (por ejemplo, resultados), trabajala en su escala original.`);
+  if (nz) recs.push(`<b>Hay ${nz} ceros (${pct(nz/x.length,0)}):</b> log(x) los convierte en -Inf. log(x + 1) los conserva (asimetría ${fmt(skL1,2)}), pero preguntate si el cero significa otra cosa ("no exporta"): muchas veces conviene una variable indicadora exporta sí/no y el log solo para los que exportan.`);
+  if (S.shape==="bimodal") recs.push("<b>Dos jorobas:</b> ninguna transformación las junta. Probablemente sean dos poblaciones distintas: separalas o agregá la variable que las distingue (por ejemplo, tamaño).");
+  if (s0.asim>1 && !nn) recs.push(`<b>Cola derecha larga (asimetría ${fmt(s0.asim,2)}):</b> es el caso típico del log. ${isFinite(skLog)?`La asimetría baja a ${fmt(skLog,2)}. `:""}Además, en una regresión los coeficientes se leen como cambios porcentuales o elasticidades.`);
+  else if (s0.asim>0.5 && !nn) recs.push(`<b>Asimetría moderada (${fmt(s0.asim,2)}):</b> el log ayuda${isFinite(skLog)?` (queda en ${fmt(skLog,2)})`:""}, pero no es imprescindible. Decidí según el análisis: si vas a interpretar en porcentajes, usalo.`);
+  else if (s0.asim<-0.5) recs.push(`<b>Cola izquierda (asimetría ${fmt(s0.asim,2)}):</b> el log empeora las cosas${isFinite(skLog)?` (quedaría en ${fmt(skLog,2)})`:""}, porque estira justamente los valores chicos. Mejor dejarla como está.`);
+  else if (S.shape!=="bimodal") recs.push(`<b>Casi simétrica (asimetría ${fmt(s0.asim,2)}):</b> no hace falta cambiar la forma. El log le crearía una leve cola a la izquierda${isFinite(skLog)?` (${fmt(skLog,2)})`:""}.`);
+  recs.push("<b>Para comparar con otras variables</b> (clustering, PCA, regularización): estandarizá con z-score. Si la variable es asimétrica, primero log y después z-score.");
+  recs.push(`<b>Min-max</b> solo si el método exige el rango [0, 1] (redes neuronales, KNN). ${s0.max>s0.p95*5?"Con este máximo tan alejado, casi todos los datos quedarían pegados al 0.":"Tildá la empresa gigante para ver por qué es frágil."}`);
+  $("t-recs").innerHTML=recs.map(r=>`<li>${r}</li>`).join("");
+  $("t-code").innerHTML=`normalizar &lt;- function(x) (x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
+
+empresas_tr &lt;- empresas |>
+  filter(!is.na(ventas_mm)) |>
+  mutate(
+    log_ventas   = log(ventas_mm),        <span class="c"># ${all.log.bad?all.log.bad+" valores -Inf/NaN":"asimetría "+fmt(skew(all.log.vals),2)}</span>
+    log1p_ventas = log1p(ventas_mm),      <span class="c"># = log(ventas_mm + 1)</span>
+    ventas_z     = (ventas_mm - mean(ventas_mm)) / sd(ventas_mm),   <span class="c"># o scale(ventas_mm)</span>
+    ventas_norm  = normalizar(ventas_mm)
+  )
+
+<span class="c"># verificar: la asimetría de z y min-max es la misma que la original</span>
+empresas_tr |> summarise(media_z = mean(ventas_z), sd_z = sd(ventas_z),
+                         min_n = min(ventas_norm), max_n = max(ventas_norm))`;
+}
+function initTr(){
+  segInit("t-tr", v=>{T.tr=v; renderTr();});
+  $("t-ext").addEventListener("change", e=>{T.ext=e.target.checked; renderTr();});
+}
+</script>
+
+<script>
+"use strict";
+/* ================= ¿QUÉ HARÍAS? ================= */
+const CASOS = [
+  {q:"En una base de 5.000 personas, 4 registros tienen edad = 999.",
+   hint:"¿999 es una edad posible o es un código?",
+   ops:[["Recodificar 999 como NA y después tratarlo como un faltante más",true,"Es un código de dato faltante o un error de carga, no una edad extrema. Primero se recodifica; con 4 casos en 5.000, eliminarlos después no afecta en nada."],
+        ["Winsorizar la edad al percentil 99",false,"Winsorizar es para valores genuinos pero influyentes. 999 no es una edad: no hay nada que recortar, hay que corregir."],
+        ["Mantenerlos: son pocos y el promedio casi no cambia",false,"Cuatro valores de 999 en 5.000 suben la edad media unos 0,7 años y el máximo queda absurdo. Un error evidente nunca se mantiene."],
+        ["Imputarlos con la media de edad sin tocar el 999",false,"Si el 999 queda en los datos, la media que usás para imputar ya está contaminada."]]},
+  {q:"En una encuesta a 2.000 empresas se perdió un lote de formularios al azar: falta el 3% de las respuestas de ventas.",
+   hint:"Pensá en el mecanismo (¿de qué depende que falte?) y en cuánto falta.",
+   ops:[["Eliminar las filas con NA",true,"Es MCAR (se perdió al azar) y es poco: eliminar no sesga y la pérdida de n es mínima. Es la opción más simple y más fácil de justificar."],
+        ["Imputar con un modelo usando todas las variables",false,"No está mal, pero con MCAR y 3% agrega complejidad sin ganar casi nada. La regla de la clase: MCAR con pocos NA, eliminar."],
+        ["Descartar la variable ventas",false,"El 3% está muy lejos del umbral de 20-30% a partir del cual una variable deja de ser confiable."]]},
+  {q:"Falta el dato de ventas del 18% de las empresas. Los NA se concentran en PyMEs del Agro. Sector y empleados están completos para todas.",
+   hint:"El faltante depende de algo que sí observás.",
+   ops:[["Imputar usando sector y tamaño (mediana por grupo o un modelo como PMM)",true,"Es MAR: el patrón depende de variables observadas, así que podés usarlas para imputar. Revisá en la pestaña Faltantes cómo el sesgo de la media casi desaparece con estos métodos."],
+        ["Eliminar las filas con NA",false,"Con MAR, eliminar deja afuera a las empresas chicas del Agro: la media de ventas queda sobreestimada."],
+        ["Imputar con la media general",false,"Ignora justamente la información que explica el faltante, achica la variabilidad y debilita la relación entre ventas y tamaño."],
+        ["Descartar la variable",false,"18% es mucho pero todavía está por debajo del umbral de 20-30%, y tenés buenas variables para imputar."]]},
+  {q:"En una encuesta de hogares, los hogares de ingresos altos tienden a no declarar su ingreso.",
+   hint:"¿De qué depende que falte el dato?",
+   ops:[["Marcar los faltantes con una variable indicadora, reportar el sesgo potencial y hacer análisis de sensibilidad",true,"Es MNAR: falta porque el valor es alto. Ni eliminar ni imputar con lo observado lo corrige. Lo honesto es dejarlo explícito, mostrar cómo cambian los resultados bajo distintos supuestos o usar modelos de selección (Heckman)."],
+        ["Imputar con la mediana del ingreso",false,"La mediana de los que responden es baja justamente porque los altos no responden: subestima todavía más."],
+        ["Eliminar los hogares sin ingreso",false,"Elimina a los más ricos: el ingreso promedio queda subestimado y la desigualdad también."],
+        ["Imputar por región con un modelo",false,"Ayudaría si fuera MAR. Con MNAR, los hogares que faltan no se parecen a los observados de su región."]]},
+  {q:"Una empresa del dataset factura 120 veces la mediana. Verificaste que es real: es una gran exportadora.",
+   hint:"¿Es un error o un dato genuino?",
+   ops:[["Mantenerla (y, si domina una regresión, winsorizar o usar log, reportando la decisión)",true,"Es un outlier genuino: eliminarlo borra información real del sector. Si su influencia es excesiva, winsorizar o trabajar en log conserva la observación."],
+        ["Eliminarla porque el IQR la marca como outlier",false,"El IQR no distingue errores de datos genuinos. Que un método la marque es el comienzo del análisis, no la decisión."],
+        ["Reemplazarla por la mediana",false,"Estarías inventando una empresa chica donde hay una grande. Imputar es para datos faltantes o errores, no para valores reales."]]},
+  {q:"Las ventas tienen una cola derecha larga (asimetría 4). Vas a estimar una regresión y querés leer los coeficientes como cambios porcentuales.",
+   hint:"¿Qué transformación cambia la forma y además tiene una interpretación económica?",
+   ops:[["log(ventas)",true,"Comprime la cola derecha, reduce la influencia de las empresas gigantes y los coeficientes se leen como semi-elasticidades o elasticidades."],
+        ["Estandarizar con z-score",false,"z-score cambia la escala pero no la forma: la asimetría sigue siendo 4."],
+        ["Min-max",false,"Tampoco cambia la forma, y con una cola larga deja casi todas las empresas pegadas al 0."]]},
+  {q:"Vas a hacer clustering de empresas usando ventas (en millones) y cantidad de empleados.",
+   hint:"¿Qué pasa con las distancias si una variable está en miles y la otra en unidades?",
+   ops:[["Estandarizar ambas variables (z-score), si son muy asimétricas aplicando log primero",true,"El clustering usa distancias: sin estandarizar, la variable con números más grandes domina. Con z-score ambas pesan lo mismo."],
+        ["Usarlas tal como están",false,"La variable con mayor escala decidiría sola los grupos."],
+        ["Aplicar log solo a ventas",false,"Mejora la forma de ventas, pero las dos variables siguen en escalas distintas."]]},
+  {q:"Exportaciones por empresa: el 40% de las empresas exporta 0 y el resto tiene una cola derecha larga. Querés usar log.",
+   hint:"¿Cuánto vale log(0)?",
+   ops:[["Usar log(x + 1), o separar en exporta sí/no y aplicar log solo a las que exportan",true,"log(0) = -Inf. log(x + 1) conserva los ceros; separar los ceros suele ser todavía mejor porque exportar o no es una decisión distinta de cuánto exportar."],
+        ["Usar log(x) y dejar que R descarte los -Inf",false,"Perderías el 40% de la muestra sin darte cuenta, y justamente las empresas que no exportan."],
+        ["Usar min-max",false,"No cambia la forma: la cola larga sigue igual."]]},
+  {q:"Aplicaste z-score con |z| > 3 a ingresos muy asimétricos y solo marcó 2 casos, aunque el boxplot muestra muchos puntos lejos.",
+   hint:"¿Qué supone el z-score sobre la forma de la distribución? ¿Qué le pasa al desvío cuando hay valores enormes?",
+   ops:[["Usar IQR, o aplicar el z-score sobre log(ingresos)",true,"El z-score supone simetría y los propios extremos inflan el desvío (masking). Con IQR o en escala log, la detección tiene más sentido. En la pestaña Outliers podés ver las dos cosas."],
+        ["Bajar el umbral a |z| > 2",false,"Sigue suponiendo simetría: vas a marcar valores genuinos de la cola sin resolver el masking."],
+        ["Concluir que casi no hay outliers",false,"El método no es adecuado para esta forma: la conclusión no es confiable."]]},
+  {q:"Una variable clave de tu TP tiene 45% de NA.",
+   hint:"Recordá la regla de la clase sobre cuánto se puede imputar.",
+   ops:[["Reportar el problema y considerar no usarla (o usarla con mucha cautela y una indicadora)",true,"Con más del 20-30% imputado, la mayor parte de la información sería inventada. Lo correcto es documentarlo y evaluar si la variable sirve."],
+        ["Imputar con la media",false,"Casi la mitad de la variable pasaría a ser un único valor inventado."],
+        ["Eliminar las filas con NA",false,"Perdés casi la mitad de la muestra y, salvo que sea MCAR, la que queda está sesgada."]]}
+];
+const LSK = "cdd_clase12_decidir";
+let resp = {};
+try { resp = JSON.parse(localStorage.getItem(LSK) || "{}") || {}; } catch(e){ resp = {}; }
+const save = () => { try { localStorage.setItem(LSK, JSON.stringify(resp)); } catch(e){} };
+/* Orden de opciones mezclado pero fijo por caso */
+const ORDER = CASOS.map((c,i)=>withSeed(1000+i, ()=>shuffle(c.ops.map((_,j)=>j))));
+function renderQuiz(){
+  const L=$("q-list"); L.innerHTML="";
+  CASOS.forEach((c,i)=>{
+    const d=document.createElement("div"); d.className="q"; const ans=resp[i];
+    d.innerHTML=`<div class="num">Caso ${i+1} de ${CASOS.length}</div><h3>${c.q}</h3><div class="ops"></div>`;
+    const ops=d.querySelector(".ops");
+    ORDER[i].forEach(j=>{
+      const [t,ok]=c.ops[j], b=document.createElement("button"); b.textContent=t;
+      if (ans!==undefined){ b.disabled=true; if (j===ans) b.className=ok?"right":"wrong"; else if (ok) b.className="right"; else b.className="faded"; }
+      b.addEventListener("click",()=>{resp[i]=j; save(); renderQuiz();});
+      ops.appendChild(b);
+    });
+    if (ans!==undefined){
+      const [,ok,fb]=c.ops[ans], right=c.ops.find(o=>o[1]);
+      const p=document.createElement("p"); p.className="fb "+(ok?"ok":"no");
+      p.innerHTML=(ok?"<b>Bien.</b> ":"<b>No es la mejor opción.</b> ")+fb+(ok?"":` <br><b>La respuesta:</b> ${right[2]}`);
+      d.appendChild(p);
+    } else {
+      const h=document.createElement("button"); h.className="hintbtn"; h.textContent="Ver una pista";
+      h.addEventListener("click",()=>{h.outerHTML=`<p class="fb">${c.hint}</p>`;}); d.appendChild(h);
+    }
+    L.appendChild(d);
+  });
+  const done=Object.keys(resp).length, ok=Object.entries(resp).filter(([i,j])=>CASOS[i]&&CASOS[i].ops[j]&&CASOS[i].ops[j][1]).length;
+  $("q-score").textContent=`${ok} bien de ${done} respondidos · ${CASOS.length} casos`;
+}
+$("q-reset").addEventListener("click",()=>{resp={}; save(); renderQuiz();});
+
+/* ================= Pestañas ================= */
+let active="imp";
+function renderActive(){ ({imp:renderImp, out:renderOut, tr:renderTr, dec:renderQuiz})[active](); }
+document.querySelectorAll("nav.tabs button").forEach(b=>b.addEventListener("click",()=>{
+  active=b.dataset.tab;
+  document.querySelectorAll("nav.tabs button").forEach(x=>x.setAttribute("aria-selected",x===b?"true":"false"));
+  ["imp","out","tr","dec"].forEach(t=>$("tab-"+t).hidden=(t!==active));
+  $("varbar").hidden = active==="dec";
+  renderActive();
+}));
+initVarbar(); initImp(); initOut(); initTr();
+D = makeData(S.shape, S.n, S.seed); renderVarbar(); renderActive();
+</script>
+</body>
+</html>
