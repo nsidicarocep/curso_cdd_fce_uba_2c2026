@@ -1,0 +1,1750 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Armá tu índice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,650&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --ground:#F3F6F8; --surface:#FFFFFF; --sunk:#EAF0F4; --ink:#15212B; --muted:#586977; --rule:#D3DDE4;
+  --azul:#2C6E9B; --rojo:#C1553B; --gris:#8C9AA5; --azul-suave:#DCE9F2; --rojo-suave:#F6E1DA;
+  --ok:#2E7D4F; --warn:#B7791F; --vio:#7A5AA6; --ok-suave:#DDEFE3;
+  --c1:#2C6E9B; --c2:#C1553B; --c3:#D9962B; --c4:#4E8F5A; --c5:#7A5C9E; --c6:#8C6D4F; --c7:#3B9AA8; --c8:#B5577F;
+  --f-display:"Literata", Georgia, "Times New Roman", serif;
+  --f-body:"Public Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", Consolas, "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0F161C; --surface:#16202A; --sunk:#1C2934; --ink:#E4EBF0; --muted:#95A5B1; --rule:#2B3A46;
+    --azul:#6AA8D4; --rojo:#E27F63; --gris:#7D8C97; --azul-suave:#1D3446; --rojo-suave:#43271F;
+    --ok:#5DBB84; --warn:#E0A74A; --vio:#B59BE0; --ok-suave:#1B3526;
+    --c1:#6AA8D4; --c2:#E27F63; --c3:#E7B252; --c4:#6DBB7E; --c5:#B59BE0; --c6:#C29E7E; --c7:#5FC3CF; --c8:#E08AB0;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0F161C; --surface:#16202A; --sunk:#1C2934; --ink:#E4EBF0; --muted:#95A5B1; --rule:#2B3A46;
+  --azul:#6AA8D4; --rojo:#E27F63; --gris:#7D8C97; --azul-suave:#1D3446; --rojo-suave:#43271F;
+  --ok:#5DBB84; --warn:#E0A74A; --vio:#B59BE0; --ok-suave:#1B3526;
+  --c1:#6AA8D4; --c2:#E27F63; --c3:#E7B252; --c4:#6DBB7E; --c5:#B59BE0; --c6:#C29E7E; --c7:#5FC3CF; --c8:#E08AB0;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55;margin:0}
+h1,h2,h3{font-family:var(--f-display);font-weight:650;text-wrap:balance;margin:0;line-height:1.2}
+.wrap{max-width:1240px;margin:0 auto;padding:0 20px}
+@media (max-width:600px){.wrap{padding:0 16px}}
+header.top{padding:26px 0 0}
+.curso{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+header.top h1{font-size:30px;margin-top:4px}
+header.top p{margin:6px 0 0;color:var(--muted);max-width:78ch}
+nav.tabs{display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--rule);margin-top:16px}
+nav.tabs button{font:inherit;background:none;border:0;border-bottom:3px solid transparent;padding:10px 14px 9px;cursor:pointer;color:var(--muted);text-align:left;display:flex;flex-direction:column;gap:1px}
+nav.tabs button b{font-weight:700;color:var(--ink);font-size:15px}
+nav.tabs button span{font-size:12.5px}
+nav.tabs button[aria-selected="true"]{border-bottom-color:var(--azul)}
+nav.tabs button[aria-selected="true"] b{color:var(--azul)}
+nav.tabs button.sec b{font-weight:600}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--azul);outline-offset:2px}
+.panel{display:grid;grid-template-columns:300px minmax(0,1fr);gap:24px;padding:22px 0 60px;align-items:start}
+@media (max-width:860px){.panel{grid-template-columns:1fr}}
+aside.ctrl{position:sticky;top:12px;background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:14px;max-height:calc(100vh - 24px);overflow-y:auto}
+@media (max-width:860px){aside.ctrl{position:static;max-height:none}}
+.ctrl h3{font-size:13px;font-family:var(--f-body);font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label,.lbl{font-size:13px;font-weight:600;display:flex;justify-content:space-between;gap:8px}
+.field label output{font-family:var(--f-mono);font-weight:400;color:var(--muted);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--azul)}
+select,input[type=number]{font:inherit;font-size:14px;padding:6px 8px;border:1px solid var(--rule);border-radius:6px;background:var(--sunk);color:var(--ink);max-width:100%}
+input[type=number]{width:120px;font-family:var(--f-mono);font-size:13px}
+.seg{display:flex;border:1px solid var(--rule);border-radius:6px;overflow:hidden}
+.seg button{flex:1;font:inherit;font-size:13px;padding:6px 4px;border:0;background:var(--sunk);color:var(--muted);cursor:pointer}
+.seg button+button{border-left:1px solid var(--rule)}
+.seg button[aria-pressed="true"]{background:var(--azul);color:#fff;font-weight:600}
+.seg.col{flex-direction:column}
+.seg.col button{text-align:left;padding:7px 10px}
+.seg.col button+button{border-left:0;border-top:1px solid var(--rule)}
+.seg.sm button{font-size:12px;padding:4px 6px}
+.shapes{display:flex;flex-wrap:wrap;gap:6px}
+.shapes button{font:inherit;font-size:13px;padding:5px 10px;border:1px solid var(--rule);border-radius:999px;background:var(--sunk);color:var(--ink);cursor:pointer}
+.shapes button[aria-pressed="true"]{background:var(--azul);border-color:var(--azul);color:#fff;font-weight:600}
+.checks{display:flex;flex-direction:column;gap:3px}
+.checks label{font-size:13.5px;font-weight:400;display:flex;gap:8px;align-items:center;justify-content:flex-start;cursor:pointer}
+.checks input{accent-color:var(--azul);margin:0}
+.roles{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 8px;align-items:center}
+.roles span{font-size:13.5px}
+.roles .seg{min-width:156px}
+.btn{font:inherit;font-weight:600;font-size:14px;border-radius:6px;padding:8px 12px;cursor:pointer;border:1px solid var(--azul);background:var(--azul);color:#fff}
+.btn.ghost{background:transparent;color:var(--azul)}
+.btn.sm{font-size:13px;padding:5px 10px}
+.btn.ghost[aria-pressed="true"]{background:var(--azul);color:#fff}
+.btn:disabled{opacity:.55;cursor:progress}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.check{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;cursor:pointer}
+.check input{margin-top:4px;accent-color:var(--azul)}
+.hint{font-size:12.5px;color:var(--muted);margin:0}
+.card .hint{font-size:13px;margin:4px 0 0;max-width:80ch}
+.results{display:flex;flex-direction:column;gap:18px;min-width:0}
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:16px 18px;min-width:0}
+.card h2{font-size:19px}
+.card h2 small{font-family:var(--f-body);font-weight:500;font-size:13px;color:var(--muted);margin-left:6px}
+.card>p{max-width:78ch}
+.card-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.card-head .seg{min-width:180px}
+.verdict{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;align-items:center;padding:14px 18px;border-radius:8px;border:1px solid var(--rule);background:var(--surface)}
+.verdict .pill{grid-row:span 2;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:6px 10px;border-radius:999px;white-space:nowrap;background:var(--azul-suave);color:var(--azul)}
+.verdict .pill.warnp{background:var(--rojo-suave);color:var(--rojo)}
+.verdict .pill.okp{background:var(--ok-suave);color:var(--ok)}
+@media (max-width:600px){.verdict{grid-template-columns:1fr}.verdict .pill{grid-row:auto;justify-self:start}}
+.verdict .stat{font-family:var(--f-mono);font-size:14px;font-variant-numeric:tabular-nums}
+.verdict .read{font-size:14px;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:18px}
+@media (max-width:600px){.grid2{grid-template-columns:1fr}}
+.split{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:20px;align-items:start;margin-top:10px}
+@media (max-width:860px){.split{grid-template-columns:1fr}}
+.scroll{overflow-x:auto}
+table.bt{border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:14px;width:100%;margin-top:8px}
+table.bt caption{text-align:left;font-size:13px;font-weight:600;color:var(--muted);padding-bottom:4px}
+table.bt th,table.bt td{padding:5px 7px;text-align:right;white-space:nowrap}
+table.bt th:first-child,table.bt td:first-child{text-align:left}
+table.bt thead th{border-top:2px solid var(--ink);border-bottom:1px solid var(--ink);font-weight:600}
+table.bt tbody tr:last-child td{border-bottom:2px solid var(--ink)}
+table.bt td.num{font-family:var(--f-mono);font-size:13px}
+table.bt td.l{text-align:left}
+table.bt td.wrap{white-space:normal;text-align:left;min-width:220px;font-size:13px;color:var(--muted)}
+table.bt td.b{font-weight:700}
+table.bt td.mut{color:var(--muted)}
+table.bt tr.sel td{background:var(--azul-suave)}
+table.bt tr.sep td{border-top:1px solid var(--rule)}
+table.bt td.both{color:var(--azul);font-weight:700}
+table.hm td.z{text-align:center;font-family:var(--f-mono);font-size:13px;min-width:64px}
+table.disj td,table.disj th{text-align:center}
+table.disj td.one{font-weight:700;color:var(--azul)}
+.sbar{display:flex;height:12px;width:220px;border-radius:2px;overflow:hidden;background:var(--sunk)}
+.sbar span{display:block;height:100%}
+svg{display:block;width:100%;height:auto;overflow:visible}
+svg text{fill:var(--muted);font-family:var(--f-body);font-size:12px}
+svg text.ink{fill:var(--ink)}
+svg text.lab{fill:var(--ink);font-size:11.5px}
+svg .ax{stroke:var(--rule)}
+pre.r{font-family:var(--f-mono);font-size:12.5px;background:var(--sunk);border-radius:6px;padding:10px 12px;margin:8px 0 0;overflow-x:auto;line-height:1.5}
+pre.r .c{color:var(--muted)}
+.legend{display:flex;gap:6px 16px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:6px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.legend i.o{border-radius:50%}
+.legend i.tri{width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:11px solid var(--gris);border-radius:0;background:none}
+.legend i.grad{width:70px;background:linear-gradient(90deg,color-mix(in srgb,var(--azul) 12%,var(--surface)),var(--azul))}
+.note{font-size:13.5px;color:var(--muted);border-left:3px solid var(--rule);padding:2px 0 2px 12px;margin:10px 0 0;max-width:80ch}
+.note.warn{border-left-color:var(--warn);color:var(--ink)}
+.note.good{border-left-color:var(--ok);color:var(--ink)}
+.note:empty{display:none}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.chips span{font-family:var(--f-mono);font-size:13px;background:var(--sunk);border-radius:6px;padding:5px 9px}
+.minis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:10px}
+.minis>button{font:inherit;text-align:left;color:inherit;background:none;border:1px solid var(--rule);border-radius:6px;padding:8px 10px;cursor:pointer}
+.minis>button:hover{border-color:var(--azul)}
+.minis>button.sel{border-color:var(--azul);box-shadow:0 0 0 1px var(--azul)}
+.minis h3{font-family:var(--f-body);font-size:13.5px;font-weight:700}
+.minis .sk{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.grp{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:10px}
+.grp>div{border:1px solid var(--rule);border-radius:6px;padding:8px 10px;font-size:13.5px}
+.grp h3{font-family:var(--f-body);font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px}
+.grp h3 i{display:inline-block;width:11px;height:11px;border-radius:50%}
+.grp details{margin-top:4px;font-size:12.5px;color:var(--muted)}
+.grp summary{cursor:pointer}
+.kv{display:flex;gap:6px 18px;flex-wrap:wrap;font-size:13.5px;margin-top:8px}
+.kv b{font-family:var(--f-mono);font-weight:600}
+.pers{display:grid;grid-template-columns:auto auto auto;gap:6px 12px;align-items:center;font-size:13.5px;margin-top:8px;justify-content:start}
+.pers b{font-weight:700}
+/* Quiz */
+.quiz-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.score{font-family:var(--f-mono);font-size:14px}
+.q{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:16px 18px}
+.q .num{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.q h3{font-size:17px;margin:4px 0 10px;max-width:80ch}
+.q .ops{display:flex;flex-direction:column;gap:8px}
+.q .ops button{font:inherit;font-size:14px;text-align:left;padding:9px 12px;border:1px solid var(--rule);border-radius:6px;background:var(--sunk);color:var(--ink);cursor:pointer}
+.q .ops button:hover:not(:disabled){border-color:var(--azul)}
+.q .ops button:disabled{cursor:default}
+.q .ops button.right{background:var(--ok-suave);border-color:var(--ok);color:var(--ink)}
+.q .ops button.wrong{background:var(--rojo-suave);border-color:var(--rojo);color:var(--ink)}
+.q .ops button.faded{opacity:.6}
+.q .fb{font-size:14px;margin:10px 0 0;padding:8px 12px;border-radius:6px;border-left:3px solid var(--rule);background:var(--sunk);max-width:80ch}
+.q .fb.ok{border-left-color:var(--ok)}
+.q .fb.no{border-left-color:var(--rojo)}
+.q .hintbtn{font:inherit;font-size:13px;background:none;border:0;color:var(--azul);cursor:pointer;padding:0;margin-top:8px;text-decoration:underline}
+.qlist{display:flex;flex-direction:column;gap:14px;padding:22px 0 60px;max-width:900px}
+[hidden]{display:none!important}
+footer{color:var(--muted);font-size:12.5px;padding:0 0 30px;max-width:110ch}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.wrow{display:grid;grid-template-columns:minmax(0,108px) minmax(0,1fr) 46px;gap:8px;align-items:center}
+.wrow label{font-size:13.5px;display:flex;gap:6px;align-items:center;cursor:pointer}
+.wrow label input{accent-color:var(--azul);margin:0}
+.wrow label i{display:inline-block;width:10px;height:10px;border-radius:2px;flex:none}
+.wrow output{font-family:var(--f-mono);font-size:12.5px;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+.wrow input[type=range]:disabled{opacity:.35}
+.wrows{display:flex;flex-direction:column;gap:6px}
+details.gp summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--azul)}
+table.gpt{border-collapse:collapse;font-size:12.5px;margin-top:6px;width:100%}
+table.gpt td{padding:2px 3px}
+table.gpt input{width:74px;font-family:var(--f-mono);font-size:12px;padding:3px 5px;border:1px solid var(--rule);border-radius:4px;background:var(--sunk);color:var(--ink)}
+.tbox{max-height:470px;overflow:auto;border-top:1px solid var(--rule);margin-top:8px}
+.tbox table.bt{margin-top:0}
+.tbox thead th{position:sticky;top:0;background:var(--surface);z-index:1}
+table.bt tr.foc td{background:var(--azul-suave);font-weight:700}
+table.bt td.up{color:var(--azul);font-family:var(--f-mono);font-size:13px}
+table.bt td.dn{color:var(--rojo);font-family:var(--f-mono);font-size:13px}
+table.bt td.hm{text-align:center;font-family:var(--f-mono);font-size:12.5px;min-width:58px}
+table.bt td.prof{padding-top:2px;padding-bottom:2px}
+table.bt td.prof svg{width:auto;display:inline-block;vertical-align:middle}
+.wbars{display:grid;grid-template-columns:auto minmax(0,1fr) 56px;gap:5px 10px;align-items:center;font-size:13.5px;margin-top:10px}
+.wbars .bar{height:10px;border-radius:2px}
+.wbars .track{background:var(--sunk);border-radius:2px;display:flex;flex-direction:column;gap:3px;padding:3px 0}
+.wbars .num{font-family:var(--f-mono);font-size:12.5px;text-align:right}
+.ab{display:grid;grid-template-columns:auto repeat(3,minmax(0,1fr));gap:6px 10px;align-items:center;font-size:13.5px;margin-top:8px}
+.ab b{font-weight:700}
+.ab output{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.ab .cell{display:flex;flex-direction:column;gap:2px}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<header class="top">
+  <div class="curso">Ciencia de Datos para Economía y Negocios · FCE-UBA · Clase 14</div>
+  <h1>Armá tu índice</h1>
+  <p>Construí un índice compuesto de desarrollo con los datos de la clase: elegí dimensiones, cómo transformar y normalizar cada variable, cuánto pesa cada una, cómo agregarlas y qué hacer con los faltantes. Después mirá cuánto se mueve el ranking, qué pesan de verdad las dimensiones y qué tan robusta es la posición de cada país. Todo se recalcula con cada cambio.</p>
+  <nav class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-tab="lab"><b>Armá tu índice</b><span>Las cinco decisiones</span></button>
+    <button role="tab" aria-selected="false" data-tab="paso"><b>Paso a paso</b><span>IDH, agregación, umbrales</span></button>
+    <button role="tab" aria-selected="false" data-tab="pesos"><b>Ponderaciones</b><span>Nominales, efectivos, PCA</span></button>
+    <button role="tab" aria-selected="false" data-tab="sens"><b>Sensibilidad</b><span>Monte Carlo y validación</span></button>
+    <button role="tab" aria-selected="false" data-tab="dec" class="sec"><b>¿Qué harías?</b><span>Casos para decidir</span></button>
+  </nav>
+</header>
+
+<!-- ===================== LABORATORIO ===================== -->
+<section class="panel" id="tab-lab">
+  <aside class="ctrl">
+    <h3>Punto de partida</h3>
+    <div class="shapes" id="l-pre" role="group" aria-label="Configuraciones predefinidas"></div>
+    <h3>1 · Dimensiones y pesos</h3>
+    <div class="wrows" id="l-dims"></div>
+    <div class="field" id="l-mix-f"><label for="l-mix">Educación: esperados / promedio <output id="l-mix-o"></output></label><input type="range" id="l-mix" min="0" max="100" step="5" value="50"></div>
+    <p class="hint">El porcentaje de la derecha es el peso que queda después de repartir: los sliders se reescalan para sumar 100%.</p>
+    <h3>2 · Transformar</h3>
+    <label class="check"><input type="checkbox" id="l-log-inb" checked>Ingreso en logaritmo</label>
+    <label class="check"><input type="checkbox" id="l-log-emis" checked>Emisiones en logaritmo</label>
+    <h3>3 · Normalizar</h3>
+    <div class="seg col" id="l-norm">
+      <button data-v="fijo" aria-pressed="true">Umbrales fijos (mín-máx)</button>
+      <button data-v="obs">Mín-máx observado</button>
+      <button data-v="z">Z-score</button>
+      <button data-v="rank">Percentil (ranking)</button>
+      <button data-v="cat">Terciles: 0, 1 o 2 puntos</button>
+    </div>
+    <p class="hint" id="l-norm-desc"></p>
+    <details class="gp" id="l-gp-box"><summary>Editar umbrales fijos</summary><table class="gpt" id="l-gp"></table><button class="btn ghost sm" id="l-gp-reset" style="margin-top:6px">Volver a los de la clase</button></details>
+    <h3>4 · Agregar</h3>
+    <div class="seg col" id="l-agg">
+      <button data-v="ari">Aritmética (suma ponderada)</button>
+      <button data-v="geo" aria-pressed="true">Geométrica (producto)</button>
+      <button data-v="min">Mínimo (sin compensación)</button>
+    </div>
+    <p class="hint" id="l-agg-desc"></p>
+    <h3>5 · Faltantes</h3>
+    <div class="seg col" id="l-na">
+      <button data-v="drop">Eliminar casos</button>
+      <button data-v="imp" aria-pressed="true">Imputar media del continente</button>
+      <button data-v="avail">Promediar lo disponible</button>
+    </div>
+    <p class="hint">Solo Igualdad (41 países sin Gini) y Ambiente (3 sin emisiones) tienen faltantes.</p>
+    <h3>Comparar</h3>
+    <div class="field"><label for="l-pais">País a seguir</label><select id="l-pais" class="pais-sel"></select></div>
+    <div class="field"><span class="lbl">Contra qué comparar</span>
+      <div class="seg col" id="l-ref">
+        <button data-v="idh" aria-pressed="true">IDH oficial del PNUD</button>
+        <button data-v="inb">Ranking por ingreso</button>
+        <button data-v="agg">Lo mismo con otra agregación</button>
+        <button data-v="saved" id="l-ref-saved">La configuración guardada</button>
+      </div></div>
+    <button class="btn ghost" id="l-save">Guardar esta configuración</button>
+    <p class="hint" id="l-saved-desc"></p>
+  </aside>
+  <div class="results">
+    <div class="verdict" id="l-verdict"></div>
+    <div id="l-notes"></div>
+    <div class="card">
+      <h2>El ranking <small id="l-rank-sub"></small></h2>
+      <p class="hint"><b id="l-rank-cfg"></b></p>
+      <p class="hint">El perfil muestra el valor normalizado de cada dimensión (barra llena = 1). Δ es cuántos puestos sube (azul) o baja (rojo) el país frente a la referencia.</p>
+      <div class="tbox" id="l-tbox"><table class="bt" id="l-table"></table></div>
+      <div class="legend" id="l-legend"></div>
+      <p class="note" id="l-excl"></p>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h2>Tu índice contra la referencia</h2>
+        <p class="hint">Cada punto es un país. Sobre la diagonal, el puesto no cambia; arriba de ella, el país está mejor en tu índice.</p>
+        <div id="l-scatter"></div>
+      </div>
+      <div class="card">
+        <h2>Los que más se mueven</h2>
+        <p class="hint">Puestos ganados o perdidos frente a la referencia, dentro de los países que están en los dos rankings.</p>
+        <div class="scroll"><table class="bt" id="l-movers"></table></div>
+        <p class="note" id="l-movers-note"></p>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Descomposición</h2>
+      <p class="hint" id="l-dec-hint"></p>
+      <div id="l-dec"></div>
+      <div class="scroll"><table class="bt" id="l-dec-t"></table></div>
+    </div>
+    <div class="card">
+      <h2>En R</h2>
+      <p class="hint">Parte de <code>base</code>, la tabla de la clase con <code>gini</code> y <code>emis_pc</code> ya unidos.</p>
+      <pre class="r" id="l-code"></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== PASO A PASO ===================== -->
+<section class="panel" id="tab-paso" hidden>
+  <aside class="ctrl">
+    <h3>País</h3>
+    <div class="field"><label for="p-pais">País a seguir</label><select id="p-pais" class="pais-sel"></select></div>
+    <p class="hint">Esta solapa usa siempre la fórmula del PNUD (umbrales fijos, ingreso en log, educación como promedio de sus dos subíndices), salvo donde se indica.</p>
+    <h3>Curvas de igual índice</h3>
+    <div class="seg col" id="p-iso"><button data-v="ari">Aritmética</button><button data-v="geo" aria-pressed="true">Geométrica</button><button data-v="min">Mínimo</button></div>
+    <p class="hint">Cambia la forma de las curvas del gráfico de compensabilidad.</p>
+  </aside>
+  <div class="results">
+    <div class="verdict" id="p-verdict"></div>
+    <div class="card">
+      <h2>Replicar el IDH</h2>
+      <p class="hint">Cada variable se normaliza con umbrales fijos: I = (x − mín) / (máx − mín). La educación promedia sus dos subíndices y el IDH es la media geométrica de las tres dimensiones.</p>
+      <div class="scroll"><table class="bt" id="p-idh"></table></div>
+      <p class="note" id="p-idh-note"></p>
+    </div>
+    <div class="card">
+      <h2>Compensabilidad: el ejemplo del pizarrón</h2>
+      <p class="hint">Mové los valores de A y B (ya normalizados). Con la suma, un punto de una dimensión compensa uno de otra; con el producto, el desbalance se castiga; con el mínimo, no hay compensación.</p>
+      <div class="split">
+        <div class="ab" id="p-ab"></div>
+        <div><div class="scroll"><table class="bt" id="p-ab-t"></table></div><p class="note" id="p-ab-note"></p></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Qué compensa a qué</h2>
+      <p class="hint">Salud e ingreso normalizados de cada país (IDH 2022). Las curvas unen combinaciones con el mismo índice de dos dimensiones, con pesos iguales: rectas con la aritmética, hipérbolas con la geométrica, ángulos rectos con el mínimo.</p>
+      <div id="p-isoplot"></div>
+    </div>
+    <div class="card">
+      <h2>¿Qué países se mueven al cambiar la agregación?</h2>
+      <p class="hint">IDH con media aritmética y con media geométrica. Se mueven más los que tienen un perfil desbalanceado.</p>
+      <div class="split">
+        <div class="scroll"><table class="bt" id="p-saltos"></table></div>
+        <div id="p-saltos-plot"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Umbrales fijos y observados a lo largo del tiempo</h2>
+      <p class="hint">El índice de salud del país elegido con dos normalizaciones: umbrales fijos (20 y 85 años) o el mínimo y el máximo mundiales de cada año.</p>
+      <div class="grid2"><div id="p-t1"></div><div id="p-t2"></div></div>
+      <p class="note" id="p-t-note"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== PONDERACIONES ===================== -->
+<section class="panel" id="tab-pesos" hidden>
+  <aside class="ctrl">
+    <h3>Tu índice</h3>
+    <p class="hint" id="w-cfg"></p>
+    <p class="hint">Todo lo de esta solapa usa la configuración de <b>Armá tu índice</b>. Cambiala allá y volvé.</p>
+    <div class="field"><label for="w-pais">País a seguir</label><select id="w-pais" class="pais-sel"></select></div>
+    <h3>Beneficio de la duda</h3>
+    <div class="field"><label for="w-floor">Peso mínimo por dimensión <output id="w-floor-o"></output></label><input type="range" id="w-floor" min="0" max="15" step="1" value="5"></div>
+    <p class="hint">Se sortean 3.000 juegos de pesos al azar que respetan ese mínimo.</p>
+  </aside>
+  <div class="results">
+    <div class="card">
+      <h2>Pesos nominales y pesos efectivos</h2>
+      <p class="hint">El peso nominal es el que elegiste. Una medida simple del peso efectivo es la correlación al cuadrado de cada dimensión con el índice, reescalada para sumar 1. Si una dimensión varía más o está más correlacionada con las demás, termina pesando más de lo que dice el papel.</p>
+      <div class="wbars" id="w-bars"></div>
+      <div class="legend"><span><i style="background:var(--gris)"></i>Nominal</span><span><i style="background:var(--azul)"></i>Efectivo (R² reescalado)</span></div>
+      <div class="scroll"><table class="bt" id="w-table"></table></div>
+      <p class="note" id="w-note"></p>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h2>Correlaciones entre dimensiones</h2>
+        <p class="hint">Si todas correlacionan mucho, el índice se comporta casi como una sola dimensión y los pesos importan poco.</p>
+        <div class="scroll"><table class="bt hm" id="w-cor"></table></div>
+      </div>
+      <div class="card">
+        <h2>Pesos de componentes principales</h2>
+        <p class="hint">Cargas al cuadrado del primer componente (dimensiones estandarizadas). Coherente con un modelo reflectivo; en uno formativo premia a las dimensiones más redundantes.</p>
+        <div id="w-pca"></div>
+        <div class="btnrow" style="margin-top:10px"><button class="btn ghost sm" id="w-pca-use">Usar estos pesos en mi índice</button></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Beneficio de la duda: ¿qué pesos le convienen a cada país?</h2>
+      <p class="hint">Si cada país pudiera elegir los pesos, ¿hasta dónde podría subir? Es la idea del <i>benefit of the doubt</i> (que en la práctica se resuelve con DEA): acá se aproxima sorteando pesos.</p>
+      <div id="w-bod"></div>
+    </div>
+    <div class="card">
+      <h2>Los pesos son tasas de sustitución</h2>
+      <p class="hint">¿Cuántos dólares de ingreso equivalen a un año más de esperanza de vida? En el IDH, TMS = (I<sub>ingreso</sub> / I<sub>salud</sub>) · Y · ln(750) / 65 (Ravallion, 2012). La última columna calcula lo mismo para tu índice, numéricamente. Se excluyen los países con ingreso por encima del tope de 75.000.</p>
+      <div class="scroll"><table class="bt" id="w-tms"></table></div>
+      <p class="note" id="w-tms-note"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== SENSIBILIDAD ===================== -->
+<section class="panel" id="tab-sens" hidden>
+  <aside class="ctrl">
+    <h3>Tu índice</h3>
+    <p class="hint" id="s-cfg"></p>
+    <div class="field"><label for="s-pais">País a seguir</label><select id="s-pais" class="pais-sel"></select></div>
+    <h3>Monte Carlo</h3>
+    <div class="field"><label for="s-n">Simulaciones <output id="s-n-o"></output></label><input type="range" id="s-n" min="100" max="2000" step="100" value="1000"></div>
+    <div class="field"><label for="s-a">Concentración de los pesos α <output id="s-a-o"></output></label><input type="range" id="s-a" min="0" max="8" step="1" value="2"></div>
+    <p class="hint">Pesos Dirichlet(α, …, α). Con α = 1, cualquier reparto es igual de probable; con α alto, los pesos sorteados quedan cerca de pesos iguales.</p>
+    <div class="field"><span class="lbl">Agregación</span>
+      <div class="seg col" id="s-agg"><button data-v="lab">La de mi índice</button><button data-v="mix" aria-pressed="true">Sorteada: aritmética o geométrica</button></div></div>
+    <div class="field"><span class="lbl">Países a mostrar</span>
+      <div class="seg col" id="s-show"><button data-v="sel" aria-pressed="true">Los de la clase y el elegido</button><button data-v="top">Los 25 primeros</button><button data-v="near">Alrededor del elegido</button></div></div>
+    <button class="btn ghost" id="s-new">Otra semilla</button>
+  </aside>
+  <div class="results">
+    <div class="verdict" id="s-verdict"></div>
+    <div class="card">
+      <h2>Posición según pesos y agregación simulados</h2>
+      <p class="hint">Mediana y rango del 5% al 95% de la posición de cada país en las simulaciones. El rombo rojo es la posición en tu índice.</p>
+      <div id="s-mc"></div>
+      <p class="note" id="s-mc-note"></p>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h2>Sacar una dimensión por vez</h2>
+        <p class="hint">Se recalcula tu índice sin cada dimensión (los pesos de las demás se reescalan). Una dimensión cuya salida no cambia nada aporta poco.</p>
+        <div class="scroll"><table class="bt" id="s-loo"></table></div>
+        <p class="note" id="s-loo-note"></p>
+      </div>
+      <div class="card">
+        <h2>Validación externa</h2>
+        <p class="hint">Un índice de desarrollo debería ordenar bien algo que no usó como insumo: la tasa de fecundidad adolescente (nacimientos cada 1.000 mujeres de 15 a 19 años). Se espera una correlación negativa.</p>
+        <div class="scroll"><table class="bt" id="s-val"></table></div>
+        <div id="s-val-plot"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>En R</h2>
+      <pre class="r" id="s-code"></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== QUÉ HARÍAS ===================== -->
+<section id="tab-dec" hidden>
+  <div class="qlist">
+    <div class="quiz-top">
+      <p class="hint" style="max-width:62ch">Doce situaciones para decidir. Puede haber más de una respuesta defendible, pero hay una que lo visto en clase justifica mejor. Tu progreso se guarda solo en este navegador.</p>
+      <div class="btnrow"><span class="score" id="q-score"></span><button class="btn ghost" id="q-reset">Empezar de nuevo</button></div>
+    </div>
+    <div id="q-list" style="display:flex;flex-direction:column;gap:14px"></div>
+  </div>
+</section>
+
+<footer>Datos: 193 países con esperanza de vida, escolarización esperada y promedio, INB per cápita (USD PPA) e IDH en 2022 (PNUD vía Argendata, Fundar). Gini: último dato disponible de cada país (41 sin dato). Emisiones de gases de efecto invernadero per cápita, 2022 (3 sin dato). Fecundidad adolescente: World Population Prospects, 2022. Para Gini y emisiones el PNUD no define umbrales: por defecto se usan el mínimo y el máximo observados, como en la clase. En la media geométrica cada dimensión tiene un piso de 0,01. Posiciones con empates al mínimo (<code>ties.method = "min"</code>); correlaciones de Spearman con rangos promedio. Los resultados pueden diferir de R en el último decimal.</footer>
+</div>
+
+<script>
+"use strict";
+const CONTS=["África","América del Norte, Central y el Caribe","América del Sur","Asia","Europa","Oceanía"];
+const PAISES_RAW=[
+["AFG","Afganistán",3,62.88,10.71,2.51,1335,0.462,null,0.973,31.76],
+["AGO","Angola",0,61.93,12.17,5.84,5328,0.591,42.7,4.915,71.2],
+["ALB","Albania",4,76.83,14.49,10.12,15293,0.789,29,2.87,6.7],
+["AND","Andorra",4,83.55,12.78,11.61,54233,0.884,null,6.648,1.5],
+["ARE","Emiratos Árabes Unidos",3,79.2,17.21,12.77,74104,0.937,null,27.351,1.33],
+["ARG","Argentina",2,76.06,18.98,11.14,22048,0.849,36.7,9.544,12.74],
+["ARM","Armenia",3,73.37,14.41,11.33,15388,0.786,32.4,3.518,6.39],
+["ATG","Antigua y Barbuda",1,79.24,15.51,10.55,18784,0.826,null,7.446,16.67],
+["AUS","Australia",5,83.58,21.08,12.73,49257,0.946,32.9,23.127,3.29],
+["AUT","Austria",4,82.41,16.37,12.31,56530,0.926,28.9,7.809,2.14],
+["AZE","Azerbaiyán",3,73.49,12.71,10.56,15018,0.76,31.8,6.971,16.4],
+["BDI","Burundi",0,61.98,9.97,3.31,712,0.42,39.2,0.715,24.43],
+["BEL","Bélgica",4,82.29,18.95,12.53,53644,0.942,26.7,9.632,2.16],
+["BEN","Benin",0,59.95,10.3,3.14,3406,0.504,47.8,1.908,38.02],
+["BFA","Burkina Faso",0,59.77,8.09,2.32,2037,0.438,35.3,2.563,42.03],
+["BGD","Bangladesh",3,73.7,11.95,7.38,6511,0.67,32.1,1.549,38.69],
+["BGR","Bulgaria",4,71.53,13.87,11.41,25921,0.799,34.8,8.415,19.9],
+["BHR","Bahrein",3,79.25,16.3,11.05,48731,0.888,null,42.699,3.91],
+["BHS","Bahamas",1,74.36,11.89,12.73,32535,0.82,null,7.121,12.38],
+["BIH","Bosnia y Herzegovina",4,75.29,13.28,10.54,16571,0.779,33.8,8.7,5.72],
+["BLR","Belarús",4,73.25,13.98,12.24,18425,0.801,26.7,11.957,4.56],
+["BLZ","Belice",1,70.96,12.43,8.85,9242,0.7,45.9,18.596,28.03],
+["BOL","Bolivia",2,64.93,15.02,9.83,7988,0.698,39.4,10.206,33.04],
+["BRA","Brasil",2,73.43,15.58,8.28,14616,0.76,44.2,11.595,22.9],
+["BRB","Barbados",1,77.71,16.53,9.89,14810,0.809,null,4.85,23.3],
+["BRN","Brunei",3,74.55,13.7,9.22,59246,0.823,null,37.541,4.57],
+["BTN","Bhután",3,72.23,13.06,5.84,10625,0.681,38.8,6.255,4.92],
+["BWA","Botswana",0,65.91,11.43,10.42,14842,0.708,60.5,11.378,27.77],
+["CAF","Rep. Centroafricana",0,54.48,7.29,3.95,869,0.387,56.2,5.593,81.15],
+["CAN","Canadá",1,82.85,15.96,13.87,48444,0.935,32.3,20.87,2.45],
+["CHE","Suiza",4,84.25,16.58,13.9,69433,0.967,30.8,4.556,0.69],
+["CHL","Chile",2,79.52,16.77,11.11,24431,0.86,41,5.925,3.85],
+["CHN","China",3,78.59,15.22,8.11,18025,0.788,38.6,9.405,2.63],
+["CIV","Costa de Marfil",0,58.92,10.1,4.24,5376,0.534,41.7,3.923,44.41],
+["CMR","Camerún",0,60.96,13.38,6.54,3681,0.587,46.5,2.336,53.37],
+["COD","Rep. Dem. Congo",0,59.74,9.58,7.21,1080,0.481,null,5.364,52.14],
+["COG","Congo",0,63.05,12.42,8.25,2903,0.593,null,6.965,53.12],
+["COL","Colombia",2,73.66,14.44,8.86,15014,0.758,44,4.856,32.6],
+["COM","Comoras",0,63.68,13.04,6.21,3261,0.586,45,1.375,27.3],
+["CPV","Cabo Verde",0,74.72,11.53,6.09,7601,0.661,47.2,1.652,19.1],
+["CRI","Costa Rica",1,77.32,16.09,8.8,20248,0.806,41.5,3.821,13.71],
+["CUB","Cuba",1,78.15,14.47,10.55,7953,0.764,null,3.568,24.19],
+["CYP","Chipre",4,81.89,16.24,12.44,40137,0.907,33.7,7.153,3.53],
+["CZE","Chequia",4,78.13,16.35,12.92,39945,0.895,24.6,9.582,3.3],
+["DEU","Alemania",4,80.99,17.34,14.26,55340,0.95,29.8,8.895,2.82],
+["DJI","Djibouti",0,62.86,8.03,3.89,4875,0.515,44.1,1.821,9.84],
+["DMA","Dominica",1,72.98,13.55,9.19,12468,0.74,null,3.103,17.62],
+["DNK","Dinamarca",4,81.88,18.77,12.96,62019,0.952,27.1,7.843,0.61],
+["DOM","Rep. Dominicana",1,74.17,13.56,9.15,18653,0.766,38.6,4.097,26.79],
+["DZA","Argelia",0,77.13,15.49,6.99,10978,0.745,27.6,6.384,4.03],
+["ECU","Ecuador",2,77.89,14.86,8.97,10693,0.765,40.1,5.019,29.57],
+["EGY","Egipto",0,70.16,12.91,9.85,12361,0.728,null,3.297,20.21],
+["ERI","Eritrea",0,66.6,7.32,5.09,1957,0.493,null,2.754,32.77],
+["ESP","España",4,83.91,17.81,10.61,40043,0.911,34.2,6.171,2.42],
+["EST","Estonia",4,79.15,15.94,13.55,37152,0.899,32.2,11.628,2.55],
+["ETH","Etiopía",0,65.64,9.94,2.39,2369,0.492,33.2,1.94,35.15],
+["FIN","Finlandia",4,82.35,19.23,12.93,49522,0.942,25.4,14.851,1.6],
+["FJI","Fiji",5,68.31,13.85,10.37,11234,0.729,36.4,2.563,10.43],
+["FRA","Francia",4,83.23,15.99,11.69,47379,0.91,30.6,5.386,2.02],
+["FSM","Micronesia",5,70.93,12.62,7.33,3709,0.634,40.1,1.49,22.47],
+["GAB","Gabón",0,65.69,12.43,9.55,11194,0.693,42.2,10.22,45.2],
+["GBR","Reino Unido",4,82.16,17.63,13.41,46624,0.94,32.3,5.9,4.06],
+["GEO","Georgia",3,71.59,16.73,12.7,15952,0.814,38.5,3.028,9.75],
+["GHA","Ghana",0,63.94,11.59,6.43,5380,0.602,42.2,1.602,29.05],
+["GIN","Guinea",0,58.99,10.2,2.36,2404,0.471,33.7,3.542,59.68],
+["GMB","Gambia",0,62.91,8.98,4.51,2090,0.495,null,1.384,28.21],
+["GNB","Guinea-Bissau",0,59.86,10.53,3.67,1880,0.483,50.7,2.352,40.67],
+["GNQ","Guinea Ecuatorial",0,61.19,12.13,8.28,10663,0.65,null,8.546,78.76],
+["GRC","Grecia",4,80.61,20.03,11.41,31382,0.893,34,6.375,3.59],
+["GRD","Granada",1,75.33,16.58,9.86,13593,0.793,null,3.11,14.79],
+["GTM","Guatemala",1,68.67,10.77,5.67,8996,0.629,41.9,3.438,35.96],
+["GUY","Guyana",2,65.99,13.02,8.63,35783,0.742,38.4,13.634,34.96],
+["HKG","Hong Kong",3,84.32,17.85,12.35,62486,0.956,null,5.091,0.55],
+["HND","Honduras",1,70.73,9.96,7.3,5272,0.624,43.1,3.133,42.23],
+["HRV","Croacia",4,79.24,15.57,12.33,34324,0.878,30,5.477,3.41],
+["HTI","Haití",1,63.73,11.14,5.61,2802,0.552,52.3,1.198,26.01],
+["HUN","Hungría",4,74.96,15.07,12.25,34196,0.851,28.8,5.614,9.67],
+["IDN","Indonesia",3,68.25,13.98,8.56,12046,0.713,38.6,6.517,13.08],
+["IND","India",3,67.74,12.58,6.57,6951,0.644,35.7,2.773,7.25],
+["IRL","Irlanda",4,82.72,19.13,11.66,87468,0.95,30.2,11.719,2],
+["IRN","Irán",3,74.56,14.12,10.75,14770,0.78,null,11.779,12.75],
+["IRQ","Iraq",3,71.34,12.22,6.81,9092,0.673,29.5,7.789,28.35],
+["ISL","Islandia",4,82.82,19.11,13.77,54688,0.959,24.3,12.883,1.77],
+["ISR","Israel",3,82.6,15.03,13.44,43588,0.915,39.2,8.944,3.23],
+["ITA","Italia",4,84.06,16.66,10.74,44284,0.906,32.9,6.533,1.51],
+["JAM","Jamaica",1,70.63,12.46,9.25,9695,0.706,45.5,2.776,19.51],
+["JOR","Jordania",3,74.21,12.63,10.45,9295,0.736,33.7,2.518,8.96],
+["JPN","Japón",3,84.82,15.46,12.67,43644,0.92,30.4,8.607,0.93],
+["KAZ","Kazajstán",3,69.49,14.82,12.43,22587,0.802,26.5,17.09,8.22],
+["KEN","Kenia",0,62.06,11.38,7.69,4808,0.601,48.5,1.972,27.89],
+["KGZ","Kirguistán",3,70.48,12.99,11.96,4782,0.701,29,2.983,13.09],
+["KHM","Camboya",3,69.9,11.56,5.2,4291,0.6,null,4.739,23.18],
+["KIR","Kiribati",5,67.66,11.8,9.13,3440,0.628,37,0.82,20.87],
+["KNA","Saint Kitts y Nevis",1,72.03,18.41,10.85,28442,0.838,null,5.519,18.34],
+["KOR","Corea del Sur",3,84.02,16.51,12.61,46026,0.929,null,12.54,0.33],
+["KWT","Kuwait",3,80.26,15.69,7.44,56729,0.847,null,30.379,0.78],
+["LAO","Laos",3,69,10.19,5.95,7745,0.62,36.4,6.346,42.13],
+["LBN","Líbano",3,74.42,12.05,8.6,12313,0.723,31.8,4.326,10.09],
+["LBR","Liberia",0,61.1,10.47,5.32,1330,0.487,33.2,4.35,62.9],
+["LBY","Libia",0,72.15,13.98,7.78,19752,0.746,null,13.028,2.95],
+["LCA","Santa Lucía",1,71.29,12.71,8.58,14778,0.725,36.7,3.069,15.03],
+["LIE","Liechtenstein",4,84.66,15.47,12.35,146673,0.942,null,4.291,0.53],
+["LKA","Sri Lanka",3,76.61,13.64,11.25,11900,0.78,39.2,1.766,7.59],
+["LSO","Lesotho",0,53.04,11.07,7.55,2709,0.521,54.2,2.757,34.93],
+["LTU","Lituania",4,74.29,16.4,13.5,38131,0.879,35.1,8.288,3.01],
+["LUX","Luxemburgo",4,82.59,14.2,12.96,78554,0.927,29.5,12.533,1.99],
+["LVA","Letonia",4,75.93,16.56,13.33,32083,0.879,32.7,7.632,4.26],
+["MAR","Marruecos",0,74.97,14.59,6.05,7955,0.698,40.7,2.866,12.4],
+["MDA","Moldavia",4,68.62,14.91,11.83,12964,0.763,27,2.267,10.53],
+["MDG","Madagascar",0,65.23,9.21,4.59,1464,0.487,42.7,1.875,67.63],
+["MDV","Maldivas",3,80.84,12.18,7.76,18847,0.762,38.4,4.318,2.51],
+["MEX","México",1,74.83,14.51,9.22,19138,0.781,42.3,5.89,30.99],
+["MHL","Islas Marshall",5,65.15,16.39,12.82,6855,0.731,null,null,34.98],
+["MKD","Macedonia del Norte",4,73.89,13,10.23,16396,0.765,null,4.764,7.4],
+["MLI","Malí",0,59.42,7.04,1.63,2044,0.41,33,2.916,68.26],
+["MLT","Malta",4,83.7,15.86,12.21,44464,0.915,null,3.688,5.11],
+["MMR","Myanmar",3,67.26,12.06,6.52,4038,0.608,38.1,3.738,17.36],
+["MNE","Montenegro",4,76.85,15.08,12.62,22513,0.844,31.9,2.57,4.93],
+["MNG","Mongolia",3,72.67,14.52,9.42,10351,0.741,32,26.868,8.69],
+["MOZ","Mozambique",0,59.63,10.73,3.86,1219,0.461,45.6,2.218,75.89],
+["MRT","Mauritania",0,64.69,8.05,4.75,5344,0.54,32.4,3.617,49.35],
+["MUS","Mauricio",0,73.97,14.61,9.99,23252,0.796,35.8,3.797,11.14],
+["MWI","Malawi",0,62.9,11.5,5.24,1432,0.508,46.1,1.415,55.57],
+["MYS","Malasia",3,76.26,12.93,10.75,27295,0.807,39.8,11.94,3.09],
+["NAM","Namibia",0,58.06,11.76,7.24,9200,0.61,61,7.19,32.35],
+["NER","Níger",0,62.08,7.19,1.34,1283,0.394,34,2.34,69.82],
+["NGA","Nigeria",0,53.63,10.51,7.59,4755,0.548,43,1.843,42.27],
+["NIC","Nicaragua",1,74.61,12.58,7.26,5427,0.669,40.1,5.957,49.1],
+["NLD","Países Bajos",4,82.45,18.58,12.58,57278,0.946,27.1,9.101,1.06],
+["NOR","Noruega",4,83.39,18.64,13.06,69190,0.966,25.4,13.273,0.7],
+["NPL","Nepal",3,70.48,12.64,4.49,4026,0.601,32.8,2.025,35.44],
+["NRU","Nauru",5,64.01,12.56,9.25,14939,0.696,null,4.962,35.03],
+["NZL","Nueva Zelanda",5,83.01,19.68,12.94,43666,0.939,null,15.821,5.36],
+["OMN","Omán",3,73.93,12.96,11.89,32967,0.819,null,25.602,2.61],
+["PAK","Pakistán",3,66.43,7.9,4.42,5374,0.54,30.7,2.192,20.11],
+["PAN","Panamá",1,76.83,13.21,10.69,32029,0.82,43.9,5.155,29.42],
+["PER","Perú",2,73.39,14.8,10.02,11916,0.762,38.1,4.114,23.03],
+["PHL","Filipinas",3,72.19,12.78,8.97,9059,0.71,40.1,2.415,15.87],
+["PLW","Palau",5,65.36,17.22,13.05,19344,0.797,null,16.602,14.85],
+["PNG","Papúa Nueva Guinea",5,65.96,11.13,4.93,3710,0.568,41.8,4.914,27.53],
+["POL","Polonia",4,77,15.93,13.16,35151,0.881,32.1,9.503,2.84],
+["PRT","Portugal",4,82.24,16.82,9.58,35315,0.874,33.7,5.492,3.44],
+["PRY","Paraguay",2,70.47,13.91,8.86,13161,0.731,41.3,11.953,36.18],
+["PSE","Palestina",3,73.44,13.15,9.94,6936,0.716,34.4,null,17.36],
+["QAT","Qatar",3,81.56,13.26,10.13,95944,0.875,null,67.232,2.4],
+["ROU","Rumania",4,74.12,14.51,11.36,31641,0.827,36.4,5.329,17.41],
+["RUS","Rusia",4,70.12,15.66,12.41,26992,0.821,37.7,18.329,6.26],
+["RWA","Ruanda",0,67.13,11.38,4.88,2317,0.548,50.4,0.774,15.58],
+["SAU","Arabia Saudita",3,77.9,15.17,11.31,50620,0.875,null,27.002,4.85],
+["SDN","Sudán",0,65.58,8.5,3.87,3515,0.516,35.4,3.008,33.43],
+["SEN","Senegal",0,67.91,9.14,2.89,3464,0.517,40.3,1.807,29.9],
+["SGP","Singapur",3,84.13,16.9,11.92,88761,0.949,null,9.833,1.27],
+["SLB","Islas Salomón",5,70.74,10.3,5.88,2273,0.562,37,3.901,24.81],
+["SLE","Sierra Leona",0,60.41,9.02,3.52,1613,0.458,34,1.964,47.55],
+["SLV","El Salvador",1,71.47,11.91,7.15,8886,0.674,null,1.666,28.46],
+["SMR","San Marino",4,83.43,12.4,10.52,57687,0.867,null,null,0],
+["SOM","Somalia",0,56.11,7.65,1.9,1072,0.38,null,2.527,58.96],
+["SRB","Serbia",4,74.14,14.5,11.5,19494,0.805,29.1,6.862,7.17],
+["SSD","Sudán del Sur",0,55.57,5.63,5.73,691,0.381,46.3,6.011,52],
+["STP","Santo Tomé y Príncipe",1,68.79,12.66,5.92,4054,0.613,30.8,1.24,42.95],
+["SUR","Suriname",2,70.29,10.96,8.39,12310,0.69,49.6,10.072,25.24],
+["SVK","Eslovaquia",4,75.33,14.72,13.01,32171,0.855,24.8,5.464,11.92],
+["SVN","Eslovenia",4,82.13,17.41,12.88,41587,0.926,24.3,8.56,1.67],
+["SWE","Suecia",4,83.5,19.04,12.67,56996,0.952,25.8,6.672,0.99],
+["SWZ","Eswatini",0,56.36,14.93,5.73,8392,0.61,51.5,1.354,34.84],
+["SYC","Seychelles",0,71.74,13.89,11.2,28386,0.802,40.3,5.253,26.89],
+["SYR","Siria",3,72.3,7.42,5.74,3594,0.557,35.8,1.692,19.39],
+["TCD","Chad",0,53,8.19,2.28,1389,0.394,43.3,6.368,65.31],
+["TGO","Togo",0,61.59,12.96,5.59,2214,0.547,43,1.283,37.67],
+["THA","Tailandia",3,79.68,15.58,8.83,16887,0.803,37.8,5.943,13.85],
+["TJK","Tayikistán",3,71.29,10.86,11.29,4807,0.679,34,2.045,19.23],
+["TKM","Turkmenistán",3,69.41,13.24,11.14,12860,0.744,40.8,16.96,9.64],
+["TLS","Timor-Leste",3,69.06,13.24,6.02,1629,0.566,30.3,3.553,14.3],
+["TON","Tonga",5,71.27,16.29,10.88,6360,0.739,37.5,3.092,12.41],
+["TTO","Trinidad y Tobago",1,74.71,14.1,11.74,22473,0.814,34.7,34.942,18.5],
+["TUN","Túnez",0,74.26,14.62,7.95,10297,0.732,35.8,3.774,2.09],
+["TUR","Turquía",3,78.47,19.68,8.81,32834,0.855,41.2,6.966,6.01],
+["TUV","Tuvalu",5,64.85,12.1,10.64,4754,0.653,39.1,2.152,13.59],
+["TZA","Tanzanía",0,66.78,8.59,5.64,2578,0.532,37.8,3.198,55.56],
+["UGA","Uganda",0,63.64,11.5,6.24,2241,0.55,41,1.363,52.72],
+["UKR","Ucrania",4,68.56,13.33,11.12,11416,0.734,25.5,5.34,4.85],
+["URY","Uruguay",2,78,17.35,9.06,22207,0.83,35.9,12.144,13.58],
+["USA","Estados Unidos",1,78.2,16.41,13.58,65565,0.927,38.9,17.764,6.99],
+["UZB","Uzbekistán",3,71.67,11.99,11.91,8056,0.727,35.3,6.004,15.93],
+["VCT","San Vicente y las Granadinas",1,68.97,16.25,11,14049,0.772,null,2.693,21.56],
+["VEN","Venezuela",2,71.11,13.5,9.63,6184,0.699,null,5.795,37.16],
+["VNM","Vietnam",3,74.58,13.05,8.46,10814,0.726,34.8,5.022,16.73],
+["VUT","Vanuatu",5,70.49,11.81,7.18,3244,0.614,37.3,1.9,31.78],
+["WSM","Samoa",5,72.6,12.44,11.37,4970,0.702,42,1.942,20.17],
+["YEM","Yemen",3,63.72,7.94,2.78,1106,0.424,null,0.817,36.26],
+["ZAF","Sudáfrica",0,61.48,14.26,11.61,13186,0.717,63.4,8.296,25.71],
+["ZMB","Zambia",0,61.8,11.02,7.28,3157,0.569,57.1,4.381,56.66],
+["ZWE","Zimbabwe",0,59.39,11.03,8.81,2079,0.55,43.2,2.102,47.13]
+];
+const T_ANIOS=[2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022];
+const T_EV={
+"AFG":[55.3,55.8,56.45,57.34,57.94,58.36,58.68,59.11,59.85,60.36,60.85,61.42,61.92,62.42,62.54,62.66,63.14,63.02,63.08,63.56,62.58,61.98,62.88],
+"AGO":[46.02,46.59,47.39,49.62,50.59,51.57,52.37,53.64,54.63,55.75,56.73,57.6,58.62,59.31,60.04,60.65,61.09,61.68,62.14,62.45,62.26,61.64,61.93],
+"ALB":[75.4,75.64,75.89,76.14,76.38,76.62,76.82,77.55,77.65,77.78,77.94,78.09,78.06,78.12,78.41,78.64,78.86,79.05,79.18,79.28,76.99,76.46,76.83],
+"AND":[80.92,81.69,82.24,83.92,80.08,81.76,82.97,82.66,82.7,82.75,82.82,82.9,82.92,82.93,82.95,82.95,82.97,82.98,82.99,83,79.02,80.37,83.55],
+"ARE":[74.38,74.64,74.9,76.22,76.45,76.68,76.91,77.13,77.49,78,78.33,78.52,78.72,78.85,79.04,79.22,79.33,79.5,79.63,79.73,78.95,78.71,79.2],
+"ARG":[73.93,74.19,74.41,74.08,74.86,75.14,75.43,75.01,75.64,75.94,75.72,76.12,76.47,76.49,76.75,76.76,76.31,76.83,77,77.28,75.89,75.39,76.06],
+"ARM":[70.62,70.93,71.02,71.44,71.42,71.79,71.99,72.33,72.4,72.81,73.16,73.31,73.45,73.68,74.06,74.44,74.66,74.91,75.06,75.44,72.17,72.04,73.37],
+"ATG":[null,null,null,null,null,null,null,76.13,76.41,76.67,76.82,77.1,77.35,77.58,77.86,77.91,78.15,78.27,78.51,78.69,78.84,78.5,79.24],
+"AUS":[79.63,80.02,80.06,80.46,80.75,81.11,81.28,81.26,81.46,81.77,82.06,82.13,82.35,82.6,82.57,82.65,82.87,83,83.39,83.11,84.32,84.53,83.58],
+"AUT":[78.24,78.72,78.85,78.85,79.36,79.52,79.97,80.17,80.36,80.21,80.46,80.83,80.84,81.08,81.39,81.16,81.59,81.64,81.69,81.91,81.5,81.58,82.41],
+"AZE":[64.89,65.51,66.24,66.76,67.35,67.56,68.17,68.6,68.81,69.36,69.53,69.98,70.36,70.88,71.12,71.45,72,72.25,72.76,73.1,66.87,69.37,73.49],
+"BDI":[47.51,48.43,49.89,50.86,52.01,53.02,53.87,54.73,55.71,56.39,57.08,57.77,58.49,59.24,59.87,60.22,60.79,61.55,61.69,62.35,61.57,61.66,61.98],
+"BEL":[77.77,78.08,78.17,78.32,78.96,79.05,79.39,79.53,79.58,79.85,80.03,80.36,80.26,80.47,81.08,80.89,81.27,81.36,81.48,81.83,80.79,81.88,82.29],
+"BEN":[56.58,56.66,56.61,56.74,56.83,57.13,57.46,57.67,57.87,57.96,58.36,58.46,58.72,58.97,59.13,59.38,59.54,59.86,60.14,60.45,60.09,59.82,59.95],
+"BFA":[50.85,51.07,51.27,51.79,52.42,53.09,53.74,54.38,55.34,55.96,56.48,57.13,57.62,57.82,58.36,58.85,59.33,59.54,60.05,60.04,59.73,59.27,59.77],
+"BGD":[65.78,66.14,66.61,66.82,67.19,67.3,67.24,66.71,67.05,67.4,68.64,68.81,69.55,69.57,69.99,70.49,71.09,71.79,72.57,72.81,71.97,72.38,73.7],
+"BGR":[71.61,71.92,72.16,72.41,72.61,72.59,72.72,73.04,73.36,73.71,73.83,74.19,74.36,74.85,74.48,74.63,74.83,74.8,74.9,75.06,73.64,71.8,71.53],
+"BHR":[75.5,75.91,76.09,76.34,76.56,76.93,77.16,77.63,78.08,78.46,78.75,78.89,79.08,79.25,79.33,79.4,79.56,79.69,79.86,80.02,79.17,78.76,79.25],
+"BHS":[72.04,72.11,72.23,72.4,72.48,72.76,72.86,72.68,72.67,72.58,72.73,72.56,72.75,73.02,73.37,73.1,73.54,73.63,73.81,71.21,72.68,71.6,74.36],
+"BIH":[74.5,75.06,74.61,75.78,76.13,75.42,76.25,76.16,76.84,76.98,77.07,77.01,77.19,76.33,75.66,76.18,76.81,76.93,77.09,77.24,76.22,75.3,75.29],
+"BLR":[69.18,68.86,68.48,68.94,69.41,69.42,69.99,70.76,70.92,71.09,71.12,71.52,72.61,72.99,73.58,73.99,74.26,74.45,74.57,74.22,72.51,72.44,73.25],
+"BLZ":[68.56,68.36,68.75,68.91,69.23,69.38,70.09,70.65,71.15,71.82,72.27,72.65,73.25,73.67,73.31,73.19,73.4,73.56,73.7,73.93,72.85,70.47,70.96],
+"BOL":[62.35,62.84,63.31,63.63,64,64.39,64.78,65.03,65.45,65.88,66.16,66.53,66.71,67.02,67.16,67.32,67.63,67.7,67.75,67.84,64.47,63.63,64.93],
+"BRA":[69.74,70.19,70.41,70.72,71.13,71.75,72.04,72.36,72.71,72.95,73.18,73.34,73.55,73.92,74.31,74.33,74.44,74.83,75.11,75.34,74.01,72.75,73.43],
+"BRB":[74.09,74.25,74.37,74.47,74.73,74.89,75.07,75.34,75.45,75.68,75.71,75.92,76.1,76.28,76.48,76.65,76.82,76.94,77.07,77.26,77.39,77.57,77.71],
+"BRN":[74.08,74.28,74.43,74.56,74.65,74.73,74.78,74.82,74.84,74.85,74.85,74.86,74.83,74.8,74.78,74.75,74.73,74.72,74.71,74.75,74.79,74.64,74.55],
+"BTN":[null,null,null,null,null,null,null,null,null,null,68.43,68.88,69.33,69.71,70.05,70.34,70.6,70.85,71.13,71.39,71.61,71.82,72.23],
+"BWA":[51.01,50.68,50.63,50.95,51.62,52.61,53.92,55.73,57.12,58.28,60.01,60.53,60.8,62,62.61,63.82,65.46,66.75,65.42,65.46,65.65,61.14,65.91],
+"CAF":[45.41,45.39,45.41,45.76,46.04,46.43,46.85,47.43,48.02,48.65,49.26,49.95,50.69,50.9,50.57,52.79,53.46,53.72,54.37,55.03,54.6,53.9,54.48],
+"CAN":[79.23,79.45,79.57,79.74,80.03,80.14,80.55,80.55,80.74,81.07,81.35,81.53,81.72,81.8,81.86,81.93,82.04,82.02,82.05,82.36,82.05,82.66,82.85],
+"CHE":[79.83,80.25,80.44,80.53,81.05,81.23,81.55,81.7,81.97,81.99,82.28,82.57,82.62,82.69,83.08,82.85,83.44,83.41,83.56,83.78,83.07,83.99,84.25],
+"CHL":[76.87,76.77,77.44,77.39,77.62,78.02,78.26,77.83,78.48,78.74,78.5,79.11,79.02,79.34,79.47,79.75,80.08,80.35,80.13,80.33,79.38,78.94,79.52],
+"CHN":[71.88,72.61,72.99,73.37,73.75,74.11,74.5,74.76,74.87,75.34,75.6,75.9,76.19,76.45,76.72,76.98,77.22,77.25,77.74,77.97,78.08,78.21,78.59],
+"CIV":[50.84,50.81,50.89,50.95,51.36,51.82,52.35,52.97,53.65,54.39,55.02,55.52,56.16,56.75,57.21,57.76,58.06,58.48,58.85,59.32,59.03,58.6,58.92],
+"CMR":[52.93,53.14,53.42,53.88,54.18,54.36,54.86,55.17,55.65,56.1,56.58,57.13,57.79,58.48,58.94,59.66,60.23,60.81,61.18,61.58,60.83,60.33,60.96],
+"COD":[51.78,52.12,52.33,52.83,53.43,53.93,54.53,54.92,55.34,55.84,56.42,57.07,57.25,57.76,58.3,58.49,59.07,59.41,59.94,60.28,59.74,59.19,59.74],
+"COG":[53.68,54.4,55.09,55.95,56.99,58.13,58.88,59.64,60.43,61.09,61.68,61.99,62.32,62.69,62.95,63.23,63.58,63.76,64.05,62.75,63.78,63.52,63.05],
+"COL":[71.32,71.5,71.94,72.36,72.69,73.08,73.47,73.84,74.29,74.74,75.03,75.32,75.6,75.83,76.04,76.26,76.47,76.65,76.75,76.75,74.77,72.83,73.66],
+"COM":[58.76,59.16,59.06,59.26,59.48,59.6,59.88,60.1,60.47,60.83,61.12,61.5,61.83,62.22,62.52,62.9,63.24,63.63,63.91,64.07,64.17,63.42,63.68],
+"CPV":[68.62,69.93,70.71,71.43,72,72.68,72.24,72.83,72.51,73.09,73.5,74.26,74.48,75.06,75.24,74.62,75.74,76.59,75.73,76,74.81,74.05,74.72],
+"CRI":[77.59,77.54,77.98,78.07,78.33,78.5,78.51,78.46,78.44,78.67,78.67,79.35,79.28,79.4,78.77,79.09,79.46,79.38,79.48,79.43,79.28,77.02,77.32],
+"CUB":[76.18,76.42,76.61,76.77,76.91,77.05,77.18,77.31,77.43,77.55,77.66,77.76,77.83,77.87,77.85,77.77,77.64,77.53,77.5,77.61,77.57,73.68,78.15],
+"CYP":[76.57,76.99,77.49,77.79,77.94,78.1,78.37,78.81,78.98,79.4,79.67,80,80.11,80.4,80.77,80.97,81.06,81.33,81.38,81.4,81.39,81.2,81.89],
+"CZE":[74.98,75.32,75.44,75.4,75.94,76.16,76.71,76.92,77.17,77.26,77.57,77.82,78.01,78.18,78.75,78.58,79,78.96,79,79.24,78.57,77.73,78.13],
+"DEU":[78.06,78.41,78.48,78.54,79.13,79.26,79.59,79.74,79.83,79.93,80.09,80.36,80.51,80.46,80.92,80.57,80.85,80.94,81.17,81.56,81.15,80.63,80.99],
+"DJI":[56.57,56.9,57.22,57.6,57.76,58.32,58.72,59.02,59.37,59.67,60.26,60.43,60.85,61.22,61.64,61.96,62.19,62.8,63.04,63.08,62.69,62.31,62.86],
+"DMA":[72.69,71.71,72.34,71.44,72.4,72.25,72.85,71.93,73.31,72.17,71.55,69.69,70.54,68.9,69.43,68.73,70.13,67.53,73.59,73.56,73.65,72.81,72.98],
+"DNK":[76.81,76.97,77.1,77.4,77.78,78.22,78.22,78.35,78.71,78.96,79.25,79.78,80.08,80.3,80.63,80.74,80.88,81.11,80.99,81.43,81.54,81.38,81.88],
+"DOM":[69.42,69.64,69.92,70.26,70.33,70.88,71.17,71.37,71.66,71.87,72.09,72.22,72.51,72.71,72.87,72.95,72.99,73.06,73.23,73.58,72.89,72.61,74.17],
+"DZA":[70.48,70.82,71.23,71.29,71.76,72.06,72.33,72.6,72.94,73.62,73.81,74.12,74.2,74.61,75.11,75.62,75.73,75.74,76.07,76.47,74.45,76.38,77.13],
+"ECU":[72.84,73.24,73.61,73.97,74.28,74.51,74.69,74.84,74.98,75.18,75.43,75.74,76.06,76.37,76.62,76.79,76.76,76.97,77.09,77.3,72.15,73.67,77.89],
+"EGY":[68.01,68.31,68.56,68.4,68.61,68.78,68.98,69.13,69.32,69.48,69.66,69.88,70.08,70.05,70.42,70.48,70.84,71.3,71.37,71.36,70.99,70.22,70.16],
+"ERI":[null,null,null,null,null,60.6,61.61,62.12,62.57,63.33,63.79,64.4,64.84,65.07,65.6,66.03,66.29,66.58,67.07,67.3,67.13,66.54,66.6],
+"ESP":[79.42,79.74,79.82,79.75,80.34,80.33,80.97,80.98,81.29,81.64,82.02,82.2,82.21,82.72,82.86,82.65,83.04,83.03,83.14,83.53,82.29,83.01,83.91],
+"EST":[71.33,71.42,71.87,72.16,72.64,73.2,73.48,73.61,74.41,75.19,75.75,76.47,76.54,77.13,77.14,77.66,77.82,77.98,78.14,78.67,78.34,77.14,79.15],
+"ETH":[50.54,51.04,51.52,52.53,53.24,54.01,55.15,56.43,57.59,58.8,59.73,60.72,61.54,62.37,62.9,63.65,64.39,64.84,65.41,65.84,65.37,64.97,65.64],
+"FIN":[77.67,78.14,78.27,78.53,78.85,78.97,79.37,79.39,79.69,79.83,80.01,80.39,80.5,80.88,81.01,81.42,81.29,81.5,81.63,81.87,81.87,82.04,82.35],
+"FJI":[66.31,66.34,65.75,66.18,66.42,66.63,66.86,66.83,66.93,67.09,67.33,67.52,67.55,67.43,67.38,66.84,67.24,67.79,67.81,67.89,67.92,67.11,68.31],
+"FRA":[79.05,79.22,79.41,79.42,80.34,80.34,80.75,80.97,81.05,81.18,81.43,81.81,81.77,82.02,82.48,82.19,82.44,82.47,82.59,82.73,82.21,82.5,83.23],
+"FSM":[69.77,70.48,69.46,70.76,70.84,70.88,71.09,71.06,71.14,71.11,71.23,71.32,71.4,71.5,71.53,71.41,71.6,71.47,71.32,71.08,70.67,70.71,70.93],
+"GAB":[61.07,61.27,61.29,61.67,61.84,61.96,62.38,62.62,63.08,63.3,63.9,64.04,64.59,64.78,64.97,65.46,65.8,66.19,66.31,66.6,66.53,65.82,65.69],
+"GBR":[77.85,78.12,78.24,78.33,78.9,79.11,79.36,79.54,79.67,80.17,80.4,80.81,80.87,80.93,81.16,80.92,81.07,81.17,81.13,81.72,80.43,80.74,82.16],
+"GEO":[69.57,69.61,70.02,70.33,70.57,71.13,71.39,71.57,71.33,71.95,72.13,72.39,72.41,72.63,73.1,73.3,73.57,73.57,73.34,73.47,72.76,71.69,71.59],
+"GHA":[58.19,58.11,58.61,59.11,59.19,59.76,59.99,60.22,60.49,60.95,61.16,61.65,62.08,62.42,63.04,63.17,63.89,64.01,64.12,64.74,64.11,63.79,63.94],
+"GIN":[52.48,52.66,53.28,53.68,54.12,54.63,55.11,55.55,56.04,56.35,56.72,57.02,57.41,57.79,57.89,58.13,58.76,59.11,59.35,59.72,59.33,58.89,58.99],
+"GMB":[56.94,57.04,57.08,57.59,58.09,58.39,59.06,59.39,60.08,60.43,60.72,61.53,62.1,62.11,62.27,62.49,63.01,62.99,63.04,63.76,62.61,62.08,62.91],
+"GNB":[null,null,null,null,null,52.25,53.37,54.15,54.65,55.54,56.23,56.97,57.69,58.23,58.61,59.13,59.67,60.07,60.5,60.88,60,59.65,59.86],
+"GNQ":[53.23,53.64,54.08,54.58,55.04,55.46,56.05,56.54,57.07,57.43,57.88,58.41,58.87,59.22,59.6,60.1,60.48,60.82,61.19,61.64,60.71,60.59,61.19],
+"GRC":[78.38,78.84,78.97,79.03,79.29,79.59,79.71,79.61,80.05,80.3,80.51,80.55,80.34,80.97,81.01,80.67,81.16,80.85,81.39,81.25,80.91,80.11,80.61],
+"GRD":[null,null,73.17,73.19,71.79,73.52,73.7,74.32,74.66,75.04,75,75.29,75.04,75.12,74.99,75.01,74.76,74.76,74.81,74.86,74.92,74.94,75.33],
+"GTM":[67.45,67.95,68.39,68.8,69.17,69.17,69.81,70.1,70.36,70.64,70.88,71.18,71.46,71.73,71.96,72.1,72.36,72.55,72.73,73.13,71.8,69.24,68.67],
+"GUY":[64.48,64.79,64.73,64.6,64.93,65.13,65.67,66.25,66.29,66.56,66.74,66.98,67.23,67.47,67.88,68.2,68.38,68.67,68.9,69.12,68.49,65.67,65.99],
+"HKG":[80.75,81.11,81.25,81.22,81.41,81.77,82.01,82.23,82.36,82.59,82.99,83.23,83.56,83.81,84.08,84.29,84.54,84.9,85.25,85.27,85.2,85.47,84.32],
+"HND":[68.66,69.01,69.37,69.51,69.8,70.1,70.26,70.38,70.44,70.91,71.09,71.44,71.73,71.96,72.26,72.49,72.59,72.69,72.81,72.88,71.46,70.12,70.73],
+"HRV":[74.58,74.64,74.74,74.61,75.5,75.41,75.99,75.86,76.21,76.39,76.81,77.22,77.34,77.84,77.95,77.56,78.23,78.08,78.34,78.74,77.98,77.58,79.24],
+"HTI":[58.37,58.49,58.85,59.51,58.47,60.42,60.76,61.1,61.33,61.74,46.02,61.62,62.29,62.6,62.99,63.24,63.39,63.85,64.02,64.25,64.05,63.19,63.73],
+"HUN":[71.76,72.39,72.51,72.51,72.91,72.86,73.34,73.43,73.96,74.18,74.52,74.92,75.18,75.68,75.85,75.65,76.15,76,76.2,76.45,75.73,74.53,74.96],
+"IDN":[66.43,66.76,67.13,67.41,65.75,67.65,67.91,68.19,68.23,68.49,68.68,68.82,68.97,69.26,69.53,69.7,69.8,69.94,70.34,70.52,68.81,67.57,68.25],
+"IND":[62.67,63.09,63.62,64.09,64.52,65,65.41,65.79,66.15,66.51,66.91,67.36,67.89,68.46,69.07,69.64,70.12,70.47,70.71,70.91,70.15,67.24,67.74],
+"IRL":[76.54,77.11,77.6,78.11,78.51,78.92,79.15,79.56,79.76,80.05,80.52,80.63,80.75,80.97,81.31,81.42,81.55,81.92,82.09,82.26,82.47,82,82.72],
+"IRN":[69.69,69.96,70.44,69.82,71.37,71.84,72.28,72.77,72.62,72.7,73.07,73.68,74.19,74.45,74.78,75.12,75.6,75.97,76.19,76.1,74.83,73.88,74.56],
+"IRQ":[66.82,67.03,67.08,65.64,65.03,64.84,63.59,63.55,64.94,66.45,67.06,67.66,68.02,68.25,68.91,69.44,68.99,70.41,71.51,71.58,69.12,70.38,71.34],
+"ISL":[79.89,80.7,80.54,80.78,80.98,81.24,81.24,81.35,81.39,81.56,81.7,82.18,82.56,81.93,82.61,82.35,82.03,82.54,82.77,82.4,82.58,82.68,82.82],
+"ISR":[78.93,79.35,79.26,79.62,80.15,80.22,80.51,80.67,81.06,81.58,81.74,81.73,81.74,82.11,82.22,82.1,82.49,82.72,82.82,82.81,82.36,82.25,82.6],
+"ITA":[79.61,79.89,80.11,80.19,81.02,81.02,81.42,81.5,81.65,81.76,82.14,82.24,82.26,82.66,82.91,82.53,83.05,82.73,83.18,83.55,82.39,82.85,84.06],
+"JAM":[70.94,70.76,70.89,70.81,70.86,71.04,71.2,71.42,71.61,72.12,72.62,73.09,73.43,73.41,72.98,72.39,72.02,71.91,71.79,71.77,71.87,70.5,70.63],
+"JOR":[71.92,72.15,72.36,72.57,72.77,72.93,73.14,73.37,73.59,73.8,74,74.19,74.37,74.56,74.79,75.01,75.21,75.5,75.77,76.04,75.18,74.26,74.21],
+"JPN":[81.18,81.51,81.79,81.86,82.13,82.01,82.38,82.55,82.64,82.97,82.92,82.68,83.18,83.41,83.65,83.89,84.07,84.2,84.3,84.43,84.69,84.78,84.82],
+"KAZ":[64.18,64.37,64.27,64.55,64.86,65.12,65.63,65.93,66.7,67.28,68.12,68.75,69.13,69.81,70.33,70.73,70.9,71.4,71.47,71.57,70.03,69.36,69.49],
+"KEN":[54.41,54.51,54.99,55.6,56.36,57.34,58.22,58.87,59.61,60.37,60.65,61.05,61.12,61.39,61.82,61.89,62.16,62.48,62.68,62.94,62.67,61.43,62.06],
+"KGZ":[65.4,65.76,65.86,66.19,66.3,66.39,66.78,67.01,67.25,67.78,68.25,68.58,68.99,69.22,69.89,70,70.28,70.59,70.73,71.23,69.63,69.98,70.48],
+"KHM":[58.63,59.97,61.23,62.52,63.55,64.29,65.06,65.73,66.47,67.44,67.71,68.42,68.92,69.3,69.74,69.87,70.22,70.51,70.56,70.69,70.42,69.58,69.9],
+"KIR":[64.41,64.65,64.84,64.95,64.99,64.97,64.91,64.84,64.83,64.89,65.02,65.19,65.38,65.59,65.82,66.06,66.33,66.6,66.86,67.15,67.27,67.42,67.66],
+"KNA":[null,null,null,null,null,71.36,71.29,71.37,71.37,71.39,71.27,71.54,71.67,71.46,70.97,70.76,71.74,71.84,71.47,71.57,71.63,71.68,72.03],
+"KOR":[76.47,77.27,77.54,77.55,78.01,78.52,79.07,79.48,80.04,80.58,80.76,81.21,81.35,81.86,82.38,82.56,82.93,83.29,83.34,83.66,83.61,83.7,84.02],
+"KWT":[76.72,76.89,76.98,76.99,76.79,76.9,76.89,77.02,77.14,77.44,77.98,78.46,78.81,79.16,79.44,79.56,79.7,79.78,79.72,79.68,76.92,78.67,80.26],
+"LAO":[58.38,59.07,59.53,60.03,60.29,60.98,61.49,62.08,62.6,63.27,63.97,64.74,65.36,65.72,66.36,66.67,67.17,67.43,67.63,68.14,68.5,68.06,69],
+"LBN":[null,null,null,null,null,76.27,76.08,77.08,77.58,77.89,78.16,78.4,78.63,78.76,78.97,79.23,79.5,79.65,79.73,79.24,77.8,75.05,74.42],
+"LBR":[51.36,52.75,53.79,53.04,56.01,56.91,57.62,58.28,58.77,59.19,59.43,59.62,59.91,59.94,59.12,59.15,60.42,60.55,60.85,61.1,60.95,60.75,61.1],
+"LBY":[70.68,70.86,71,71.13,71.49,71.59,71.72,71.86,72.27,72.36,72.37,70.07,72.25,72.34,71.51,71.7,71.76,72.48,72.79,72.46,72.47,71.91,72.15],
+"LCA":[70.77,71.14,71.47,71.77,72.03,72.25,72.46,72.6,72.7,72.72,72.72,72.94,72.88,72.74,72.86,73.14,73.11,73.13,73.36,73.44,73.42,71.11,71.29],
+"LIE":[76.98,79.48,79.85,80.18,82,80.82,81.16,81.5,82.89,81.68,82,81.93,82.5,82.43,82.22,82.81,82.39,83.89,83.15,84.31,82.8,83.26,84.66],
+"LKA":[70.36,70.79,71.12,71.37,67.09,72.12,71.97,72.05,71.73,69.19,73.21,73.38,73.91,74.24,74.65,74.93,75.33,75.4,75.75,76.01,76.39,76.4,76.61],
+"LSO":[48.43,46.85,45.6,44.53,43.71,43.23,42.91,43.12,43.57,44.03,45.6,46.69,47.83,49,50.03,51.1,52.26,53.06,53.73,54.17,54.69,53.06,53.04],
+"LTU":[72.09,71.79,71.8,72.14,72.23,71.74,71.58,71.54,72.42,73.18,73.42,73.93,74.2,74.31,74.84,74.61,74.88,75.44,75.68,76.21,75.07,73.72,74.29],
+"LUX":[77.81,78.16,78.36,77.77,79.22,79.4,79.42,79.48,80.47,80.61,80.57,80.77,80.98,81.37,81.73,81.84,82.05,81.73,81.8,82.14,81.43,82.63,82.59],
+"LVA":[70.25,70.07,70.35,70.62,70.93,70.78,70.88,71.06,72.04,72.75,72.95,73.69,73.75,74.18,74.43,74.68,74.75,74.81,75,75.53,75.45,73.58,75.93],
+"MAR":[66.79,67.18,67.55,67.92,68.23,68.7,69.13,69.6,70.05,70.46,70.83,71.27,71.68,72.12,72.54,72.92,73.28,73.66,73.99,74.27,73.92,74.04,74.97],
+"MDA":[66.42,66.79,66.94,67.42,67.86,68.17,68.48,68.95,69.39,69.57,69.36,69.19,69.14,69.1,69.03,69.24,69.92,70.52,70.49,70.93,70.17,68.85,68.62],
+"MDG":[57.94,58.57,58.89,59.49,60.15,60.57,61.31,61.76,62.14,62.73,62.87,63.49,63.54,63.96,64.25,64.34,65,65.09,65.27,65.88,65.18,64.49,65.23],
+"MDV":[70.88,72.18,73.29,74.06,73.54,74.75,75.13,75.69,76.54,77.07,77.66,78.12,78.68,79.06,79.42,79.69,79.87,79.94,80.01,80.12,79.88,79.92,80.84],
+"MEX":[73.57,73.87,74.11,74.27,74.37,74.38,74.33,74.24,74.15,74.12,74.19,74.36,74.57,74.74,74.8,74.68,74.41,74.14,74.01,74.2,70.13,70.21,74.83],
+"MHL":[null,null,null,null,null,null,null,null,null,null,null,63.26,63.37,63.46,63.62,63.83,64.06,64.27,64.5,64.75,64.98,65.27,65.15],
+"MKD":[72.86,73.23,73.15,73.39,73.78,73.75,74,73.9,74.53,74.72,75.12,75.19,75.14,75.87,75.93,75.98,76.03,76.48,77.31,77.29,75.17,73.84,73.89],
+"MLI":[50.54,51.28,52.22,52.89,53.54,54,54.62,54.94,55.29,55.87,56.38,56.76,57.08,57.36,57.9,58.36,58.73,59.13,59.39,59.66,58.63,58.94,59.42],
+"MLT":[77.58,79.01,78.47,78.76,79.19,79.65,79.78,80.09,80.09,80.68,81.81,81.15,81.39,82.01,82.74,82.96,83.11,83.59,83.35,83.21,83.36,83.78,83.7],
+"MMR":[60.15,60.42,60.72,60.98,61.25,61.6,61.89,62.37,56.51,63.15,63.33,63.9,64.14,64.82,65.06,65.56,65.68,65.84,66.46,66.61,66.8,65.67,67.26],
+"MNE":[null,null,null,74.07,74.69,74.26,74.05,74.53,75.31,75.27,76.14,76.07,76.33,76.61,76.75,76.76,76.75,76.94,77.16,77.04,76.26,76.34,76.85],
+"MNG":[62.88,63.28,63.52,64.21,64.8,64.88,65.51,65.97,66.38,66.77,67.18,67.44,68.11,68.58,69.05,69.5,69.86,70.24,71.2,71.82,72.14,70.97,72.67],
+"MOZ":[49.49,50.06,50.59,50.87,51.25,51.56,51.96,52.57,53.16,53.79,54.2,54.87,55.64,56.49,57.27,58.15,59.04,59.77,60.53,61.17,61.17,59.33,59.63],
+"MRT":[61.03,61.19,61.27,61.35,61.59,61.66,61.89,62.23,62.4,62.8,63.1,63.35,63.58,63.91,64.15,64.49,64.77,65.08,65.31,65.69,64.53,64.36,64.69],
+"MUS":[71.64,71.89,72.01,72.28,72.48,72.68,72.89,73.08,73.34,73.63,74,74.24,74.37,74.71,74.85,74.97,75.01,74.88,74.92,75.12,74.33,73.56,73.97],
+"MWI":[44.52,45.9,47.22,48.79,50.45,52.04,53.24,53.95,54.6,55.45,56.38,57.46,58.68,59.73,60.9,61.38,62.21,62.98,63.28,64.12,63.72,62.9,62.9],
+"MYS":[72.78,73.34,73.56,73.8,73.9,74.1,74.16,74.21,74.25,74.23,74.44,74.75,74.94,75.04,75.15,75.09,75.29,75.48,75.64,75.76,75.94,74.88,76.26],
+"NAM":[51.99,51.26,51.25,51.08,51.25,51.79,52.65,53.68,54.65,55.5,56.01,56.55,57.64,58.69,59.82,60.7,61.68,62.29,62.59,63.08,62.83,59.27,58.06],
+"NER":[49.32,49.84,50.56,51.43,52.59,53.59,54.6,55.55,56.51,57.4,58.37,58.99,59.65,60.24,60.79,61.08,61.63,62.16,62.45,62.9,61.45,61.58,62.08],
+"NGA":[null,null,null,48.44,48.77,49.3,49.73,50.03,50.22,50.71,50.94,51.36,51.5,51.71,51.79,51.84,52.04,52.31,52.55,52.91,52.89,52.68,53.63],
+"NIC":[67.23,67.21,67.18,67.22,67.42,67.94,68.72,69.56,70.59,71.43,72.01,72.42,72.61,72.7,72.81,72.98,73.26,73.55,73.85,74.05,71.79,73.84,74.61],
+"NLD":[78.12,78.33,78.4,78.66,79.23,79.48,79.84,80.25,80.38,80.66,80.82,81.1,81.05,81.29,81.64,81.48,81.55,81.73,81.77,82.05,81.64,81.69,82.45],
+"NOR":[78.69,78.9,78.96,79.53,79.96,80.17,80.44,80.5,80.68,80.87,81.04,81.24,81.44,81.67,82.09,82.27,82.42,82.62,82.76,82.96,83.19,83.23,83.39],
+"NPL":[62.61,63.34,63.26,64.2,64.82,65.46,65.87,66.33,66.42,66.76,66.81,67.31,67.47,67.96,68.08,67.46,68.78,68.91,68.98,69.56,69.25,68.45,70.48],
+"NRU":[null,null,null,null,null,58.16,58.38,58.53,58.83,59.12,59.64,60.24,60.72,61.23,61.81,62.27,62.7,62.99,63.23,63.48,63.44,63.62,64.01],
+"NZL":[78.68,78.67,78.88,79.15,79.37,80.06,80.05,80.16,80.29,80.59,81.1,80.89,81.21,81.65,81.79,81.98,82.07,82.22,82.38,82.57,82.74,82.45,83.01],
+"OMN":[73.47,73.81,73.87,74.14,74.33,74.4,74.48,74.46,74.61,74.68,76.27,76.61,77.06,77.25,77.45,77.69,77.92,77.92,77.97,78,74.76,72.54,73.93],
+"PAK":[62.1,62.42,62.63,62.84,63.05,62.47,63.73,63.85,64.04,64.14,64.44,64.65,64.78,65.15,65.28,65.7,65.88,66.3,66.48,66.76,66.27,66.1,66.43],
+"PAN":[74,74.41,74.82,75.22,75.54,75.83,76.01,76.15,76.22,76.34,76.45,76.63,76.82,77.04,77.25,77.47,77.65,77.79,77.86,77.81,76.66,76.22,76.83],
+"PER":[70.42,71.04,71.66,72.22,72.67,72.99,73.17,73.22,73.38,73.47,73.71,74.13,74.54,74.97,75.33,75.62,75.79,75.88,76.01,76.16,73.67,72.38,73.39],
+"PHL":[69.41,69.61,69.78,69.92,70.04,70.24,70.28,70.48,70.56,70.63,70.75,70.79,70.88,70.83,71.15,71.27,71.39,71.52,71.69,71.86,72.12,69.27,72.19],
+"PLW":[65.89,66.55,66.96,67.23,67.19,66.99,66.73,66.49,66.21,65.92,65.6,65.15,64.71,64.23,63.86,63.75,63.85,64.08,64.39,64.8,65.35,66.02,65.36],
+"PNG":[61.72,61.77,61.7,61.8,61.76,61.8,61.92,62.03,62.57,62.79,63.04,63.53,63.73,63.96,64.26,64.7,64.84,65.1,65.18,65.47,65.79,65.35,65.96],
+"POL":[73.73,74.22,74.58,74.74,74.97,75.09,75.28,75.34,75.58,75.78,76.32,76.65,76.71,76.97,77.57,77.42,77.8,77.72,77.63,77.93,76.94,76.46,77],
+"PRT":[76.83,77.15,77.37,77.58,78.42,78.31,79.07,79.28,79.56,79.77,80.04,80.5,80.48,80.82,81.22,81.21,81.23,81.5,81.39,81.7,81.06,81.04,82.24],
+"PRY":[69.75,69.9,70.03,70.3,70.48,70.53,70.78,71.11,71.38,71.64,71.89,72.13,72.45,72.76,72.88,73.19,73.53,73.64,73.57,73.62,73.18,70.26,70.47],
+"PSE":[null,null,null,null,71.18,72.07,71.92,72.15,72.41,72.61,73,73.24,73.47,74.03,72.62,74.41,74.55,74.83,74.79,75.24,74.4,73.47,73.44],
+"QAT":[74.83,75.26,75.41,75.57,75.96,76.06,76.57,77.02,77.43,77.88,78.43,78.89,79.23,79.54,79.77,80.06,80.43,80.72,80.9,80.99,79.1,79.27,81.56],
+"ROU":[71.28,71.29,70.71,69.8,69.5,70.61,71.47,72.55,73.61,74.03,74,74.43,74.39,74.98,74.93,74.79,75.25,75.95,76.15,76.51,75.35,74.18,74.12],
+"RUS":[65.27,65.42,65.14,65.26,65.9,66.07,67.28,68.15,68.49,69.21,69.39,70.4,70.77,71.3,71.57,72.1,72.66,73.37,73.53,73.93,71.34,69.42,70.12],
+"RWA":[47.13,49.02,51.03,53.37,55.49,57.32,58.71,59.97,61.13,61.96,62.54,63.26,64.01,64.43,64.94,65.3,65.74,65.94,66.25,66.44,66.77,66.07,67.13],
+"SAU":[72.47,72.97,73.34,73.63,74.15,74.59,74.81,75.05,75.27,75.43,75.76,76.23,76.46,76.63,76.76,76.92,77.06,77.16,77.21,77.3,76.24,76.94,77.9],
+"SDN":[58.32,58.56,58.98,58.2,56.77,57.28,60.28,61.26,61.21,62.64,63.02,63.25,63.79,63.68,64.27,64.66,64.78,65.44,65.68,65.88,65.61,65.27,65.58],
+"SEN":[56.94,57.56,58.23,59.12,60.03,60.92,61.75,62.54,63.24,63.92,64.61,65.26,65.46,66.07,66.45,66.88,67.5,67.75,68.1,68.53,68.01,67.09,67.91],
+"SGP":[79.07,79.19,79.3,79.4,79.76,80.35,80.71,80.96,81.17,81.46,81.69,81.97,82.24,82.52,82.65,82.83,83,83.22,83.46,83.76,82.86,82.75,84.13],
+"SLB":[67.22,67.36,67.51,67.64,67.8,67.94,68.09,67.99,68.4,68.47,68.73,68.91,69.08,69.19,69.23,69.58,69.8,69.99,70.17,70.38,70.2,70.35,70.74],
+"SLE":[45.05,45.66,46.36,46.96,47.58,48.24,49.32,50.37,51.53,52.63,53.69,54.62,55.45,56.31,56.39,57.19,58.4,58.65,59.8,60.26,59.76,60.06,60.41],
+"SLV":[69.86,69.6,70.23,70.14,70.34,70.44,70.77,71.11,71.42,71.58,71.85,71.86,71.83,71.77,71.75,71.81,72.03,72.31,72.56,72.56,71.06,70.75,71.47],
+"SMR":[79.95,80.42,80.77,80.73,80.7,81.22,81.56,81.85,82.21,82.49,82.68,82.76,82.57,82.39,82.89,82.93,82.97,82.92,82.95,82.99,79.59,80.88,83.43],
+"SOM":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,56.11],
+"SRB":[71.44,72.31,72.26,72.44,72.62,72.71,73.36,73.62,73.94,74.04,74.38,74.77,75.11,75.61,75.72,75.82,76.26,76.21,76.51,76.7,75.41,74.19,74.14],
+"SSD":[null,null,null,null,null,null,null,null,null,null,54.81,54.94,55.87,55.75,54.97,55.57,55.54,55.31,55.95,55.91,55.48,54.97,55.57],
+"STP":[61.65,62.03,62.6,63.17,63.73,63.71,64.4,64.72,65.08,65.12,65.25,64.9,65.75,66.33,66.85,67.25,67.49,68.27,68.36,68.52,67.79,67.59,68.79],
+"SUR":[null,null,null,null,66.42,67,67.57,68.2,68.82,69.5,69.89,69.91,69.76,69.68,69.78,70.8,71.59,72.42,72.55,72.24,72.56,70.27,70.29],
+"SVK":[73.14,73.57,73.77,73.82,74.22,74.16,74.42,74.5,74.86,75.22,75.5,76.02,76.18,76.51,76.85,76.65,77.21,77.22,77.26,77.68,77,74.91,75.33],
+"SVN":[76.2,76.54,76.79,76.67,77.49,77.71,78.42,78.59,79.14,79.27,79.7,79.99,80.13,80.34,80.94,80.82,81.16,81.07,81.36,81.6,80.44,80.69,82.13],
+"SWE":[79.74,79.84,79.93,80.19,80.55,80.62,80.83,80.97,81.14,81.36,81.52,81.76,81.73,81.93,82.22,82.18,82.34,82.44,82.53,83.05,82.43,82.98,83.5],
+"SWZ":[47.26,45.97,44.49,43.35,42.54,42.13,43.12,43.64,44.17,44.64,46.62,48.19,49.83,51.49,53.05,55.02,56.66,57.9,59.41,60.55,59.69,57.07,56.36],
+"SYC":[69.72,69.99,70.39,70.98,71.16,71.56,71.83,72.11,72.4,72.69,72.97,73.75,73.64,73.78,73.75,73.7,73.64,73.8,73.95,74.17,73.53,71.29,71.74],
+"SYR":[70.76,71.64,71.94,72.41,72.47,72.77,73.35,73.71,73.55,73.85,73.88,73.31,66.77,63.83,63.15,65.12,65.99,68.48,70.14,71.82,72.14,72.06,72.3],
+"TCD":[47.44,47.85,47.95,48.21,48.23,48.31,48.29,48.75,49.02,49.2,49.58,50.01,50.54,50.78,51.2,51.59,52.08,52.31,52.83,53.26,52.78,52.53,53],
+"TGO":[54.74,54.86,55.31,55.64,55.57,55.96,56.22,56.51,56.69,57.01,57.3,57.92,58.07,58.68,58.85,59.4,59.55,60.15,60.24,60.9,61.03,61.62,61.59],
+"THA":[72.32,72.61,72.93,73.15,73.08,73.82,74.94,75.19,75.49,75.84,76.13,76.42,76.77,77.08,77.42,77.72,78.05,78.39,78.66,78.97,79.27,78.71,79.68],
+"TJK":[63.26,64.06,64.85,65.55,66.03,66.51,67.01,67.22,67.69,68.04,67.74,68.15,68.48,68.89,69.07,69.31,69.55,69.9,70.35,70.87,67.99,71.59,71.29],
+"TKM":[null,null,null,null,null,66.07,66.5,66.89,67.41,67.96,68.29,68.57,68.72,68.74,68.61,68.78,68.78,68.92,68.8,69,68.69,69.26,69.41],
+"TLS":[58.57,59.36,60.15,60.87,61.63,62.33,63.07,63.72,64.33,64.85,65.3,65.7,66.08,66.44,66.79,67.14,67.45,67.75,68.02,68.27,68.47,67.74,69.06],
+"TON":[68.98,69.13,69.33,69.5,69.67,69.77,69.89,70.05,70.16,70.01,70.32,70.38,70.44,70.5,70.54,70.61,70.66,70.71,70.78,70.87,70.93,70.99,71.27],
+"TTO":[69.1,69.65,70.49,69.73,71.08,71.31,71.26,71.65,71.47,73.13,72.72,73.28,73.72,73.96,74.21,74.5,74.28,74.23,73.8,74.23,74.41,72.97,74.71],
+"TUN":[73.69,73.82,74.06,74.31,74.49,74.76,74.92,75.07,75.18,75.27,75.42,75.46,75.55,75.65,75.65,75.69,75.79,75.85,75.95,75.99,75.29,73.77,74.26],
+"TUR":[71.86,72.23,72.58,72.89,73.24,73.53,73.85,74.19,74.45,74.76,75.07,74.94,75.68,76.3,76.57,76.65,76.66,77.14,77.56,77.83,75.85,76.03,78.47],
+"TUV":[63.5,63.54,63.58,63.63,63.69,63.84,63.93,63.93,63.95,63.95,63.98,63.97,63.96,64.01,64.03,64.06,64.11,64.15,64.21,64.28,64.38,64.55,64.85],
+"TZA":[52.36,53.16,53.86,54.9,55.6,56.3,56.91,57.52,58.09,58.89,60.1,61.05,62.03,62.96,63.87,64.65,65.39,66,66.54,66.99,66.41,66.2,66.78],
+"UGA":[48.34,49.01,49.65,50.37,51.55,52.98,54.37,55.24,55.82,56.49,57.06,57.97,58.82,59.76,60.41,61.09,61.65,62.12,62.71,62.99,62.85,62.71,63.64],
+"UKR":[67.86,68.18,68.17,68.21,68.4,68.15,68.74,68.77,69.12,70.25,70.62,71.39,71.63,71.86,72.59,73.46,74.31,74.72,74.41,74.54,72.57,71.62,68.56],
+"URY":[75.03,75.29,75.54,75.79,76.01,76.19,76.36,76.5,76.62,76.74,76.86,76.98,77.11,77.24,77.37,77.48,77.57,77.63,77.61,77.51,78.43,75.44,78],
+"USA":[76.81,76.93,77,77.15,77.56,77.56,77.84,78.1,78.2,78.56,78.77,78.82,78.94,78.95,79.02,78.87,78.85,78.82,78.99,79.14,77.41,77.2,78.2],
+"UZB":[65.72,66.09,66.6,67.04,67.4,67.49,67.89,68.29,68.76,68.87,69.24,69.65,69.87,69.99,70.23,70.47,70.75,71.01,71.15,71.34,70.33,70.86,71.67],
+"VCT":[71.38,71.94,72.17,72.35,73.04,73.52,74.02,74.7,75.05,75.08,74.72,74.6,74.15,73.8,74.47,74.41,74.28,74.31,74.13,72.83,72.13,69.63,68.97],
+"VEN":[72.48,71.2,72.66,71.94,72.51,72.78,72.74,73.06,72.44,72.58,72.89,72.91,73.04,73.2,72.85,73.01,72.06,71.94,71.98,72.16,71.1,70.55,71.11],
+"VNM":[72.46,72.65,72.8,72.98,73.14,73.27,73.32,73.44,73.41,73.5,73.51,73.69,73.7,73.78,73.86,73.88,73.94,73.96,73.98,74.09,75.38,73.62,74.58],
+"VUT":[null,null,null,null,null,69.39,69.46,69.54,69.6,69.65,69.62,69.55,69.5,69.53,69.46,69.51,69.65,69.71,69.79,69.88,70.3,70.45,70.49],
+"WSM":[70.75,71.02,71.28,71.5,71.7,71.75,72.02,72.1,72.15,70.07,72.25,72.26,72.17,72.39,72.46,72.51,72.54,72.59,72.64,72.16,72.77,72.77,72.6],
+"YEM":[62.59,63.22,63.91,64.54,65.01,65.54,65.99,66.57,66.96,67.2,67.28,67.42,67.34,67.54,67.38,65.87,66.06,65.96,64.57,65.09,64.65,63.75,63.72],
+"ZAF":[58.47,57.26,55.67,54.33,54.04,53.98,54.28,54.99,56.02,57.45,58.9,60.65,61.85,62.53,63.38,63.95,64.75,65.4,65.67,66.18,65.25,62.34,61.48],
+"ZMB":[45.23,46.02,46.98,48.28,49.49,50.66,51.79,52.74,53.94,55.3,56.8,57.77,58.87,59.88,60.7,61.21,61.79,62.12,62.34,62.79,62.38,61.22,61.8],
+"ZWE":[44.69,41.96,44.56,43.39,44.5,44.77,45.36,45.61,46.72,48.06,50.65,53.35,55.63,57.46,58.85,59.59,60.31,60.71,61.41,61.29,61.12,59.25,59.39]
+};
+/* ---------------- Formato (es-AR) ---------------- */
+const fmt = (x, d = 2) => (isFinite(x) ? Number(x).toLocaleString("es-AR", {minimumFractionDigits: d, maximumFractionDigits: d}) : "—");
+const $ = id => document.getElementById(id);
+function fv(v){const a=Math.abs(v); return fmt(v, a>=1000?0:a>=10?1:a>=1?2:3);}
+const pctf = (v, d = 1) => fmt(v, d) + "%";
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const CL = i => `var(--c${(((i%8)+8)%8)+1})`;
+
+/* ---------------- Aleatorios ---------------- */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+let rnd = mulberry32((Date.now() % 1e9) | 0);
+function rnorm(){let u=0,v=0;while(u===0)u=rnd();while(v===0)v=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function withSeed(seed, fn){const r0=rnd; rnd=mulberry32(seed); try{return fn();} finally{rnd=r0;}}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+/* ---------------- Estadística ---------------- */
+const sum = a => {let s=0; for (const v of a) s+=v; return s;};
+const mean = a => sum(a)/a.length;
+const sdv = a => {const m=mean(a); let s=0; for (const v of a) s+=(v-m)**2; return Math.sqrt(s/(a.length-1));};
+function corr(a,b){const ma=mean(a), mb=mean(b); let sab=0,saa=0,sbb=0; for (let i=0;i<a.length;i++){const x=a[i]-ma,y=b[i]-mb; sab+=x*y; saa+=x*x; sbb+=y*y;} return saa>0&&sbb>0 ? sab/Math.sqrt(saa*sbb) : 0;}
+function minmax(a){let lo=Infinity,hi=-Infinity; for (const v of a){if(v<lo)lo=v; if(v>hi)hi=v;} return [lo,hi];}
+function quant(sorted, p){const h=(sorted.length-1)*p, lo=Math.floor(h), hi=Math.min(lo+1, sorted.length-1); return sorted[lo]+(h-lo)*(sorted[hi]-sorted[lo]);}
+
+/* Autovalores y autovectores de una matriz simétrica (Jacobi cíclico).
+   Devuelve values (de mayor a menor) y vectors[k] = autovector k */
+function eigSym(A0){
+  const n=A0.length, A=A0.map(r=>r.slice()), V=Array.from({length:n},(_,i)=>Array.from({length:n},(_,j)=>i===j?1:0));
+  for (let sweep=0; sweep<100; sweep++){
+    let off=0; for (let i=0;i<n;i++) for (let j=i+1;j<n;j++) off+=A[i][j]*A[i][j];
+    if (off<1e-24) break;
+    for (let p=0;p<n-1;p++) for (let q=p+1;q<n;q++){
+      const apq=A[p][q]; if (Math.abs(apq)<1e-300) continue;
+      const theta=(A[q][q]-A[p][p])/(2*apq);
+      const t=(theta>=0?1:-1)/(Math.abs(theta)+Math.sqrt(theta*theta+1));
+      const c=1/Math.sqrt(t*t+1), s=t*c;
+      for (let k=0;k<n;k++){const akp=A[k][p], akq=A[k][q]; A[k][p]=c*akp-s*akq; A[k][q]=s*akp+c*akq;}
+      for (let k=0;k<n;k++){const apk=A[p][k], aqk=A[q][k]; A[p][k]=c*apk-s*aqk; A[q][k]=s*apk+c*aqk;}
+      for (let k=0;k<n;k++){const vkp=V[k][p], vkq=V[k][q]; V[k][p]=c*vkp-s*vkq; V[k][q]=s*vkp+c*vkq;}
+    }
+  }
+  const idx=[...Array(n).keys()].sort((a,b)=>A[b][b]-A[a][a]);
+  return {values: idx.map(i=>A[i][i]), vectors: idx.map(i=>V.map(r=>r[i]))};
+}
+function cholesky(S){
+  const p=S.length, L=Array.from({length:p},()=>new Array(p).fill(0));
+  for (let i=0;i<p;i++) for (let j=0;j<=i;j++){
+    let s=S[i][j]; for (let k=0;k<j;k++) s-=L[i][k]*L[j][k];
+    L[i][j] = i===j ? Math.sqrt(Math.max(s,1e-12)) : s/L[j][j];
+  }
+  return L;
+}
+function covMat(X){ /* filas = observaciones */
+  const n=X.length, p=X[0].length, m=new Array(p).fill(0);
+  for (const r of X) for (let j=0;j<p;j++) m[j]+=r[j]/n;
+  const S=Array.from({length:p},()=>new Array(p).fill(0));
+  for (const r of X) for (let a=0;a<p;a++){const da=r[a]-m[a]; for (let b=a;b<p;b++) S[a][b]+=da*(r[b]-m[b]);}
+  for (let a=0;a<p;a++) for (let b=a;b<p;b++){S[a][b]/=(n-1); S[b][a]=S[a][b];}
+  return {m,S};
+}
+
+/* ---------------- Gráficos SVG ---------------- */
+function niceTicks(lo,hi,n=5){const span=hi-lo||1,step0=span/n,mag=Math.pow(10,Math.floor(Math.log10(step0))),err=step0/mag;const step=(err>=7.5?10:err>=3.5?5:err>=1.5?2:1)*mag;const t=[];for(let v=Math.ceil(lo/step-1e-9)*step;v<=hi+1e-9;v+=step)t.push(+v.toFixed(10));return {t,step};}
+function decOf(step){return Math.max(0,-Math.floor(Math.log10(step)+1e-9));}
+function fAx(v, step){return Math.abs(v)>=1000 ? fmt(v,0) : fmt(v, decOf(step));}
+function padR(a,b,f=0.06){const s=(b-a)||1; return [a-s*f, b+s*f];}
+
+/* Marco de un gráfico cartesiano. equal: misma escala en x e y */
+function frame(o){
+  const W=o.W||640, H=o.H||420, m=Object.assign({l:o.yticks===false?14:46, r:14, t:14, b:o.xlab?(o.xticks===false?26:42):(o.xticks===false?14:26)}, o.m||{});
+  let [x0,x1]=o.xr, [y0,y1]=o.yr;
+  const pw=W-m.l-m.r, ph=H-m.t-m.b;
+  if (o.equal){const s=Math.min(pw/(x1-x0), ph/(y1-y0)), cx=(x0+x1)/2, cy=(y0+y1)/2; x0=cx-pw/s/2; x1=cx+pw/s/2; y0=cy-ph/s/2; y1=cy+ph/s/2;}
+  const X=v=>m.l+pw*(v-x0)/(x1-x0), Y=v=>m.t+ph*(1-(v-y0)/(y1-y0));
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.aria||"Gráfico")}">`;
+  if (o.box) s+=`<rect x="${m.l}" y="${m.t}" width="${pw}" height="${ph}" style="fill:none;stroke:var(--rule)"/>`;
+  if (o.yticks!==false){const t=niceTicks(y0,y1,o.ny||5); t.t.forEach(v=>{s+=`<line class="ax" x1="${m.l}" x2="${W-m.r}" y1="${Y(v)}" y2="${Y(v)}" style="opacity:.6"/><text x="${m.l-6}" y="${Y(v)+4}" text-anchor="end">${(o.yfmt||(x=>fAx(x,t.step)))(v)}</text>`;});}
+  if (o.xticks!==false){const t=niceTicks(x0,x1,o.nx||6); t.t.forEach(v=>{ if (o.xgrid) s+=`<line class="ax" x1="${X(v)}" x2="${X(v)}" y1="${m.t}" y2="${H-m.b}" style="opacity:.6"/>`; s+=`<text x="${X(v)}" y="${H-m.b+16}" text-anchor="middle">${(o.xfmt||(x=>fAx(x,t.step)))(v)}</text>`;});}
+  if (o.zero){ if (y0<0&&y1>0) s+=`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(0)}" y2="${Y(0)}" style="stroke:var(--gris);opacity:.7"/>`; if (x0<0&&x1>0) s+=`<line x1="${X(0)}" x2="${X(0)}" y1="${m.t}" y2="${H-m.b}" style="stroke:var(--gris);opacity:.7"/>`; }
+  if (o.base!==false && !o.box) s+=`<line x1="${m.l}" x2="${W-m.r}" y1="${H-m.b}" y2="${H-m.b}" style="stroke:var(--muted)"/>`;
+  if (o.xlab) s+=`<text x="${m.l+pw/2}" y="${H-5}" text-anchor="middle">${o.xlab}</text>`;
+  if (o.ylab) s+=`<text transform="translate(12 ${m.t+ph/2}) rotate(-90)" text-anchor="middle">${o.ylab}</text>`;
+  if (o.title) s+=`<text x="${m.l}" y="11" class="ink" style="font-weight:600">${o.title}</text>`;
+  return {X,Y,s,W,H,m,x0,x1,y0,y1,pw,ph};
+}
+/* Ubicación de etiquetas sin superponerse (greedy) */
+function placeLabels(items, W, H, boxes0){
+  const boxes=(boxes0||[]).slice(), out=[];
+  for (const it of items){
+    const w=it.text.length*(it.cw||6.2), hh=12, r=(it.r||3)+3;
+    const cands=[[r,4,"start"],[-r,4,"end"],[0,-r-2,"middle"],[0,r+10,"middle"],[r,-6,"start"],[r,13,"start"],[-r,-6,"end"],[-r,13,"end"],[r+8,-16,"start"],[-r-8,-16,"end"],[r+8,22,"start"],[-r-8,22,"end"]];
+    let chosen=null, fallback=null;
+    for (const [dx,dy,a] of cands){
+      const tx=it.x+dx, ty=it.y+dy, bx=a==="start"?tx:a==="end"?tx-w:tx-w/2;
+      const b={x0:bx-1,x1:bx+w+1,y0:ty-hh+2,y1:ty+3};
+      if (b.x0<0||b.x1>W||b.y0<0||b.y1>H) continue;
+      if (!fallback) fallback={x:tx,y:ty,a,b};
+      if (boxes.some(o=>!(b.x1<o.x0||b.x0>o.x1||b.y1<o.y0||b.y0>o.y1))) continue;
+      chosen={x:tx,y:ty,a,b}; break;
+    }
+    if (!chosen && it.force) chosen=fallback;
+    if (chosen) boxes.push(chosen.b);
+    out.push(chosen);
+  }
+  return out;
+}
+/* Etiquetas con búsqueda en espiral y línea guía cuando quedan lejos del punto.
+   items: {x, y, text, r, force}; los puntos de todos los items funcionan como obstáculos */
+function drawLabels(items, W, H, styleFn){
+  const boxes=items.map(it=>{const r=it.r||3; return {x0:it.x-r,x1:it.x+r,y0:it.y-r,y1:it.y+r};});
+  const hit=b=>boxes.some(o=>!(b.x1<o.x0||b.x0>o.x1||b.y1<o.y0||b.y0>o.y1));
+  let s="";
+  for (const it of items){
+    const w=it.text.length*(it.cw||6.2), hh=12, r=(it.r||3)+3;
+    let chosen=null, fallback=null;
+    outer: for (const ext of [0,8,18,30,44,60,80]){
+      const R=r+ext, dirs=[];
+      if (ext===0) dirs.push([R,4,"start"],[-R,4,"end"],[0,-R-1,"middle"],[0,R+10,"middle"]);
+      else for (let k=0;k<12;k++){const t=k*Math.PI/6, c=Math.cos(t), sn=Math.sin(t); dirs.push([R*c, R*sn+4+(sn>0.3?6:0), c>0.3?"start":c<-0.3?"end":"middle"]);}
+      for (const [dx,dy,a] of dirs){
+        const tx=it.x+dx, ty=it.y+dy, bx=a==="start"?tx:a==="end"?tx-w:tx-w/2;
+        const b={x0:bx-1,x1:bx+w+1,y0:ty-hh+2,y1:ty+3};
+        if (b.x0<0||b.x1>W||b.y0<0||b.y1>H) continue;
+        if (!fallback) fallback={x:tx,y:ty,a,b,lead:false};
+        if (hit(b)) continue;
+        chosen={x:tx,y:ty,a,b,lead:ext>8}; break outer;
+      }
+    }
+    if (!chosen && it.force) chosen=fallback;
+    if (!chosen) continue;
+    boxes.push(chosen.b);
+    const b=chosen.b;
+    if (chosen.lead){const ex=Math.max(b.x0,Math.min(it.x,b.x1)), ey=Math.max(b.y0+2,Math.min(it.y,b.y1-2)); s+=`<line x1="${it.x.toFixed(1)}" y1="${it.y.toFixed(1)}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" style="stroke:var(--muted);stroke-width:.7;opacity:.8"/>`;}
+    s+=`<text x="${chosen.x.toFixed(1)}" y="${chosen.y.toFixed(1)}" text-anchor="${chosen.a}" class="lab" style="${styleFn?styleFn(it):""}">${esc(it.text)}</text>`;
+  }
+  return s;
+}
+/* Histograma simple con línea vertical */
+function histSimple(el, vals, o){
+  const W=o.W||640, H=o.H||200, bins=o.bins||25;
+  let [a,b]=minmax(vals.concat(o.line!=null?[o.line]:[])); [a,b]=padR(a,b,0.04);
+  const bw=(b-a)/bins, c=new Array(bins).fill(0);
+  for (const v of vals){let k=Math.floor((v-a)/bw); if(k>=bins)k=bins-1; if(k<0)k=0; c[k]++;}
+  const f=frame({W,H,xr:[a,b],yr:[0,Math.max(...c)*1.12],xlab:o.xlab,ny:3,yfmt:v=>fmt(v,0),aria:o.aria});
+  let s=f.s;
+  c.forEach((n,k)=>{ if(!n) return; const x0=f.X(a+k*bw)+0.5, w=Math.max(0.5,f.X(a+(k+1)*bw)-f.X(a+k*bw)-1); s+=`<rect x="${x0}" y="${f.Y(n)}" width="${w}" height="${f.Y(0)-f.Y(n)}" style="fill:var(--gris);opacity:.75"/>`; });
+  if (o.line!=null){const x=f.X(o.line); s+=`<line x1="${x}" x2="${x}" y1="${f.m.t}" y2="${f.Y(0)}" style="stroke:var(--rojo);stroke-width:2.5"/><text x="${x+(x>W*0.7?-5:5)}" y="${f.m.t+10}" text-anchor="${x>W*0.7?"end":"start"}" style="fill:var(--rojo);font-weight:600">${o.lineLab||"observado"}</text>`;}
+  el.innerHTML=s+"</svg>";
+}
+function segInit(id, onChange){
+  const el=$(id);
+  el.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{
+    el.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed", x===b?"true":"false"));
+    onChange(b.dataset.v);
+  }));
+}
+function segSet(id, v){ $(id).querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed", x.dataset.v===String(v)?"true":"false")); }
+function rangeInit(id, fmtF, onChange){
+  const el=$(id), o=$(id+"-o");
+  const upd=()=>{ if (o) o.textContent=fmtF(+el.value); };
+  el.addEventListener("input",()=>{upd(); onChange(+el.value);}); upd();
+  return upd;
+}
+
+/* ================= Datos ================= */
+const PAISES=PAISES_RAW.map(r=>({iso:r[0],pais:r[1],cont:r[2],ev:r[3],eys:r[4],mys:r[5],inb:r[6],idh:r[7],gini:r[8],emis:r[9],fec:r[10]})).sort((a,b)=>a.pais.localeCompare(b.pais,"es"));
+const NP=PAISES.length;
+const idxIso=iso=>PAISES.findIndex(p=>p.iso===iso);
+const SEL=["ARG","BRA","CHL","URY","MEX","CRI","USA","NOR","QAT","CHN","IND","ZAF"];
+
+const VDEF={
+  ev:  {lab:"Esperanza de vida",                sh:"Esp. vida",     u:"años",   dir:1,  gp:[20,85],      r:"expectativa_vida"},
+  eys: {lab:"Años esperados de escolarización", sh:"Esc. esperada", u:"años",   dir:1,  gp:[0,18],       r:"expectativa_educ"},
+  mys: {lab:"Años promedio de escolarización",  sh:"Esc. promedio", u:"años",   dir:1,  gp:[0,15],       r:"anios_prom_educ"},
+  inb: {lab:"INB per cápita",                   sh:"INB pc",        u:"USD",    dir:1,  gp:[100,75000],  r:"inb_pc", canLog:true},
+  gini:{lab:"Gini",                             sh:"Gini",          u:"",       dir:-1, gp:[24.3,63.4],  r:"gini"},
+  emis:{lab:"Emisiones per cápita",             sh:"Emisiones",     u:"t",      dir:-1, gp:[0.71,67.24],  r:"emis_pc", canLog:true}
+};
+const DIMS=[
+  {k:"sal",lab:"Salud",    vars:["ev"],        c:"var(--c1)", r:"i_salud"},
+  {k:"edu",lab:"Educación",vars:["eys","mys"], c:"var(--c7)", r:"i_educ"},
+  {k:"ing",lab:"Ingreso",  vars:["inb"],       c:"var(--c3)", r:"i_ingreso"},
+  {k:"igu",lab:"Igualdad", vars:["gini"],      c:"var(--c5)", r:"i_igualdad"},
+  {k:"amb",lab:"Ambiente", vars:["emis"],      c:"var(--c4)", r:"i_ambiente"}
+];
+const DK=Object.fromEntries(DIMS.map(d=>[d.k,d]));
+const NORMS={fijo:"umbrales fijos", obs:"mín-máx observado", z:"z-score", rank:"percentiles", cat:"terciles (0, 1, 2)"};
+const AGGS={ari:"aritmética", geo:"geométrica", min:"mínimo"};
+const NAS={drop:"eliminar casos", imp:"imputar media del continente", avail:"promediar lo disponible"};
+const NORM_DESC={
+  fijo:"(x − mín) / (máx − mín) con umbrales elegidos de antemano y recortado entre 0 y 1. Es lo que hace el PNUD: el valor de un país no depende de los demás.",
+  obs:"(x − mín) / (máx − mín) con el mínimo y el máximo de los datos. El país peor ubicado queda en 0 y el mejor en 1: cambia si cambia la muestra.",
+  z:"(x − media) / desvío. Sin unidades y con valores negativos: no se puede usar con la media geométrica.",
+  rank:"Posición relativa: rango / n. Se pierde la distancia entre países; solo queda el orden.",
+  cat:"Cada variable da 0, 1 o 2 puntos según en qué tercio de la distribución cae (como el índice de importabilidad). Se divide por 2."
+};
+const AGG_DESC={
+  ari:"Σ w·I. Una unidad de una dimensión compensa exactamente una unidad (ponderada) de otra.",
+  geo:"Π I^w. El aporte marginal es mayor cuanto más baja está la dimensión: el desbalance se castiga. Piso de 0,01.",
+  min:"El índice es la peor dimensión del país. No hay compensación y los pesos no cuentan."
+};
+const GP0=Object.fromEntries(Object.entries(VDEF).map(([k,v])=>[k,v.gp.slice()]));
+const BASECFG={on:{sal:true,edu:true,ing:true,igu:false,amb:false}, w:{sal:50,edu:50,ing:50,igu:50,amb:50}, mix:50, log:{inb:true,emis:true}, norm:"fijo", agg:"geo", na:"imp", gp:JSON.parse(JSON.stringify(GP0))};
+const PRESETS=[
+  {k:"idh",  lab:"IDH (PNUD)",            set:{}},
+  {k:"idh0", lab:"IDH aritmético (hasta 2009)", set:{agg:"ari"}},
+  {k:"amp",  lab:"Ampliado de la clase",  set:{on:{sal:true,edu:true,ing:true,igu:true,amb:true}, agg:"ari"}},
+  {k:"ing",  lab:"Solo ingreso",          set:{on:{sal:false,edu:false,ing:true,igu:false,amb:false}, agg:"ari"}}
+];
+const cloneCfg=c=>JSON.parse(JSON.stringify({on:c.on,w:c.w,mix:c.mix,log:c.log,norm:c.norm,agg:c.agg,na:c.na,gp:c.gp}));
+function presetCfg(p){ const c=cloneCfg(BASECFG); Object.assign(c, JSON.parse(JSON.stringify(p.set))); return c; }
+
+const S=Object.assign(cloneCfg(BASECFG), {focal:"ARG", ref:"idh", saved:null, preset:"idh"});
+const LSK_SAVED="cdd_clase14_guardada";
+try { const s=JSON.parse(localStorage.getItem(LSK_SAVED)||"null"); if (s&&s.on&&s.w&&s.gp) S.saved=s; } catch(e){}
+
+/* ================= Modelo ================= */
+const tf=(v,x,cfg)=>VDEF[v].canLog&&cfg.log[v]?Math.log(x):x;
+function upperBound(a,t){let lo=0,hi=a.length; while(lo<hi){const m=(lo+hi)>>1; if(a[m]<=t) lo=m+1; else hi=m;} return lo;}
+function lowerBound(a,t){let lo=0,hi=a.length; while(lo<hi){const m=(lo+hi)>>1; if(a[m]<t) lo=m+1; else hi=m;} return lo;}
+function fitNorm(xs, method, gp, dir){
+  const v=xs.filter(x=>x!=null);
+  if (method==="fijo"){ const [lo,hi]=gp; return x=>{ const y=Math.min(1,Math.max(0,(x-lo)/(hi-lo))); return dir>0?y:1-y; }; }
+  if (method==="obs"){ const [lo,hi]=minmax(v); return x=>{ const y=(x-lo)/(hi-lo); return dir>0?y:1-y; }; }
+  if (method==="z"){ const m=mean(v), s=sdv(v); return x=>dir*(x-m)/s; }
+  const sv=v.map(x=>dir*x).sort((a,b)=>a-b), n=sv.length;
+  if (method==="rank") return x=>{ const t=dir*x, lt=lowerBound(sv,t), le=upperBound(sv,t); return (le>lt ? (lt+1+le)/2 : lt+0.5)/n; };
+  const q1=quant(sv,1/3), q2=quant(sv,2/3);
+  return x=>{ const t=dir*x; return ((t>q1?1:0)+(t>q2?1:0))/2; };
+}
+function activeDims(cfg){
+  const on=DIMS.filter(d=>cfg.on[d.k]);
+  const pos=on.filter(d=>cfg.w[d.k]>0);
+  return pos.length ? pos : on;
+}
+function model(cfg){
+  const dims=activeDims(cfg);
+  let ws=dims.map(d=>cfg.w[d.k]); const s=sum(ws); ws=s>0?ws.map(w=>w/s):ws.map(()=>1/dims.length);
+  const nf={};
+  for (const v of [...new Set(dims.flatMap(d=>d.vars))]){
+    const xs=PAISES.map(p=>p[v]==null?null:tf(v,p[v],cfg)), gp=cfg.gp[v].map(g=>tf(v,g,cfg));
+    nf[v]=fitNorm(xs,cfg.norm,gp,VDEF[v].dir);
+  }
+  const dimVal=(d,p)=>{
+    if (d.vars.some(v=>p[v]==null)) return null;
+    if (d.k==="edu"){ const m=cfg.mix/100; return m*nf.eys(tf("eys",p.eys,cfg))+(1-m)*nf.mys(tf("mys",p.mys,cfg)); }
+    const v=d.vars[0]; return nf[v](tf(v,p[v],cfg));
+  };
+  return {cfg,dims,wn:ws,nf,dimVal};
+}
+const FLOOR=0.01;
+function aggregate(vals, ws, agg){
+  let sw=0, acc=agg==="min"?Infinity:0, n=0;
+  for (let j=0;j<vals.length;j++){
+    const v=vals[j]; if (v==null) continue; n++; const w=ws[j]; sw+=w;
+    if (agg==="ari") acc+=w*v; else if (agg==="geo") acc+=w*Math.log(Math.max(v,FLOOR)); else if (v<acc) acc=v;
+  }
+  if (!n) return null;
+  if (agg==="min") return acc;
+  if (!(sw>0)) return null;
+  return agg==="ari" ? acc/sw : Math.exp(acc/sw);
+}
+function evaluate(M){
+  const cfg=M.cfg;
+  const I=M.dims.map(d=>PAISES.map(p=>M.dimVal(d,p)));
+  const miss=PAISES.map((_,i)=>I.some(col=>col[i]==null));
+  const imputed=PAISES.map(()=>false);
+  if (cfg.na==="imp"){
+    I.forEach(col=>{
+      const byC={}; col.forEach((v,i)=>{ if (v!=null) (byC[PAISES[i].cont]=byC[PAISES[i].cont]||[]).push(v); });
+      const g=mean(col.filter(v=>v!=null));
+      col.forEach((v,i)=>{ if (v==null){ const a=byC[PAISES[i].cont]; col[i]=a&&a.length?mean(a):g; imputed[i]=true; } });
+    });
+  }
+  const incl=PAISES.map((_,i)=> cfg.na==="drop" ? !miss[i] : I.some(col=>col[i]!=null));
+  const val=PAISES.map((_,i)=> incl[i] ? aggregate(I.map(col=>col[i]), M.wn, cfg.agg) : null);
+  return {M, I, miss, imputed, incl, val, rank:rankDesc(val), n:incl.filter(Boolean).length};
+}
+const run=cfg=>evaluate(model(cfg));
+function rankDesc(val){
+  const idx=[]; val.forEach((v,i)=>{ if (v!=null) idx.push(i); });
+  idx.sort((a,b)=>val[b]-val[a]);
+  const r=new Array(val.length).fill(null); let prev=null, pr=0;
+  idx.forEach((i,k)=>{ if (prev===null || val[i]<prev-1e-12){ pr=k+1; prev=val[i]; } r[i]=pr; });
+  return r;
+}
+function rankAvg(a){ const idx=a.map((v,i)=>i).sort((x,y)=>a[x]-a[y]), r=new Array(a.length); let k=0;
+  while (k<idx.length){ let j=k; while (j+1<idx.length && a[idx[j+1]]===a[idx[k]]) j++; const rr=(k+j)/2+1; for (let t=k;t<=j;t++) r[idx[t]]=rr; k=j+1; } return r; }
+const spearman=(a,b)=>corr(rankAvg(a),rankAvg(b));
+function compare(valA, valB){
+  const common=[]; for (let i=0;i<NP;i++) if (valA[i]!=null&&valB[i]!=null) common.push(i);
+  const a=new Array(NP).fill(null), b=new Array(NP).fill(null);
+  common.forEach(i=>{a[i]=valA[i]; b[i]=valB[i];});
+  const ra=rankDesc(a), rb=rankDesc(b);
+  const delta=new Array(NP).fill(null); common.forEach(i=>{ delta[i]=rb[i]-ra[i]; });
+  const ad=common.map(i=>Math.abs(delta[i]));
+  return {common, ra, rb, delta, rho:spearman(common.map(i=>valA[i]),common.map(i=>valB[i])), mad:mean(ad), maxd:Math.max(...ad), n10:ad.filter(x=>x>=10).length};
+}
+function altAgg(cfg){ if (cfg.agg==="geo") return "ari"; if (cfg.agg==="ari") return cfg.norm==="z"?"min":"geo"; return "ari"; }
+function refInfo(E){
+  const cfg=E.M.cfg;
+  if (S.ref==="inb") return {val:PAISES.map(p=>p.inb), lab:"ranking por ingreso", short:"Ingreso"};
+  if (S.ref==="agg"){ const a=altAgg(cfg), c=cloneCfg(cfg); c.agg=a; return {val:run(c).val, lab:`tu índice con agregación ${AGGS[a]}`, short:a==="ari"?"Aritm.":a==="geo"?"Geom.":"Mín."}; }
+  if (S.ref==="saved" && S.saved) return {val:run(S.saved).val, lab:"la configuración guardada", short:"Guardada"};
+  return {val:PAISES.map(p=>p.idh), lab:"IDH oficial", short:"IDH"};
+}
+function cfgSummary(cfg){
+  const M=model(cfg);
+  return M.dims.map((d,j)=>`${d.lab} ${fmt(100*M.wn[j],0)}%`).join(" · ")+`. Normalización: ${NORMS[cfg.norm]}; agregación ${AGGS[cfg.agg]}; faltantes: ${NAS[cfg.na]}.`;
+}
+
+/* ================= Helpers de UI ================= */
+const fi=v=>v==null?"—":fmt(v, S.norm==="z"?2:3);
+const dispI=(v,norm)=>v==null?0:norm==="z"?Math.min(1,Math.max(0,(v+2.5)/5)):Math.min(1,Math.max(0,v));
+function profileSVG(vals, dims, norm){
+  const bw=7, gap=2, H=18;
+  let s=`<svg viewBox="0 0 ${dims.length*(bw+gap)} ${H}" width="${dims.length*(bw+gap)}" height="${H}" aria-hidden="true">`;
+  dims.forEach((d,j)=>{ const h=Math.max(1,dispI(vals[j],norm)*H); s+=`<rect x="${j*(bw+gap)}" y="0" width="${bw}" height="${H}" style="fill:var(--sunk)"/>`;
+    if (vals[j]!=null) s+=`<rect x="${j*(bw+gap)}" y="${H-h}" width="${bw}" height="${h}" style="fill:${d.c}"/>`; });
+  return s+"</svg>";
+}
+function fillPaisSelects(){
+  const opts=PAISES.map(p=>`<option value="${p.iso}">${esc(p.pais)}</option>`).join("");
+  document.querySelectorAll("select.pais-sel").forEach(s=>{ s.innerHTML=opts; s.value=S.focal;
+    s.addEventListener("change",()=>{ S.focal=s.value; document.querySelectorAll("select.pais-sel").forEach(o=>o.value=S.focal); renderActive(); }); });
+}
+const hmBg=(v,lo,hi)=>{ if (v==null) return ""; const t=Math.min(1,Math.max(0,(v-lo)/((hi-lo)||1))); return `background:color-mix(in srgb, var(--azul) ${(8+60*t).toFixed(0)}%, var(--surface))`; };
+const corBg=r=>`background:color-mix(in srgb, ${r>=0?"var(--azul)":"var(--rojo)"} ${(Math.abs(r)*65).toFixed(0)}%, var(--surface))`;
+
+/* ================= LABORATORIO ================= */
+function initLab(){
+  $("l-pre").innerHTML=PRESETS.map(p=>`<button data-k="${p.k}" aria-pressed="${p.k===S.preset}">${p.lab}</button>`).join("");
+  $("l-pre").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{
+    const p=PRESETS.find(x=>x.k===b.dataset.k); Object.assign(S, presetCfg(p)); S.preset=p.k; syncLab(); renderLab();
+  }));
+  $("l-dims").innerHTML=DIMS.map(d=>`<div class="wrow"><label><input type="checkbox" data-k="${d.k}"><i style="background:${d.c}"></i>${d.lab}</label><input type="range" min="0" max="100" step="5" data-k="${d.k}" aria-label="Peso de ${d.lab}"><output id="l-w-${d.k}"></output></div>`).join("");
+  $("l-dims").querySelectorAll("input[type=checkbox]").forEach(c=>c.addEventListener("change",()=>{
+    const k=c.dataset.k; S.on[k]=c.checked; if (!DIMS.some(d=>S.on[d.k])){ S.on[k]=true; c.checked=true; }
+    if (S.on[k] && S.w[k]===0) S.w[k]=50;
+    touched(); syncLab(); renderLab();
+  }));
+  $("l-dims").querySelectorAll("input[type=range]").forEach(r=>r.addEventListener("input",()=>{ S.w[r.dataset.k]=+r.value; touched(); syncWeights(); renderLab(); }));
+  $("l-mix").addEventListener("input",()=>{ S.mix=+$("l-mix").value; touched(); syncWeights(); renderLab(); });
+  $("l-log-inb").addEventListener("change",e=>{ S.log.inb=e.target.checked; touched(); syncLab(); renderLab(); });
+  $("l-log-emis").addEventListener("change",e=>{ S.log.emis=e.target.checked; touched(); syncLab(); renderLab(); });
+  segInit("l-norm",v=>{ S.norm=v; if (v==="z"&&S.agg==="geo"){ S.agg="ari"; S._zmsg=true; } touched(); syncLab(); renderLab(); });
+  segInit("l-agg",v=>{ S.agg=v; touched(); syncLab(); renderLab(); });
+  segInit("l-na",v=>{ S.na=v; touched(); renderLab(); });
+  segInit("l-ref",v=>{ if (v==="saved"&&!S.saved){ saveCfg(); } S.ref=v; renderLab(); });
+  $("l-save").addEventListener("click",()=>{ saveCfg(); S.ref="saved"; syncLab(); renderLab(); });
+  $("l-gp-reset").addEventListener("click",()=>{ S.gp=JSON.parse(JSON.stringify(GP0)); touched(); syncLab(); renderLab(); });
+  syncLab();
+}
+function touched(){ S.preset=null; $("l-pre").querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed","false")); }
+function saveCfg(){ S.saved=cloneCfg(S); try { localStorage.setItem(LSK_SAVED, JSON.stringify(S.saved)); } catch(e){} }
+function syncWeights(){
+  const M=model(S);
+  DIMS.forEach(d=>{ const j=M.dims.indexOf(d); $("l-w-"+d.k).textContent=j>=0?fmt(100*M.wn[j],0)+"%":"—"; });
+  $("l-mix-o").textContent=`${S.mix} / ${100-S.mix}`;
+}
+function syncLab(){
+  $("l-pre").querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.k===S.preset?"true":"false"));
+  $("l-dims").querySelectorAll("input[type=checkbox]").forEach(c=>c.checked=!!S.on[c.dataset.k]);
+  $("l-dims").querySelectorAll("input[type=range]").forEach(r=>{ r.value=S.w[r.dataset.k]; r.disabled=!S.on[r.dataset.k]; });
+  $("l-mix-f").hidden=!S.on.edu;
+  $("l-mix").value=S.mix;
+  $("l-log-inb").checked=S.log.inb; $("l-log-emis").checked=S.log.emis;
+  segSet("l-norm",S.norm); segSet("l-agg",S.agg); segSet("l-na",S.na); segSet("l-ref",S.ref);
+  $("l-agg").querySelector('[data-v="geo"]').disabled=S.norm==="z";
+  $("l-norm-desc").textContent=NORM_DESC[S.norm];
+  $("l-agg-desc").textContent=AGG_DESC[S.agg];
+  $("l-gp-box").hidden=S.norm!=="fijo";
+  $("l-gp").innerHTML=`<tr><td></td><td><b>Mín.</b></td><td><b>Máx.</b></td></tr>`+Object.entries(VDEF).map(([k,v])=>`<tr><td>${v.sh}${v.dir<0?" (−)":""}</td><td><input type="number" data-k="${k}" data-j="0" value="${S.gp[k][0]}" step="any"></td><td><input type="number" data-k="${k}" data-j="1" value="${S.gp[k][1]}" step="any"></td></tr>`).join("");
+  $("l-gp").querySelectorAll("input").forEach(inp=>inp.addEventListener("change",()=>{
+    const v=+inp.value, k=inp.dataset.k, j=+inp.dataset.j, o=S.gp[k][1-j];
+    const ok=isFinite(v) && (j===0?v<o:v>o) && !(VDEF[k].canLog&&S.log[k]&&v<=0);
+    if (ok){ S.gp[k][j]=v; touched(); renderLab(); } else inp.value=S.gp[k][j];
+  }));
+  $("l-saved-desc").textContent=S.saved?"Guardada: "+cfgSummary(S.saved):"Guardá una configuración para comparar contra ella después de cambiar cosas.";
+  syncWeights();
+}
+function labNotes(E){
+  const M=E.M, cfg=M.cfg, out=[];
+  if (S._zmsg){ out.push(["warn","Con z-scores hay valores negativos y la media geométrica no está definida: se pasó a la aritmética."]); S._zmsg=false; }
+  if (cfg.agg==="geo"){ const low=PAISES.map((_,i)=>i).filter(i=>E.incl[i]&&E.I.some(col=>col[i]!=null&&col[i]<FLOOR));
+    if (low.length) out.push(["warn",`${low.length} país${low.length>1?"es tienen":" tiene"} alguna dimensión en cero o casi (${low.slice(0,5).map(i=>PAISES[i].pais).join(", ")}${low.length>5?"…":""}). Con la geométrica se aplica un piso de 0,01 y ${low.length>1?"quedan":"queda"} muy abajo sin importar el resto.`]); }
+  if (cfg.agg==="min") out.push(["", "Con el mínimo los pesos no cuentan: cada país vale lo que su peor dimensión."]);
+  if (cfg.norm==="fijo"){ const cut=[]; M.dims.forEach(d=>d.vars.forEach(v=>{ const [lo,hi]=cfg.gp[v]; const n=PAISES.filter(p=>p[v]!=null&&(p[v]<lo||p[v]>hi)).length; if (n) cut.push(`${VDEF[v].sh}: ${n}`); }));
+    if (cut.length) out.push(["", `Valores fuera de los umbrales, recortados a 0 o 1 (${cut.join("; ")}). Por ejemplo, los países con ingreso por encima de 75.000 quedan todos en 1.`]); }
+  if (cfg.norm==="z") out.push(["", "Con z-scores el índice no tiene unidades: 0 es el promedio de los países y cada dimensión puede tirar para abajo."]);
+  if (cfg.norm==="rank"||cfg.norm==="cat") out.push(["", "Con percentiles o terciles el índice mide posición relativa: si cambia la lista de países, cambia el valor de países que no cambiaron en nada."]);
+  if (M.dims.some(d=>d.k==="ing") && !cfg.log.inb) out.push(["warn","Ingreso en niveles: pasar de 1.000 a 2.000 dólares suma lo mismo que pasar de 70.000 a 71.000. Mirá cómo caen los países pobres en salud o educación respecto de los ricos."]);
+  return out;
+}
+function renderLab(){
+  const E=run(S), M=E.M, ref=refInfo(E), C=compare(E.val, ref.val), i0=idxIso(S.focal), P0=PAISES[i0];
+  /* veredicto */
+  const pill=C.rho>=0.98?"okp":C.rho<0.9?"warnp":"";
+  const fin=E.incl[i0];
+  $("l-verdict").innerHTML=`<span class="pill ${pill}">Spearman ${fmt(C.rho,3)}</span>
+    <div class="stat">${esc(P0.pais)}: ${fin?`puesto ${E.rank[i0]} de ${E.n} · índice ${fi(E.val[i0])}`:"queda afuera (le faltan datos)"}${fin&&C.ra[i0]!=null?` · en la referencia, ${C.rb[i0]}`:""}</div>
+    <div class="read">Contra ${ref.lab}: ${C.n10} países cambian 10 puestos o más; el cambio promedio es de ${fmt(C.mad,1)} puestos y el máximo, de ${C.maxd}.</div>`;
+  $("l-notes").innerHTML=labNotes(E).map(([c,t])=>`<p class="note ${c}">${t}</p>`).join("");
+  $("l-rank-sub").textContent=`${E.n} países`;
+  $("l-rank-cfg").textContent=cfgSummary(S);
+  /* tabla */
+  const order=PAISES.map((_,i)=>i).filter(i=>E.incl[i]).sort((a,b)=>E.rank[a]-E.rank[b]||PAISES[a].pais.localeCompare(PAISES[b].pais,"es"));
+  let t=`<thead><tr><th>#</th><th>País</th><th>Índice</th><th>${ref.short}</th><th>Δ</th><th>Perfil</th></tr></thead><tbody>`;
+  for (const i of order){
+    const d=C.delta[i], cls=d==null?"mut":d>0?"up":d<0?"dn":"mut";
+    t+=`<tr class="${i===i0?"foc":""}" data-i="${i}"><td class="num">${E.rank[i]}</td><td class="l">${esc(PAISES[i].pais)}${E.imputed[i]?' <span class="mut" title="Alguna dimensión imputada">*</span>':""}</td><td class="num">${fi(E.val[i])}</td><td class="num mut">${C.rb[i]??"—"}</td><td class="${cls}">${d==null?"—":d>0?"+"+d:d}</td><td class="prof" title="${M.dims.map((dd,j)=>dd.lab+" "+fi(E.I[j][i])).join(" · ")}">${profileSVG(E.I.map(col=>col[i]),M.dims,S.norm)}</td></tr>`;
+  }
+  $("l-table").innerHTML=t+"</tbody>";
+  const box=$("l-tbox"), row=box.querySelector("tr.foc"); if (row) box.scrollTop=Math.max(0,row.offsetTop-160);
+  $("l-legend").innerHTML=M.dims.map(d=>`<span><i style="background:${d.c}"></i>${d.lab}</span>`).join("")+(E.imputed.some(Boolean)?"<span>* con alguna dimensión imputada</span>":"");
+  const out=PAISES.map((_,i)=>i).filter(i=>!E.incl[i]);
+  $("l-excl").textContent=out.length?`Fuera del índice por faltantes (${out.length}): ${out.map(i=>PAISES[i].pais).join(", ")}.`:"";
+  renderLabScatter(E,C,i0);
+  /* movers */
+  const mv=C.common.slice().sort((a,b)=>C.delta[b]-C.delta[a]);
+  const up=mv.slice(0,6).filter(i=>C.delta[i]>0), dn=mv.slice(-6).reverse().filter(i=>C.delta[i]<0);
+  const mrow=i=>`<tr class="${i===i0?"foc":""}"><td class="l">${esc(PAISES[i].pais)}</td><td class="num">${C.rb[i]}</td><td class="num">${C.ra[i]}</td><td class="${C.delta[i]>0?"up":"dn"}">${C.delta[i]>0?"+":""}${C.delta[i]}</td><td class="prof">${profileSVG(E.I.map(col=>col[i]),M.dims,S.norm)}</td></tr>`;
+  $("l-movers").innerHTML=`<thead><tr><th>País</th><th>${ref.short}</th><th>Tuyo</th><th>Δ</th><th>Perfil</th></tr></thead><tbody>`+
+    (up.length?up.map(mrow).join(""):`<tr><td class="mut" colspan="5">Nadie sube</td></tr>`)+`<tr class="sep"><td colspan="5"></td></tr>`+(dn.length?dn.map(mrow).join(""):`<tr><td class="mut" colspan="5">Nadie baja</td></tr>`)+"</tbody>";
+  $("l-movers-note").textContent=C.maxd===0?"Los dos rankings son idénticos.":`Mirá el perfil de los que más se mueven: ¿qué dimensión los distingue?`;
+  renderDecomp(E,i0);
+  $("l-code").innerHTML=rCode(S);
+}
+function renderLabScatter(E,C,i0){
+  const N=C.common.length, W=520, H=430, f=frame({W,H,xr:[0,N+1],yr:[0,N+1],yticks:false,xticks:false,m:{l:44,b:40},xlab:"Puesto en la referencia",aria:"Puesto en tu índice contra puesto en la referencia"});
+  let s=f.s;
+  const tk=[1,...niceTicks(0,N,4).t.filter(v=>v>=25)].filter(v=>v<=N);
+  tk.forEach(r=>{ s+=`<line class="ax" x1="${f.m.l}" x2="${W-f.m.r}" y1="${f.Y(N+1-r)}" y2="${f.Y(N+1-r)}" style="opacity:.5"/><text x="${f.m.l-6}" y="${f.Y(N+1-r)+4}" text-anchor="end">${r}</text><text x="${f.X(r)}" y="${H-f.m.b+16}" text-anchor="middle">${r}</text>`; });
+  s+=`<text transform="translate(12 ${f.m.t+f.ph/2}) rotate(-90)" text-anchor="middle">Puesto en tu índice</text>`;
+  s+=`<line x1="${f.X(1)}" y1="${f.Y(N)}" x2="${f.X(N)}" y2="${f.Y(1)}" style="stroke:var(--muted);stroke-dasharray:4 4"/>`;
+  const col=d=>d>=10?"var(--azul)":d<=-10?"var(--rojo)":"var(--gris)";
+  C.common.forEach(i=>{ if (i===i0) return; const d=C.delta[i]; s+=`<circle cx="${f.X(C.rb[i]).toFixed(1)}" cy="${f.Y(N+1-C.ra[i]).toFixed(1)}" r="3.6" style="fill:${col(d)};opacity:.8"><title>${esc(PAISES[i].pais)} · referencia ${C.rb[i]} · tuyo ${C.ra[i]}</title></circle>`; });
+  const items=[];
+  if (C.ra[i0]!=null){ s+=`<circle cx="${f.X(C.rb[i0])}" cy="${f.Y(N+1-C.ra[i0])}" r="6.5" style="fill:${col(C.delta[i0])};stroke:var(--ink);stroke-width:2.5"><title>${esc(PAISES[i0].pais)}</title></circle>`; items.push({x:f.X(C.rb[i0]),y:f.Y(N+1-C.ra[i0]),text:PAISES[i0].pais,r:6.5,force:true}); }
+  const mv=C.common.filter(i=>i!==i0).sort((a,b)=>Math.abs(C.delta[b])-Math.abs(C.delta[a])).slice(0,6).filter(i=>C.delta[i]!==0);
+  mv.forEach(i=>items.push({x:f.X(C.rb[i]),y:f.Y(N+1-C.ra[i]),text:PAISES[i].pais,r:3.6}));
+  s+=drawLabels(items,W,H);
+  s+=`<text x="${W-f.m.r-6}" y="${f.m.t+12}" text-anchor="end" style="fill:var(--azul);font-weight:600">mejor en tu índice ↑</text><text x="${f.m.l+8}" y="${H-f.m.b-8}" style="fill:var(--rojo);font-weight:600">↓ peor en tu índice</text>`;
+  $("l-scatter").innerHTML=s+"</svg>";
+}
+function renderDecomp(E,i0){
+  const M=E.M, cfg=M.cfg, ids=[...new Set([...SEL.map(idxIso),i0])].filter(i=>i>=0&&E.incl[i]).sort((a,b)=>E.val[b]-E.val[a]);
+  const additive=cfg.agg==="ari"&&cfg.norm!=="z";
+  $("l-dec-hint").textContent=additive?"Con la agregación aritmética el índice es la suma de los aportes: peso × valor normalizado de cada dimensión. Mostrar los aportes hace al índice interpretable; es lo que más se pierde cuando se publica solo el número.":
+    cfg.agg==="geo"?"Con la geométrica el índice no se descompone como una suma: abajo, los valores normalizados de cada dimensión. Fijate qué dimensión tira para abajo a cada país.":
+    "Abajo, los valores normalizados de cada dimensión. Fijate cuál es la más baja de cada país.";
+  if (additive){
+    const W=640, rowH=22, H=ids.length*rowH+34, l=150, maxv=Math.max(...ids.map(i=>E.val[i]))*1.08, X=v=>l+(W-l-50)*v/maxv;
+    let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Aporte de cada dimensión al índice">`;
+    niceTicks(0,maxv,5).t.forEach(v=>{ s+=`<line class="ax" x1="${X(v)}" x2="${X(v)}" y1="4" y2="${H-26}" style="opacity:.5"/><text x="${X(v)}" y="${H-10}" text-anchor="middle">${fmt(v,1)}</text>`; });
+    ids.forEach((i,r)=>{ const y=6+r*rowH, vals=E.I.map(col=>col[i]); let sw=0; vals.forEach((v,j)=>{ if (v!=null) sw+=M.wn[j]; }); let x=0;
+      s+=`<text x="${l-8}" y="${y+13}" text-anchor="end" class="${i===i0?"ink":""}" style="${i===i0?"font-weight:700":""}">${esc(PAISES[i].pais)}</text>`;
+      vals.forEach((v,j)=>{ if (v==null) return; const a=M.wn[j]/sw*v; s+=`<rect x="${X(x)}" y="${y}" width="${Math.max(0,X(x+a)-X(x))}" height="${rowH-6}" style="fill:${M.dims[j].c}"><title>${esc(PAISES[i].pais)} · ${M.dims[j].lab}: ${fmt(a,3)}</title></rect>`; x+=a; });
+      s+=`<text x="${X(x)+5}" y="${y+13}" class="ink">${fmt(E.val[i],3)}</text>`; });
+    $("l-dec").innerHTML=s+"</svg>"+`<div class="legend">${M.dims.map(d=>`<span><i style="background:${d.c}"></i>${d.lab}</span>`).join("")}</div>`;
+  } else $("l-dec").innerHTML="";
+  const all=E.I.flatMap(col=>col.filter(v=>v!=null)), [lo,hi]=minmax(all);
+  $("l-dec-t").innerHTML=`<thead><tr><th>País</th>${M.dims.map(d=>`<th>${d.lab}</th>`).join("")}<th>Índice</th><th>#</th></tr></thead><tbody>`+
+    ids.map(i=>{ const vals=E.I.map(col=>col[i]), mn=Math.min(...vals.filter(v=>v!=null));
+      return `<tr class="${i===i0?"foc":""}"><td class="l">${esc(PAISES[i].pais)}</td>${vals.map(v=>`<td class="hm" style="${hmBg(v,lo,hi)};${v===mn&&M.dims.length>1?"outline:2px solid var(--rojo);outline-offset:-2px":""}">${fi(v)}</td>`).join("")}<td class="num b">${fi(E.val[i])}</td><td class="num">${E.rank[i]}</td></tr>`; }).join("")+"</tbody>";
+}
+
+/* Código de R */
+function rCode(cfg){
+  const M=model(cfg), c=s=>s, L=[];
+  const n=v=>+v.toFixed(4);
+  const expr=v=>{
+    const def=VDEF[v], lg=def.canLog&&cfg.log[v], x=lg?`log(${def.r})`:def.r, inv=def.dir<0;
+    if (cfg.norm==="fijo"){ const [a,b]=cfg.gp[v]; const e=`norm_fija(${x}, ${lg?`log(${n(a)})`:n(a)}, ${lg?`log(${n(b)})`:n(b)})`; return inv?`1 - ${e}`:e; }
+    if (cfg.norm==="obs") return inv?`1 - norm_obs(${x})`:`norm_obs(${x})`;
+    if (cfg.norm==="z") return inv?`-as.numeric(scale(${x}))`:`as.numeric(scale(${x}))`;
+    if (cfg.norm==="rank") return `percentil(${inv?"-":""}${x})`;
+    return `terciles(${inv?"-":""}${x})`;
+  };
+  L.push("library(tidyverse)","");
+  if (cfg.norm==="fijo") L.push("norm_fija <- function(x, min, max) pmin(pmax((x - min) / (max - min), 0), 1)");
+  if (cfg.norm==="obs") L.push("norm_obs  <- function(x) (x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))");
+  if (cfg.norm==="rank") L.push("percentil <- function(x) rank(x, na.last = \"keep\") / sum(!is.na(x))");
+  if (cfg.norm==="cat") L.push("terciles  <- function(x) findInterval(x, quantile(x, c(1/3, 2/3), na.rm = TRUE), left.open = TRUE) / 2");
+  L.push("","indice <- base |>","  mutate(");
+  const ms=M.dims.map(d=>{
+    if (d.k==="edu"){ const m=cfg.mix/100; return `    i_educ = ${n(m)} * ${expr("eys")} +\n             ${n(1-m)} * ${expr("mys")}`; }
+    return `    ${d.r} = ${expr(d.vars[0])}`;
+  });
+  L.push(ms.join(",\n"),"  )");
+  const naD=M.dims.filter(d=>d.k==="igu"||d.k==="amb").map(d=>d.r);
+  if (naD.length){
+    if (cfg.na==="drop") L.push("",c("# Eliminar casos con faltantes"),`indice <- indice |> drop_na(${naD.join(", ")})`);
+    if (cfg.na==="imp") L.push("",c("# Imputar la media del continente"),"indice <- indice |>","  group_by(continente) |>",`  mutate(across(c(${naD.join(", ")}), ~ coalesce(.x, mean(.x, na.rm = TRUE)))) |>`,"  ungroup()");
+    if (cfg.na==="avail") L.push("",c("# Promediar lo disponible: el peso de lo que falta se reparte entre las demás"));
+  }
+  L.push("",`pesos <- c(${M.dims.map((d,j)=>`${d.r} = ${n(M.wn[j])}`).join(", ")})`,
+    "M <- as.matrix(indice[names(pesos)])",
+    "W <- sweep(!is.na(M), 2, pesos, `*`)   "+c("# peso 0 donde falta el dato"),"");
+  if (cfg.agg==="ari") L.push("indice$indice <- rowSums(W * M, na.rm = TRUE) / rowSums(W)");
+  if (cfg.agg==="geo") L.push("indice$indice <- exp(rowSums(W * log(pmax(M, 0.01)), na.rm = TRUE) / rowSums(W))");
+  if (cfg.agg==="min") L.push("indice$indice <- apply(M, 1, min, na.rm = TRUE)");
+  L.push("","indice |>","  mutate(posicion = rank(-indice, ties.method = \"min\")) |>","  arrange(posicion) |>","  select(pais, posicion, indice, all_of(names(pesos)))");
+  return esc(L.join("\n")).replace(/(#[^\n]*)/g,'<span class="c">$1</span>');
+}
+
+/* ================= PASO A PASO ================= */
+const nfix=(x,a,b)=>Math.min(1,Math.max(0,(x-a)/(b-a)));
+const IDHP=PAISES.map(p=>{ const s=nfix(p.ev,20,85), e1=nfix(p.eys,0,18), e2=nfix(p.mys,0,15), e=(e1+e2)/2, y=nfix(Math.log(p.inb),Math.log(100),Math.log(75000));
+  return {s,e1,e2,e,y,geo:Math.cbrt(s*e*y),ari:(s+e+y)/3,min:Math.min(s,e,y)}; });
+const AB={A:[0.9,0.9,0.3], B:[0.7,0.7,0.7]};
+let ISO="geo";
+function initPaso(){
+  const dn=["Salud","Educación","Ingreso"];
+  $("p-ab").innerHTML=`<span></span>${dn.map(d=>`<b>${d}</b>`).join("")}`+["A","B"].map(k=>`<b>${k}</b>`+AB[k].map((v,j)=>`<div class="cell"><input type="range" min="0" max="1" step="0.05" value="${v}" data-k="${k}" data-j="${j}" aria-label="${k} ${dn[j]}"><output id="p-ab-${k}${j}">${fmt(v,2)}</output></div>`).join("")).join("");
+  $("p-ab").querySelectorAll("input").forEach(r=>r.addEventListener("input",()=>{ AB[r.dataset.k][+r.dataset.j]=+r.value; $(`p-ab-${r.dataset.k}${r.dataset.j}`).textContent=fmt(+r.value,2); renderAB(); }));
+  segInit("p-iso",v=>{ ISO=v; renderIso(); });
+}
+function renderPaso(){
+  const i0=idxIso(S.focal), p=PAISES[i0], q=IDHP[i0];
+  const dmax=Math.max(...PAISES.map((pp,i)=>Math.abs(IDHP[i].geo-pp.idh))), r=corr(IDHP.map(x=>x.geo),PAISES.map(pp=>pp.idh));
+  const rk=v=>rankDesc(v), rg=rk(IDHP.map(x=>x.geo)), ra=rk(IDHP.map(x=>x.ari)), ri=rk(PAISES.map(pp=>pp.inb));
+  $("p-verdict").innerHTML=`<span class="pill">IDH ${fmt(q.geo,3)}</span><div class="stat">${esc(p.pais)}: réplica ${fmt(q.geo,3)} · oficial ${fmt(p.idh,3)} · puesto ${rg[i0]} de ${NP} (por ingreso: ${ri[i0]})</div><div class="read">Con la media aritmética sería ${fmt(q.ari,3)} y quedaría en el puesto ${ra[i0]}.</div>`;
+  const row=(lab,x,a,b,iv,extra)=>`<tr><td class="l">${lab}</td><td class="num">${x}</td><td class="num mut">${a}</td><td class="num mut">${b}</td><td class="num b">${fmt(iv,3)}</td><td class="wrap">${extra||""}</td></tr>`;
+  $("p-idh").innerHTML=`<thead><tr><th>Paso</th><th>Valor</th><th>Mín.</th><th>Máx.</th><th>Índice</th><th>Cuenta</th></tr></thead><tbody>`+
+    row("Esperanza de vida",fmt(p.ev,1),"20","85",q.s,`(${fmt(p.ev,1)} − 20) / 65`)+
+    row("Años esperados de escolarización",fmt(p.eys,1),"0","18",q.e1,`${fmt(p.eys,1)} / 18${p.eys>18?" → recortado a 1":""}`)+
+    row("Años promedio de escolarización",fmt(p.mys,1),"0","15",q.e2,`${fmt(p.mys,1)} / 15`)+
+    row("INB per cápita (log)",fmt(p.inb,0),"100","75.000",q.y,`(ln ${fmt(p.inb,0)} − ln 100) / (ln 75.000 − ln 100)${p.inb>75000?" → recortado a 1":""}`)+
+    `<tr class="sep"><td class="l">Dimensión educación</td><td></td><td></td><td></td><td class="num b">${fmt(q.e,3)}</td><td class="wrap">promedio de los dos subíndices</td></tr>`+
+    `<tr><td class="l"><b>IDH (geométrica)</b></td><td></td><td></td><td></td><td class="num b">${fmt(q.geo,3)}</td><td class="wrap">(${fmt(q.s,3)} × ${fmt(q.e,3)} × ${fmt(q.y,3)})<sup>1/3</sup> · oficial: ${fmt(p.idh,3)}</td></tr>`+
+    `<tr><td class="l">Con aritmética</td><td></td><td></td><td></td><td class="num">${fmt(q.ari,3)}</td><td class="wrap">(${fmt(q.s,3)} + ${fmt(q.e,3)} + ${fmt(q.y,3)}) / 3</td></tr></tbody>`;
+  $("p-idh-note").textContent=`En los ${NP} países, la réplica difiere del IDH oficial como mucho en ${fmt(dmax,3)} (correlación ${fmt(r,4)}): las diferencias vienen del redondeo y de revisiones de datos.`;
+  renderAB(); renderIso(); renderSaltos(ra,rg,i0); renderTiempo(i0);
+}
+function renderAB(){
+  const g=v=>Math.cbrt(Math.max(v[0],0)*Math.max(v[1],0)*Math.max(v[2],0)), a=v=>(v[0]+v[1]+v[2])/3, m=v=>Math.min(...v);
+  const A=AB.A, B=AB.B, cmp=(x,y)=>Math.abs(x-y)<5e-4?"empatan":x>y?"gana A":"gana B";
+  $("p-ab-t").innerHTML=`<thead><tr><th></th><th>Aritmética</th><th>Geométrica</th><th>Mínimo</th></tr></thead><tbody>
+    <tr><td>A</td><td class="num">${fmt(a(A),3)}</td><td class="num">${fmt(g(A),3)}</td><td class="num">${fmt(m(A),3)}</td></tr>
+    <tr><td>B</td><td class="num">${fmt(a(B),3)}</td><td class="num">${fmt(g(B),3)}</td><td class="num">${fmt(m(B),3)}</td></tr>
+    <tr class="sep"><td></td><td class="mut">${cmp(a(A),a(B))}</td><td class="mut">${cmp(g(A),g(B))}</td><td class="mut">${cmp(m(A),m(B))}</td></tr></tbody>`;
+  const lo=A.indexOf(Math.min(...A)), hi=A.indexOf(Math.max(...A)), up=(v,j)=>{const w=v.slice(); w[j]=Math.min(1,w[j]+0.1); return w;};
+  const dn=["salud","educación","ingreso"];
+  $("p-ab-note").innerHTML=lo===hi?"Con las tres dimensiones iguales, las tres agregaciones dan lo mismo.":
+    `Subirle 0,1 a A en su peor dimensión (${dn[lo]}) suma ${fmt(a(up(A,lo))-a(A),3)} con la aritmética y ${fmt(g(up(A,lo))-g(A),3)} con la geométrica. En su mejor dimensión (${dn[hi]}): ${fmt(a(up(A,hi))-a(A),3)} y ${fmt(g(up(A,hi))-g(A),3)}. Con la suma da igual dónde mejorar; con el producto conviene mejorar lo que está peor.`;
+}
+function renderIso(){
+  const W=560, H=430, i0=idxIso(S.focal), f=frame({W,H,xr:[0,1],yr:[0,1],xlab:"Índice de ingreso",ylab:"Índice de salud",equal:false,m:{l:48},aria:"Curvas de igual índice"});
+  let s=f.s;
+  [0.3,0.5,0.7,0.9].forEach(c=>{
+    let pts=[];
+    if (ISO==="ari") pts=[[Math.max(0,2*c-1),Math.min(1,2*c)],[Math.min(1,2*c),Math.max(0,2*c-1)]];
+    else if (ISO==="geo"){ for (let k=0;k<=80;k++){ const x=c*c+(1-c*c)*k/80, y=c*c/x; if (y<=1.0001) pts.push([x,Math.min(1,y)]); } }
+    else pts=[[c,1],[c,c],[1,c]];
+    s+=`<polyline points="${pts.map(([x,y])=>f.X(x).toFixed(1)+","+f.Y(y).toFixed(1)).join(" ")}" style="fill:none;stroke:var(--azul);stroke-width:1.6;opacity:.85"/>`;
+    const [lx,ly]=pts[pts.length-1]; s+=`<text x="${f.X(lx)-4}" y="${f.Y(ly)-5}" text-anchor="end" style="fill:var(--azul)">${fmt(c,1)}</text>`;
+  });
+  PAISES.forEach((p,i)=>{ if (i!==i0) s+=`<circle cx="${f.X(IDHP[i].y).toFixed(1)}" cy="${f.Y(IDHP[i].s).toFixed(1)}" r="3.3" style="fill:var(--gris);opacity:.65"><title>${esc(p.pais)} · ingreso ${fmt(IDHP[i].y,2)} · salud ${fmt(IDHP[i].s,2)}</title></circle>`; });
+  s+=`<circle cx="${f.X(IDHP[i0].y)}" cy="${f.Y(IDHP[i0].s)}" r="6.5" style="fill:var(--rojo);stroke:var(--ink);stroke-width:2"/>`;
+  s+=drawLabels([{x:f.X(IDHP[i0].y),y:f.Y(IDHP[i0].s),text:PAISES[i0].pais,r:6.5,force:true}],W,H);
+  $("p-isoplot").innerHTML=s+"</svg>";
+}
+function renderSaltos(ra,rg,i0){
+  const sd3=q=>sdv([q.s,q.e,q.y]);
+  const ids=PAISES.map((_,i)=>i).sort((a,b)=>Math.abs(ra[b]-rg[b])-Math.abs(ra[a]-rg[a]));
+  const top=ids.slice(0,7); if (!top.includes(i0)) top.push(i0);
+  $("p-saltos").innerHTML=`<thead><tr><th>País</th><th>Sal.</th><th>Edu.</th><th>Ing.</th><th>Rk A</th><th>Rk G</th><th>Salto</th></tr></thead><tbody>`+
+    top.map(i=>{ const q=IDHP[i], d=ra[i]-rg[i]; return `<tr class="${i===i0?"foc":""}"><td class="l">${esc(PAISES[i].pais)}</td><td class="num">${fmt(q.s,2)}</td><td class="num">${fmt(q.e,2)}</td><td class="num">${fmt(q.y,2)}</td><td class="num">${ra[i]}</td><td class="num">${rg[i]}</td><td class="${d>0?"up":d<0?"dn":"mut"}">${d>0?"+":""}${d}</td></tr>`; }).join("")+"</tbody>";
+  const xs=IDHP.map(sd3), ys=PAISES.map((_,i)=>Math.abs(ra[i]-rg[i])), W=420, H=300;
+  const f=frame({W,H,xr:padR(0,Math.max(...xs)),yr:[0,Math.max(...ys)+1],xlab:"Desbalance entre dimensiones (desvío)",ylab:"Cambio de puesto",ny:4,yfmt:v=>fmt(v,0),aria:"Desbalance y cambio de puesto"});
+  let s=f.s; PAISES.forEach((p,i)=>{ s+=`<circle cx="${f.X(xs[i]).toFixed(1)}" cy="${f.Y(ys[i]).toFixed(1)}" r="${i===i0?6:3.2}" style="fill:${i===i0?"var(--rojo)":"var(--azul)"};opacity:${i===i0?1:.55}"><title>${esc(p.pais)} · desvío ${fmt(xs[i],3)} · salto ${ys[i]}</title></circle>`; });
+  $("p-saltos-plot").innerHTML=s+"</svg>";
+}
+function renderTiempo(i0){
+  const iso=PAISES[i0].iso, ser=T_EV[iso]||[], yrs=T_ANIOS;
+  const mm=yrs.map((_,t)=>{ const v=Object.values(T_EV).map(a=>a[t]).filter(x=>x!=null); return minmax(v); });
+  const fijo=ser.map(v=>v==null?null:nfix(v,20,85)), obs=ser.map((v,t)=>v==null?null:(v-mm[t][0])/(mm[t][1]-mm[t][0]));
+  const line=(f,arr,c,dash)=>{ const pts=arr.map((v,t)=>v==null?null:`${f.X(yrs[t]).toFixed(1)},${f.Y(v).toFixed(1)}`).filter(Boolean); return `<polyline points="${pts.join(" ")}" style="fill:none;stroke:${c};stroke-width:2.2;${dash?"stroke-dasharray:5 4":""}"/>`; };
+  const W=420, H=280, ok=[...fijo,...obs].filter(v=>v!=null);
+  if (!ok.length){ $("p-t1").innerHTML=$("p-t2").innerHTML=""; $("p-t-note").textContent="No hay serie para este país."; return; }
+  const [lo,hi]=minmax(ok);
+  let f=frame({W,H,xr:[yrs[0],yrs[yrs.length-1]],yr:padR(lo,hi,0.15),xfmt:v=>String(v),title:"Índice de salud",nx:5,aria:"Índice de salud con dos normalizaciones"});
+  let s=f.s+line(f,fijo,"var(--azul)")+line(f,obs,"var(--rojo)");
+  $("p-t1").innerHTML=s+`</svg><div class="legend"><span><i style="background:var(--azul)"></i>Umbrales fijos (20-85)</span><span><i style="background:var(--rojo)"></i>Mínimo y máximo de cada año</span></div>`;
+  const all=[...mm.flat(),...ser.filter(v=>v!=null)], [l2,h2]=minmax(all);
+  f=frame({W,H,xr:[yrs[0],yrs[yrs.length-1]],yr:padR(l2,h2,0.08),xfmt:v=>String(v),title:"Esperanza de vida (años)",nx:5,aria:"Esperanza de vida, mínimo y máximo mundial"});
+  s=f.s+line(f,mm.map(x=>x[1]),"var(--gris)",true)+line(f,mm.map(x=>x[0]),"var(--gris)",true)+line(f,ser,"var(--ink)");
+  $("p-t2").innerHTML=s+`</svg><div class="legend"><span><i style="background:var(--ink)"></i>${esc(PAISES[i0].pais)}</span><span><i style="background:var(--gris)"></i>Mínimo y máximo mundial</span></div>`;
+  const t0=ser.findIndex(v=>v!=null), t1=yrs.indexOf(2019)>=0&&ser[yrs.indexOf(2019)]!=null?yrs.indexOf(2019):ser.length-1-[...ser].reverse().findIndex(v=>v!=null);
+  const dObs=obs[t1]-obs[t0];
+  $("p-t-note").innerHTML=`Entre ${yrs[t0]} y ${yrs[t1]} la esperanza de vida en ${esc(PAISES[i0].pais)} pasó de ${fmt(ser[t0],1)} a ${fmt(ser[t1],1)} años. Con umbrales fijos el índice ${fijo[t1]>=fijo[t0]?"sube":"baja"} (${fmt(fijo[t0],3)} → ${fmt(fijo[t1],3)}); con los observados ${dObs>=0?"sube":"<b>baja</b>"} (${fmt(obs[t0],3)} → ${fmt(obs[t1],3)}), porque el mínimo mundial pasó de ${fmt(mm[t0][0],1)} a ${fmt(mm[t1][0],1)} y el máximo de ${fmt(mm[t0][1],1)} a ${fmt(mm[t1][1],1)}. Con umbrales observados, el índice mide la posición relativa, no la situación del país.`;
+}
+
+/* ================= PONDERACIONES ================= */
+let FLOORW=5;
+function initPesos(){
+  rangeInit("w-floor",v=>v+"%",v=>{ FLOORW=v; renderBod(run(S)); });
+  $("w-pca-use").addEventListener("click",()=>{ const E=run(S), P=pcaWeights(E); if (!P) return; E.M.dims.forEach((d,j)=>{ S.w[d.k]=Math.max(5,Math.round(100*P.w[j]/5)*5); }); touched(); syncLab(); renderPesos(); });
+}
+function completeRows(E){ return PAISES.map((_,i)=>i).filter(i=>E.incl[i]&&E.I.every(col=>col[i]!=null)); }
+function pcaWeights(E){
+  const J=E.M.dims.length; if (J<2) return null;
+  const rows=completeRows(E), X=rows.map(i=>E.I.map(col=>col[i]));
+  const sds=E.I.map((_,j)=>sdv(X.map(r=>r[j]))); if (sds.some(s=>!(s>0))) return null;
+  const ms=E.I.map((_,j)=>mean(X.map(r=>r[j]))), Z=X.map(r=>r.map((v,j)=>(v-ms[j])/sds[j]));
+  const {S:R}=covMat(Z), e=eigSym(R), v=e.vectors[0];
+  return {w:v.map(x=>x*x), ve:e.values[0]/sum(e.values)};
+}
+function renderPesos(){
+  const E=run(S), M=E.M, J=M.dims.length, i0=idxIso(S.focal);
+  $("w-cfg").textContent=cfgSummary(S);
+  const rows=completeRows(E), r2=M.dims.map((_,j)=>{ const r=corr(rows.map(i=>E.I[j][i]), rows.map(i=>E.val[i])); return r*r; }), sr2=sum(r2), infl=r2.map(x=>x/sr2);
+  $("w-bars").innerHTML=M.dims.map((d,j)=>`<span>${d.lab}</span><div class="track"><div class="bar" style="width:${(100*M.wn[j]).toFixed(1)}%;background:var(--gris)"></div><div class="bar" style="width:${(100*infl[j]).toFixed(1)}%;background:var(--azul)"></div></div><span class="num">${fmt(100*M.wn[j],0)} → ${fmt(100*infl[j],0)}</span>`).join("");
+  $("w-table").innerHTML=`<thead><tr><th>Dimensión</th><th>Desvío</th><th>R² con el índice</th><th>Peso nominal</th><th>Influencia relativa</th></tr></thead><tbody>`+
+    M.dims.map((d,j)=>`<tr><td>${d.lab}</td><td class="num">${fmt(sdv(rows.map(i=>E.I[j][i])),3)}</td><td class="num">${fmt(r2[j],3)}</td><td class="num">${fmt(M.wn[j],3)}</td><td class="num b">${fmt(infl[j],3)}</td></tr>`).join("")+"</tbody>";
+  if (J<2) $("w-note").textContent="Con una sola dimensión no hay nada que ponderar.";
+  else { const jm=infl.indexOf(Math.max(...infl)), jn=infl.indexOf(Math.min(...infl));
+    $("w-note").textContent=S.agg==="min"?"Con el mínimo los pesos nominales no se usan: la influencia depende de qué dimensión suele ser la peor.":`${M.dims[jm].lab} es la que más influye (${fmt(100*infl[jm],0)}% contra un peso nominal de ${fmt(100*M.wn[jm],0)}%); ${M.dims[jn].lab}, la que menos (${fmt(100*infl[jn],0)}%). Probá subir el peso de ${M.dims[jn].lab.toLowerCase()} en el laboratorio y mirá cuánto hace falta para que influya lo mismo que las demás.`; }
+  /* correlaciones */
+  $("w-cor").innerHTML=`<thead><tr><th></th>${M.dims.map(d=>`<th style="text-align:center">${d.lab.slice(0,4)}.</th>`).join("")}</tr></thead><tbody>`+
+    M.dims.map((d,a)=>`<tr><td>${d.lab}</td>${M.dims.map((_,b)=>{ const r=corr(rows.map(i=>E.I[a][i]),rows.map(i=>E.I[b][i])); return `<td class="z" style="${a===b?"":corBg(r)}">${a===b?"1":fmt(r,2)}</td>`; }).join("")}</tr>`).join("")+"</tbody>";
+  /* PCA */
+  const P=pcaWeights(E);
+  if (!P){ $("w-pca").innerHTML=`<p class="note">Hacen falta al menos dos dimensiones con variación.</p>`; $("w-pca-use").disabled=true; }
+  else {
+    $("w-pca-use").disabled=false;
+    const c=cloneCfg(S); M.dims.forEach((d,j)=>c.w[d.k]=P.w[j]*1000); const Ep=run(c);
+    const ok=PAISES.map((_,i)=>i).filter(i=>E.val[i]!=null&&Ep.val[i]!=null), rho=spearman(ok.map(i=>E.val[i]),ok.map(i=>Ep.val[i]));
+    $("w-pca").innerHTML=`<div class="kv"><span>Varianza que explica el primer componente: <b>${fmt(100*P.ve,0)}%</b></span><span>Spearman con tu índice: <b>${fmt(rho,3)}</b></span></div>
+      <div class="wbars">${M.dims.map((d,j)=>`<span>${d.lab}</span><div class="track"><div class="bar" style="width:${(100*M.wn[j]).toFixed(1)}%;background:var(--gris)"></div><div class="bar" style="width:${(100*P.w[j]).toFixed(1)}%;background:${d.c}"></div></div><span class="num">${fmt(100*P.w[j],0)}%</span>`).join("")}</div>
+      <p class="note">${(()=>{ const jm=P.w.indexOf(Math.min(...P.w)); return P.ve>0.8?"Con dimensiones tan correlacionadas, los pesos de PCA quedan cerca de la igualdad y el índice casi no cambia: se comporta como una sola dimensión.":`El primer componente deja afuera el ${fmt(100-100*P.ve,0)}% de la varianza y le da menos peso a la dimensión que menos se parece a las demás: ${M.dims[jm].lab.toLowerCase()} (${fmt(100*P.w[jm],0)}%).`; })()} En ${esc(PAISES[i0].pais)}: puesto ${E.rank[i0]??"—"} con tus pesos, ${Ep.rank[i0]??"—"} con los de PCA.</p>`;
+  }
+  renderBod(E); renderTms(E,i0);
+}
+function rgamma(a){ if (a<1){ const u=rnd(); return rgamma(1+a)*Math.pow(u,1/a); } const d=a-1/3, c=1/Math.sqrt(9*d);
+  for(;;){ let x,v; do { x=rnorm(); v=1+c*x; } while (v<=0); v=v*v*v; const u=rnd(); if (u<1-0.0331*x*x*x*x) return d*v; if (Math.log(u)<0.5*x*x+d*(1-v+Math.log(v))) return d*v; } }
+const rdirichlet=(J,a)=>{ const g=Array.from({length:J},()=>rgamma(a)), s=sum(g); return g.map(x=>x/s); };
+function renderBod(E){
+  const M=E.M, J=M.dims.length, i0=idxIso(S.focal), el=$("w-bod");
+  if (J<2){ el.innerHTML=`<p class="note">Con una sola dimensión no hay pesos para elegir.</p>`; return; }
+  if (S.agg==="min"){ el.innerHTML=`<p class="note">Con el mínimo los pesos no cuentan: ningún juego de pesos mueve a nadie.</p>`; return; }
+  if (!E.incl[i0]){ el.innerHTML=`<p class="note">${esc(PAISES[i0].pais)} queda fuera de tu índice por faltantes.</p>`; return; }
+  const fl=FLOORW/100*J>=1?1/J-1e-9:FLOORW/100, ids=PAISES.map((_,i)=>i).filter(i=>E.incl[i]), Iv=ids.map(i=>E.I.map(col=>col[i])), k0=ids.indexOf(i0);
+  const NS=3000, first=new Map(); let best={r:Infinity}, worst={r:-Infinity};
+  withSeed(14, ()=>{ for (let s=0;s<NS;s++){
+    const w=rdirichlet(J,1).map(x=>fl+(1-J*fl)*x), v=Iv.map(r=>aggregate(r,w,S.agg));
+    let r=1, top=0; for (let k=0;k<v.length;k++){ if (v[k]>v[k0]+1e-12) r++; if (v[k]>v[top]) top=k; }
+    first.set(top,(first.get(top)||0)+1);
+    if (r<best.r) best={r,w}; if (r>worst.r) worst={r,w};
+  }});
+  const wbar=w=>`<div class="sbar" style="width:100%;max-width:320px;height:14px">${M.dims.map((d,j)=>`<span style="width:${(100*w[j]).toFixed(1)}%;background:${d.c}" title="${d.lab} ${fmt(100*w[j],0)}%"></span>`).join("")}</div><div class="hint">${M.dims.map((d,j)=>`${d.lab} ${fmt(100*w[j],0)}%`).join(" · ")}</div>`;
+  const tops=[...first.entries()].sort((a,b)=>b[1]-a[1]);
+  el.innerHTML=`<div class="grid2" style="margin-top:10px">
+    <div><div class="kv"><span>${esc(PAISES[i0].pais)} con tus pesos: <b>${E.rank[i0]}</b></span><span>Mejor puesto posible: <b>${best.r}</b></span><span>Peor: <b>${worst.r}</b></span></div>
+      <p class="hint" style="margin-top:8px"><b>Los pesos que más le convienen</b></p>${wbar(best.w)}
+      <p class="hint" style="margin-top:8px"><b>Los que menos le convienen</b></p>${wbar(worst.w)}</div>
+    <div><p class="hint" style="margin-top:0"><b>${tops.length} país${tops.length>1?"es pueden":" puede"} quedar primero</b> con algún juego de pesos (porcentaje de los sorteos en que lo logra):</p>
+      <div class="chips">${tops.slice(0,10).map(([k,n])=>`<span>${esc(PAISES[ids[k]].pais)} ${fmt(100*n/NS,0)}%</span>`).join("")}</div></div></div>
+    <p class="note">Si cada país elige los pesos que lo favorecen, casi todos mejoran: por eso el beneficio de la duda suele usarse con restricciones sobre los pesos (subí el peso mínimo y mirá cómo se achica el rango).</p>`;
+}
+function tmsFor(E,i){
+  const M=E.M, cfg=M.cfg, js=M.dims.findIndex(d=>d.k==="sal"), jy=M.dims.findIndex(d=>d.k==="ing");
+  if (js<0||jy<0||!E.incl[i]) return null;
+  const vals=E.I.map(col=>col[i]), p=PAISES[i], b=aggregate(vals,M.wn,cfg.agg);
+  const v1=vals.slice(); v1[js]=M.dimVal(M.dims[js],Object.assign({},p,{ev:p.ev+0.01}));
+  const h=p.inb*1e-4, v2=vals.slice(); v2[jy]=M.dimVal(M.dims[jy],Object.assign({},p,{inb:p.inb+h}));
+  const dE=(aggregate(v1,M.wn,cfg.agg)-b)/0.01, dY=(aggregate(v2,M.wn,cfg.agg)-b)/h;
+  if (!(dY>1e-14)) return dE>1e-14?Infinity:NaN;
+  return dE/dY;
+}
+function renderTms(E,i0){
+  const ids=[...new Set([...SEL,"BDI","NER","CHE"].map(idxIso).concat([i0]))].filter(i=>i>=0&&PAISES[i].inb<75000);
+  const tmsP=i=>{ const q=IDHP[i]; return (q.y/q.s)*PAISES[i].inb*Math.log(750)/65; };
+  const M=E.M, has=M.dims.some(d=>d.k==="sal")&&M.dims.some(d=>d.k==="ing"), disc=S.norm==="rank"||S.norm==="cat";
+  ids.sort((a,b)=>tmsP(a)-tmsP(b));
+  const ft=v=>v==null?"—":v===Infinity?"∞":isNaN(v)?"no definida":"USD "+fmt(v,0);
+  $("w-tms").innerHTML=`<thead><tr><th>País</th><th>INB pc</th><th>Esp. vida</th><th>USD por año (IDH)</th><th>USD por año (tu índice)</th></tr></thead><tbody>`+
+    ids.map(i=>`<tr class="${i===i0?"foc":""}"><td class="l">${esc(PAISES[i].pais)}</td><td class="num">${fmt(PAISES[i].inb,0)}</td><td class="num">${fmt(PAISES[i].ev,1)}</td><td class="num b">${ft(tmsP(i))}</td><td class="num">${has&&!disc?ft(tmsFor(E,i)):"—"}</td></tr>`).join("")+"</tbody>";
+  const b=idxIso("BDI"), c=idxIso("CHE");
+  $("w-tms-note").innerHTML=`En el IDH, un año más de vida en Suiza “vale” ${fmt(tmsP(c)/tmsP(b),0)} veces más dólares que en Burundi. Nadie eligió ese número: sale de combinar el logaritmo, los umbrales y la media geométrica. `+
+    (!has?"Tu índice no incluye salud e ingreso a la vez, así que la tasa no existe.":disc?"Con percentiles o terciles la tasa no está definida: el índice cambia a saltos, no de forma continua.":S.agg==="min"?"Con el mínimo la tasa es 0 o infinita: solo cuenta la dimensión más baja.":"Probá en el laboratorio el ingreso en niveles o la agregación aritmética y mirá cómo cambia la última columna.");
+}
+
+/* ================= SENSIBILIDAD ================= */
+const SS={n:1000, a:2, agg:"mix", show:"sel", seed:2026};
+const AVALS=[0.3,0.5,1,2,5,10,20,50,100];
+function initSens(){
+  rangeInit("s-n",v=>fmt(v,0),v=>{ SS.n=v; renderSens(); });
+  rangeInit("s-a",v=>fmt(AVALS[v],AVALS[v]<1?1:0),v=>{ SS.a=v; renderSens(); });
+  segInit("s-agg",v=>{ SS.agg=v; renderSens(); });
+  segInit("s-show",v=>{ SS.show=v; renderSens(); });
+  $("s-new").addEventListener("click",()=>{ SS.seed++; renderSens(); });
+}
+function renderSens(){
+  const E=run(S), M=E.M, J=M.dims.length, i0=idxIso(S.focal);
+  $("s-cfg").textContent=cfgSummary(S);
+  const ids=PAISES.map((_,i)=>i).filter(i=>E.incl[i]), Iv=ids.map(i=>E.I.map(col=>col[i])), n=ids.length;
+  const aggs=SS.agg==="lab"?[S.agg]:S.norm==="z"?["ari"]:["ari","geo"], alpha=AVALS[SS.a];
+  const R=ids.map(()=>new Int16Array(SS.n));
+  withSeed(SS.seed,()=>{ for (let s=0;s<SS.n;s++){
+    const w=J>1?rdirichlet(J,alpha):[1], ag=aggs[Math.floor(rnd()*aggs.length)];
+    const v=Iv.map(r=>aggregate(r,w,ag)), ord=v.map((_,k)=>k).sort((a,b)=>v[b]-v[a]);
+    let pr=0, prev=null; ord.forEach((k,pos)=>{ if (prev===null||v[k]<prev-1e-12){ pr=pos+1; prev=v[k]; } R[k][s]=pr; });
+  }});
+  const st=R.map(arr=>{ const a=Array.from(arr).sort((x,y)=>x-y); return {p05:quant(a,.05), med:quant(a,.5), p95:quant(a,.95)}; });
+  const widths=st.map(x=>x.p95-x.p05), k0=ids.indexOf(i0);
+  /* qué mostrar */
+  let show;
+  if (SS.show==="sel") show=[...new Set([...SEL.map(idxIso),i0])].map(i=>ids.indexOf(i)).filter(k=>k>=0);
+  else if (SS.show==="top") show=ids.map((i,k)=>k).sort((a,b)=>E.rank[ids[a]]-E.rank[ids[b]]).slice(0,25);
+  else { const r0=k0>=0?E.rank[i0]:1; show=ids.map((i,k)=>k).filter(k=>Math.abs(E.rank[ids[k]]-r0)<=10); }
+  show.sort((a,b)=>st[a].med-st[b].med||E.rank[ids[a]]-E.rank[ids[b]]);
+  /* veredicto */
+  const fr=ids.map((_,k)=>k).sort((a,b)=>widths[b]-widths[a]);
+  $("s-verdict").innerHTML=k0>=0?`<span class="pill ${widths[k0]>20?"warnp":widths[k0]<6?"okp":""}">Rango ${fmt(st[k0].p05,0)}–${fmt(st[k0].p95,0)}</span><div class="stat">${esc(PAISES[i0].pais)}: puesto ${E.rank[i0]} en tu índice · mediana simulada ${fmt(st[k0].med,0)} · 90% de las simulaciones entre ${fmt(st[k0].p05,0)} y ${fmt(st[k0].p95,0)}</div><div class="read">Ancho medio del intervalo en los ${n} países: ${fmt(mean(widths),1)} puestos. Los más sensibles: ${fr.slice(0,3).map(k=>PAISES[ids[k]].pais).join(", ")}.</div>`:
+    `<span class="pill warnp">Fuera</span><div class="stat">${esc(PAISES[i0].pais)} queda fuera de tu índice por faltantes.</div><div class="read">Ancho medio del intervalo en los ${n} países: ${fmt(mean(widths),1)} puestos.</div>`;
+  /* gráfico */
+  const W=640, rowH=21, H=show.length*rowH+46, l=150, r=16, X=v=>l+(W-l-r)*(v-1)/Math.max(1,n-1);
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Rango de posiciones simuladas">`;
+  const tk=[1,...niceTicks(0,n,5).t.filter(v=>v>=10&&v<=n)];
+  tk.forEach(v=>{ s+=`<line class="ax" x1="${X(v)}" x2="${X(v)}" y1="4" y2="${H-30}" style="opacity:.5"/><text x="${X(v)}" y="${H-14}" text-anchor="middle">${v}</text>`; });
+  s+=`<text x="${l+(W-l-r)/2}" y="${H-1}" text-anchor="middle">Puesto en el ranking (1 = el mejor)</text>`;
+  show.forEach((k,row)=>{ const y=10+row*rowH, i=ids[k], q=st[k], rl=E.rank[i];
+    s+=`<text x="${l-8}" y="${y+4}" text-anchor="end" class="${i===i0?"ink":""}" style="${i===i0?"font-weight:700":""}">${esc(PAISES[i].pais)}</text>`;
+    s+=`<line x1="${X(q.p05)}" x2="${X(q.p95)}" y1="${y}" y2="${y}" style="stroke:var(--azul);stroke-width:${i===i0?4:2.5};stroke-linecap:round;opacity:.75"/>`;
+    s+=`<circle cx="${X(q.med)}" cy="${y}" r="4.5" style="fill:var(--azul)"><title>${esc(PAISES[i].pais)} · mediana ${fmt(q.med,0)} · ${fmt(q.p05,0)} a ${fmt(q.p95,0)}</title></circle>`;
+    s+=`<path d="M${X(rl)} ${y-5} l5 5 l-5 5 l-5 -5 z" style="fill:var(--rojo)"><title>Puesto en tu índice: ${rl}</title></path>`; });
+  $("s-mc").innerHTML=s+"</svg>";
+  const rob=show.slice().sort((a,b)=>widths[a]-widths[b]);
+  $("s-mc-note").textContent=J<2?"Con una sola dimensión los pesos no cambian nada; solo puede moverse por la agregación.":`En los mostrados, el más robusto es ${PAISES[ids[rob[0]]].pais} (rango de ${fmt(widths[rob[0]],0)} puestos) y el más sensible, ${PAISES[ids[rob[rob.length-1]]].pais} (${fmt(widths[rob[rob.length-1]],0)}). ¿Qué tienen en común los sensibles? Mirá su perfil en el laboratorio. Subí α para ver qué pasa si los pesos no se alejan mucho de la igualdad.`;
+  renderLoo(E,i0); renderVal(E,i0);
+  $("s-code").innerHTML=esc(`M <- as.matrix(select(indice, ${M.dims.map(d=>d.r).join(", ")}))
+n_sim <- ${SS.n}
+set.seed(${SS.seed})
+sims <- lapply(seq_len(n_sim), function(s) {
+  w <- rgamma(ncol(M), ${alpha}); w <- w / sum(w)     # pesos Dirichlet(${alpha}, ..., ${alpha})
+  agre <- ${aggs.length>1?'sample(c("aditiva", "geometrica"), 1)':`"${aggs[0]==="ari"?"aditiva":aggs[0]==="geo"?"geometrica":"minimo"}"`}
+  ind <- ${aggs.includes("min")?"apply(M, 1, min)":'if (agre == "aditiva") M %*% w else exp(log(pmax(M, 0.01)) %*% w)'}
+  tibble(iso = indice$iso, rk = rank(-ind[, 1], ties.method = "min"), sim = s)
+}) |> bind_rows()
+
+sims |>
+  group_by(iso) |>
+  summarise(p05 = quantile(rk, .05), mediana = median(rk), p95 = quantile(rk, .95))`).replace(/(#[^\n]*)/g,'<span class="c">$1</span>');
+}
+function renderLoo(E,i0){
+  const M=E.M;
+  if (M.dims.length<2){ $("s-loo").innerHTML=""; $("s-loo-note").textContent="Hacen falta al menos dos dimensiones."; return; }
+  const rows=M.dims.map(d=>{ const c=cloneCfg(S); c.on[d.k]=false; const E2=run(c), C=compare(E.val,E2.val); return {d, mad:C.mad, rho:C.rho, pos:E2.rank[i0], n:E2.n}; });
+  $("s-loo").innerHTML=`<thead><tr><th>Se excluye</th><th>Cambio medio</th><th>Spearman</th><th>Pos. ${esc(PAISES[i0].iso)}</th></tr></thead><tbody>`+
+    `<tr class="mut"><td>Ninguna</td><td class="num">0</td><td class="num">1</td><td class="num">${E.rank[i0]??"—"}</td></tr>`+
+    rows.map(r=>`<tr><td><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${r.d.c};margin-right:6px"></i>${r.d.lab}</td><td class="num">${fmt(r.mad,1)}</td><td class="num">${fmt(r.rho,3)}</td><td class="num">${r.pos??"—"}</td></tr>`).join("")+"</tbody>";
+  const s=rows.slice().sort((a,b)=>a.mad-b.mad);
+  $("s-loo-note").textContent=`Sacar ${s[0].d.lab.toLowerCase()} es lo que menos mueve (${fmt(s[0].mad,1)} puestos en promedio): sus variaciones ya están en las demás. Sacar ${s[s.length-1].d.lab.toLowerCase()}, lo que más (${fmt(s[s.length-1].mad,1)}).`;
+}
+function renderVal(E,i0){
+  const ids=PAISES.map((_,i)=>i).filter(i=>E.incl[i]&&PAISES[i].fec!=null), fec=ids.map(i=>PAISES[i].fec);
+  const rows=[["Tu índice",ids.map(i=>E.val[i]),true],["IDH oficial",ids.map(i=>PAISES[i].idh)],["INB per cápita",ids.map(i=>PAISES[i].inb)]];
+  if (S.saved){ const Es=run(S.saved); const ok=ids.every(i=>Es.val[i]!=null); if (ok) rows.push(["Configuración guardada",ids.map(i=>Es.val[i])]); }
+  $("s-val").innerHTML=`<thead><tr><th>Índice</th><th>Spearman con fecundidad adolescente</th></tr></thead><tbody>`+
+    rows.map(([l,v,b])=>`<tr><td class="${b?"b":""}">${l}</td><td class="num ${b?"b":""}">${fmt(spearman(v,fec),3)}</td></tr>`).join("")+`</tbody><caption>${ids.length} países</caption>`;
+  const W=420, H=300, xs=ids.map(i=>E.val[i]), f=frame({W,H,xr:padR(...minmax(xs)),yr:[0,Math.max(...fec)*1.05],xlab:"Tu índice",ylab:"Fecundidad adolescente",ny:4,yfmt:v=>fmt(v,0),aria:"Tu índice y la fecundidad adolescente"});
+  let s=f.s; ids.forEach((i,k)=>{ s+=`<circle cx="${f.X(xs[k]).toFixed(1)}" cy="${f.Y(fec[k]).toFixed(1)}" r="${i===i0?6:3.2}" style="fill:${i===i0?"var(--rojo)":"var(--azul)"};opacity:${i===i0?1:.55}"><title>${esc(PAISES[i].pais)} · ${fmt(fec[k],1)}</title></circle>`; });
+  $("s-val-plot").innerHTML=s+"</svg>";
+}
+
+/* ================= ¿QUÉ HARÍAS? ================= */
+const CASOS=[
+ {q:"Armás un índice de calidad de vida urbana y una de las variables es la tasa de homicidios cada 100.000 habitantes. ¿Qué hacés antes de agregarla?",
+  hint:"Pensá en la pregunta de dirección: ¿más homicidios es mejor o peor?",
+  ops:[["La invierto (por ejemplo, 1 − valor normalizado) para que más alto siempre sea mejor",true,"Todas las variables tienen que apuntar en la misma dirección que el concepto. Es lo que hace el laboratorio con el Gini y las emisiones."],
+       ["La normalizo como las demás: el signo se compensa solo",false,"No se compensa: estarías premiando a las ciudades más violentas."],
+       ["La dejo afuera porque correlaciona negativamente con las demás",false,"Correlacionar negativamente es esperable si mide algo malo; lo que hay que hacer es invertirla."],
+       ["La paso a logaritmo",false,"El logaritmo puede servir por la asimetría, pero no resuelve la dirección."]]},
+ {q:"Querés usar tu índice para ver si Argentina mejoró entre 2010 y 2022. ¿Qué normalización elegís?",
+  hint:"Mirá la solapa Paso a paso: la esperanza de vida con umbrales fijos y observados.",
+  ops:[["Mín-máx con umbrales fijos, los mismos para todos los años",true,"Con umbrales fijos el valor de un país depende solo de su dato. Con mínimos y máximos de cada año, el índice puede bajar aunque el país mejore, si los demás mejoran más."],
+       ["Mín-máx con el mínimo y el máximo de cada año",false,"Así medís la posición relativa en cada año, no el progreso: el índice de salud de Argentina baja entre 2000 y 2019 aunque la esperanza de vida sube."],
+       ["Percentiles de cada año",false,"Los percentiles solo dicen la posición: si todos mejoran igual, nadie se mueve."],
+       ["Z-scores de cada año",false,"Mismo problema: el promedio y el desvío cambian todos los años."]]},
+ {q:"Normalizaste con z-scores y querés agregar con media geométrica para castigar el desbalance. ¿Qué pasa?",
+  hint:"¿Cuánto vale el logaritmo de un número negativo?",
+  ops:[["No se puede: hay valores negativos. Hay que normalizar con algo positivo (mín-máx, por ejemplo) o resignar la geométrica",true,"Normalización y agregación van juntas. La geométrica necesita valores estrictamente positivos (y aun así, un cero hunde al país)."],
+       ["Funciona igual que con mín-máx",false,"La mitad de los z-scores son negativos: el producto no tiene sentido."],
+       ["Funciona si se toman valores absolutos",false,"Los valores absolutos premiarían a los países muy por debajo del promedio."],
+       ["Funciona, pero los pesos tienen que sumar 1",false,"Los pesos no resuelven el problema del signo."]]},
+ {q:"Usás pesos iguales para cinco dimensiones, pero el R² de ingreso con el índice es mucho mayor que el de ambiente. Un colega dice que “los pesos son iguales, así que todas pesan lo mismo”. ¿Qué respondés?",
+  hint:"Mirá la solapa Ponderaciones: pesos nominales y efectivos.",
+  ops:[["Que no: los pesos nominales no son la influencia efectiva, que depende de la varianza y de las correlaciones",true,"Una dimensión correlacionada con las demás arrastra al índice; una que va a contramano influye menos de lo que dice su peso (Paruolo, Saisana y Saltelli, 2013)."],
+       ["Que tiene razón: si los pesos son iguales, la influencia es igual",false,"Eso solo pasa si las dimensiones tienen la misma varianza y no están correlacionadas."],
+       ["Que hay que sacar ambiente porque no influye",false,"Influir poco no la hace irrelevante para el concepto. Si querés que influya más, hay que decidirlo explícitamente."],
+       ["Que hay que estandarizar el índice final",false,"Estandarizar el resultado no cambia el orden ni la influencia de cada dimensión."]]},
+ {q:"Para no discutir pesos, proponés usar las cargas del primer componente principal. Tu índice es formativo: las dimensiones construyen el concepto. ¿Qué problema tiene?",
+  hint:"¿A qué dimensiones les da más peso el PCA?",
+  ops:[["El PCA premia a las dimensiones más redundantes entre sí y castiga a la que aporta algo distinto",true,"El primer componente resume lo que las variables tienen en común. En un índice formativo, justo la dimensión que aporta algo nuevo puede quedar casi sin peso."],
+       ["Ninguno: el PCA da los pesos óptimos",false,"Óptimos para resumir varianza, que no es lo mismo que para medir el concepto."],
+       ["El PCA solo funciona con variables categóricas",false,"Es al revés: con categóricas se usa MCA."],
+       ["El PCA no se puede hacer con menos de diez dimensiones",false,"Se puede hacer con dos o más."]]},
+ {q:"En tu índice ampliado, Sudáfrica tiene el Gini más alto de la muestra. Con mín-máx observado su índice de igualdad es 0 y con la media geométrica queda casi último aunque le va bien en otras dimensiones. ¿Qué decís?",
+  hint:"Probalo en el laboratorio con la configuración “Ampliado de la clase” y agregación geométrica.",
+  ops:[["Que es consecuencia de dos decisiones (mín-máx observado y geométrica) y hay que justificarlas o cambiar alguna, por ejemplo con umbrales por debajo del mínimo",true,"Con el mínimo observado alguien siempre queda en 0, y la geométrica convierte ese 0 en un índice ínfimo. El piso de 0,01 también es una decisión."],
+       ["Que está bien: un Gini alto debe anular todo lo demás",false,"Puede defenderse, pero es una decisión normativa fuerte que tiene que ser explícita, no un efecto colateral."],
+       ["Que hay que sacar a Sudáfrica de la muestra",false,"Sacar al país incómodo cambia la normalización de todos los demás."],
+       ["Que es un error de datos",false,"El dato es correcto; lo que produce el resultado es la combinación de normalización y agregación."]]},
+ {q:"Al agregar el Gini te faltan 41 países, la mayoría de Asia y del Caribe. ¿Qué es lo más defendible?",
+  hint:"¿Los faltantes se reparten al azar?",
+  ops:[["Elegir una estrategia, documentarla y mostrar cuánto cambian las posiciones con las otras",true,"No hay una estrategia neutral: eliminar cambia la muestra, imputar supone que el país es típico de su región y promediar lo disponible le cambia los pesos solo a algunos países."],
+       ["Eliminar los casos: es lo más honesto",false,"Si los faltantes no son al azar, eliminar sesga la comparación y deja de ser comparable con el IDH."],
+       ["Imputar cero",false,"Cero es el peor valor posible: castiga a los países por no tener el dato."],
+       ["Promediar lo disponible, que no tiene supuestos",false,"Tiene uno fuerte: que la dimensión faltante vale lo mismo que el promedio de las demás para ese país."]]},
+ {q:"Corrés un Monte Carlo de pesos y agregación y tu país queda entre los puestos 35 y 70 en el 90% de las simulaciones. ¿Cómo lo reportás?",
+  hint:"¿El puesto puntual dice algo si cambia tanto?",
+  ops:[["Reporto el puesto con su rango y digo que la posición depende fuertemente de los pesos",true,"Es lo que propone el análisis de incertidumbre (Saisana, Saltelli y Tarantola, 2005): una posición robusta y una frágil no deberían comunicarse igual."],
+       ["Reporto solo la mediana de las simulaciones",false,"La mediana esconde justamente lo que el ejercicio muestra: la incertidumbre."],
+       ["Elijo los pesos que dejan al país en el puesto 35",false,"Eso es elegir pesos para obtener un resultado."],
+       ["No reporto nada: el índice no sirve",false,"Que una posición sea sensible es información útil, no un motivo para descartar el índice."]]},
+ {q:"Sacás la dimensión de salud y el ranking casi no cambia (correlación de Spearman 0,998). ¿Qué concluís?",
+  hint:"Mirá la tabla de sacar una dimensión por vez.",
+  ops:[["Que salud aporta poca información que no esté ya en las otras dimensiones; si se mantiene, es por el marco conceptual",true,"Una dimensión puede ser importante en el concepto y redundante en los datos. Hay que decidir si se mantiene por razones teóricas y decirlo."],
+       ["Que la salud no importa para el desarrollo",false,"No importa para el orden de este índice, que no es lo mismo."],
+       ["Que hay que darle más peso a salud",false,"Darle más peso a una dimensión redundante no cambia mucho el orden."],
+       ["Que hay un error en los datos de salud",false,"Es lo esperable cuando la esperanza de vida correlaciona mucho con ingreso y educación."]]},
+ {q:"Tu nuevo índice de desarrollo tiene una correlación de 0,97 con el ingreso per cápita. ¿Qué pregunta te hacés?",
+  hint:"Si el ranking es casi el mismo, ¿para qué el índice?",
+  ops:[["¿Qué agrega mi índice que el ingreso no tenga? Miro dónde difieren los dos rankings y por qué",true,"Es la pregunta de la apertura de la clase: el valor de un índice compuesto está en los países donde el orden cambia, y en poder explicar por qué."],
+       ["Ninguna: alta correlación con el ingreso valida el índice",false,"Si solo reproduce el ingreso, alcanza con usar el ingreso."],
+       ["Saco el ingreso del índice para bajar la correlación",false,"Bajar la correlación no es un objetivo en sí mismo; cambiaría el concepto que medís."],
+       ["Paso todo a percentiles",false,"Los percentiles no cambian el orden de cada variable."]]},
+ {q:"Comparás tu índice con el ingreso en niveles y con el ingreso en logaritmo. En niveles, Qatar y Luxemburgo sacan mucha ventaja y los países pobres casi no se diferencian entre sí. ¿Qué justifica el logaritmo?",
+  hint:"Mirá la nota del laboratorio cuando sacás el logaritmo.",
+  ops:[["Rendimientos decrecientes: un dólar más vale más donde hay menos dólares",true,"Con el logaritmo, duplicar el ingreso suma lo mismo en cualquier punto: pasar de 1.000 a 2.000 dólares equivale a pasar de 30.000 a 60.000."],
+       ["Que el logaritmo hace que la variable sea normal",false,"Puede acercarla a la simetría, pero la razón de fondo en el IDH es conceptual."],
+       ["Que así el ingreso pesa más",false,"El logaritmo comprime la parte alta: en general el ingreso queda más parecido a las otras dimensiones."],
+       ["Que el PNUD lo usa y hay que copiarlo",false,"Copiar sin entender por qué no es una justificación."]]},
+ {q:"En el índice de importabilidad cada variable da 0, 1 o 2 puntos y se suman. ¿Qué se gana y qué se pierde frente a un índice continuo?",
+  hint:"Probá la normalización por terciles en el laboratorio y mirá cuántos países empatan.",
+  ops:[["Se gana interpretabilidad (cada bien se explica variable por variable) y se pierde resolución entre casos parecidos; la suma sigue siendo compensatoria",true,"Muchos casos comparten el mismo puntaje con perfiles distintos, y un 0 se compensa con dos 2. Por eso conviene publicar los puntajes parciales."],
+       ["Se gana precisión: los puntos eliminan el error de medición",false,"Discretizar no elimina el error; lo esconde dentro de cada tramo."],
+       ["No cambia nada: es lo mismo que un promedio continuo",false,"El orden puede parecerse, pero hay muchos empates y los cortes pasan a ser decisiones clave."],
+       ["Se evita tener que elegir pesos",false,"Sumar puntos es usar pesos iguales; la decisión sigue estando."]]}
+];
+const LSK="cdd_clase14_decidir";
+let resp={};
+try { resp=JSON.parse(localStorage.getItem(LSK)||"{}")||{}; } catch(e){ resp={}; }
+const save=()=>{ try { localStorage.setItem(LSK, JSON.stringify(resp)); } catch(e){} };
+const ORDER=CASOS.map((c,i)=>withSeed(1400+i,()=>shuffle(c.ops.map((_,j)=>j))));
+function renderQuiz(){
+  const L=$("q-list"); L.innerHTML="";
+  CASOS.forEach((c,i)=>{
+    const d=document.createElement("div"); d.className="q"; const ans=resp[i];
+    d.innerHTML=`<div class="num">Caso ${i+1} de ${CASOS.length}</div><h3>${c.q}</h3><div class="ops"></div>`;
+    const ops=d.querySelector(".ops");
+    ORDER[i].forEach(j=>{
+      const [t,ok]=c.ops[j], b=document.createElement("button"); b.textContent=t;
+      if (ans!==undefined){ b.disabled=true; if (j===ans) b.className=ok?"right":"wrong"; else if (ok) b.className="right"; else b.className="faded"; }
+      b.addEventListener("click",()=>{resp[i]=j; save(); renderQuiz();});
+      ops.appendChild(b);
+    });
+    if (ans!==undefined){
+      const [,ok,fb]=c.ops[ans], right=c.ops.find(o=>o[1]);
+      const p=document.createElement("p"); p.className="fb "+(ok?"ok":"no");
+      p.innerHTML=(ok?"<b>Bien.</b> ":"<b>No es la mejor opción.</b> ")+fb+(ok?"":` <br><b>La respuesta:</b> ${right[2]}`);
+      d.appendChild(p);
+    } else {
+      const h=document.createElement("button"); h.className="hintbtn"; h.textContent="Ver una pista";
+      h.addEventListener("click",()=>{h.outerHTML=`<p class="fb">${c.hint}</p>`;}); d.appendChild(h);
+    }
+    L.appendChild(d);
+  });
+  const done=Object.keys(resp).length, ok=Object.entries(resp).filter(([i,j])=>CASOS[i]&&CASOS[i].ops[j]&&CASOS[i].ops[j][1]).length;
+  $("q-score").textContent=`${ok} bien de ${done} respondidos · ${CASOS.length} casos`;
+}
+$("q-reset").addEventListener("click",()=>{resp={}; save(); renderQuiz();});
+
+/* ================= Pestañas ================= */
+const TABS=["lab","paso","pesos","sens","dec"];
+let active="lab";
+function renderActive(){ ({lab:renderLab, paso:renderPaso, pesos:renderPesos, sens:renderSens, dec:renderQuiz})[active](); }
+document.querySelectorAll("nav.tabs button").forEach(b=>b.addEventListener("click",()=>{
+  active=b.dataset.tab;
+  document.querySelectorAll("nav.tabs button").forEach(x=>x.setAttribute("aria-selected",x===b?"true":"false"));
+  TABS.forEach(t=>$("tab-"+t).hidden=(t!==active));
+  renderActive();
+}));
+fillPaisSelects(); initLab(); initPaso(); initPesos(); initSens();
+renderActive();
+</script>
+</body>
+</html>

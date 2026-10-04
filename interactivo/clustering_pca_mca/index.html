@@ -1,0 +1,1799 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grupos y dimensiones</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,650&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --ground:#F3F6F8; --surface:#FFFFFF; --sunk:#EAF0F4; --ink:#15212B; --muted:#586977; --rule:#D3DDE4;
+  --azul:#2C6E9B; --rojo:#C1553B; --gris:#8C9AA5; --azul-suave:#DCE9F2; --rojo-suave:#F6E1DA;
+  --ok:#2E7D4F; --warn:#B7791F; --vio:#7A5AA6; --ok-suave:#DDEFE3;
+  --c1:#2C6E9B; --c2:#C1553B; --c3:#D9962B; --c4:#4E8F5A; --c5:#7A5C9E; --c6:#8C6D4F; --c7:#3B9AA8; --c8:#B5577F;
+  --f-display:"Literata", Georgia, "Times New Roman", serif;
+  --f-body:"Public Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", Consolas, "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0F161C; --surface:#16202A; --sunk:#1C2934; --ink:#E4EBF0; --muted:#95A5B1; --rule:#2B3A46;
+    --azul:#6AA8D4; --rojo:#E27F63; --gris:#7D8C97; --azul-suave:#1D3446; --rojo-suave:#43271F;
+    --ok:#5DBB84; --warn:#E0A74A; --vio:#B59BE0; --ok-suave:#1B3526;
+    --c1:#6AA8D4; --c2:#E27F63; --c3:#E7B252; --c4:#6DBB7E; --c5:#B59BE0; --c6:#C29E7E; --c7:#5FC3CF; --c8:#E08AB0;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0F161C; --surface:#16202A; --sunk:#1C2934; --ink:#E4EBF0; --muted:#95A5B1; --rule:#2B3A46;
+  --azul:#6AA8D4; --rojo:#E27F63; --gris:#7D8C97; --azul-suave:#1D3446; --rojo-suave:#43271F;
+  --ok:#5DBB84; --warn:#E0A74A; --vio:#B59BE0; --ok-suave:#1B3526;
+  --c1:#6AA8D4; --c2:#E27F63; --c3:#E7B252; --c4:#6DBB7E; --c5:#B59BE0; --c6:#C29E7E; --c7:#5FC3CF; --c8:#E08AB0;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55;margin:0}
+h1,h2,h3{font-family:var(--f-display);font-weight:650;text-wrap:balance;margin:0;line-height:1.2}
+.wrap{max-width:1240px;margin:0 auto;padding:0 20px}
+@media (max-width:600px){.wrap{padding:0 16px}}
+header.top{padding:26px 0 0}
+.curso{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+header.top h1{font-size:30px;margin-top:4px}
+header.top p{margin:6px 0 0;color:var(--muted);max-width:78ch}
+nav.tabs{display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--rule);margin-top:16px}
+nav.tabs button{font:inherit;background:none;border:0;border-bottom:3px solid transparent;padding:10px 14px 9px;cursor:pointer;color:var(--muted);text-align:left;display:flex;flex-direction:column;gap:1px}
+nav.tabs button b{font-weight:700;color:var(--ink);font-size:15px}
+nav.tabs button span{font-size:12.5px}
+nav.tabs button[aria-selected="true"]{border-bottom-color:var(--azul)}
+nav.tabs button[aria-selected="true"] b{color:var(--azul)}
+nav.tabs button.sec b{font-weight:600}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--azul);outline-offset:2px}
+.panel{display:grid;grid-template-columns:300px minmax(0,1fr);gap:24px;padding:22px 0 60px;align-items:start}
+@media (max-width:860px){.panel{grid-template-columns:1fr}}
+aside.ctrl{position:sticky;top:12px;background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:14px;max-height:calc(100vh - 24px);overflow-y:auto}
+@media (max-width:860px){aside.ctrl{position:static;max-height:none}}
+.ctrl h3{font-size:13px;font-family:var(--f-body);font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label,.lbl{font-size:13px;font-weight:600;display:flex;justify-content:space-between;gap:8px}
+.field label output{font-family:var(--f-mono);font-weight:400;color:var(--muted);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--azul)}
+select,input[type=number]{font:inherit;font-size:14px;padding:6px 8px;border:1px solid var(--rule);border-radius:6px;background:var(--sunk);color:var(--ink);max-width:100%}
+input[type=number]{width:120px;font-family:var(--f-mono);font-size:13px}
+.seg{display:flex;border:1px solid var(--rule);border-radius:6px;overflow:hidden}
+.seg button{flex:1;font:inherit;font-size:13px;padding:6px 4px;border:0;background:var(--sunk);color:var(--muted);cursor:pointer}
+.seg button+button{border-left:1px solid var(--rule)}
+.seg button[aria-pressed="true"]{background:var(--azul);color:#fff;font-weight:600}
+.seg.col{flex-direction:column}
+.seg.col button{text-align:left;padding:7px 10px}
+.seg.col button+button{border-left:0;border-top:1px solid var(--rule)}
+.seg.sm button{font-size:12px;padding:4px 6px}
+.shapes{display:flex;flex-wrap:wrap;gap:6px}
+.shapes button{font:inherit;font-size:13px;padding:5px 10px;border:1px solid var(--rule);border-radius:999px;background:var(--sunk);color:var(--ink);cursor:pointer}
+.shapes button[aria-pressed="true"]{background:var(--azul);border-color:var(--azul);color:#fff;font-weight:600}
+.checks{display:flex;flex-direction:column;gap:3px}
+.checks label{font-size:13.5px;font-weight:400;display:flex;gap:8px;align-items:center;justify-content:flex-start;cursor:pointer}
+.checks input{accent-color:var(--azul);margin:0}
+.roles{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 8px;align-items:center}
+.roles span{font-size:13.5px}
+.roles .seg{min-width:156px}
+.btn{font:inherit;font-weight:600;font-size:14px;border-radius:6px;padding:8px 12px;cursor:pointer;border:1px solid var(--azul);background:var(--azul);color:#fff}
+.btn.ghost{background:transparent;color:var(--azul)}
+.btn.sm{font-size:13px;padding:5px 10px}
+.btn.ghost[aria-pressed="true"]{background:var(--azul);color:#fff}
+.btn:disabled{opacity:.55;cursor:progress}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.check{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;cursor:pointer}
+.check input{margin-top:4px;accent-color:var(--azul)}
+.hint{font-size:12.5px;color:var(--muted);margin:0}
+.card .hint{font-size:13px;margin:4px 0 0;max-width:80ch}
+.results{display:flex;flex-direction:column;gap:18px;min-width:0}
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:16px 18px;min-width:0}
+.card h2{font-size:19px}
+.card h2 small{font-family:var(--f-body);font-weight:500;font-size:13px;color:var(--muted);margin-left:6px}
+.card>p{max-width:78ch}
+.card-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.card-head .seg{min-width:180px}
+.verdict{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;align-items:center;padding:14px 18px;border-radius:8px;border:1px solid var(--rule);background:var(--surface)}
+.verdict .pill{grid-row:span 2;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:6px 10px;border-radius:999px;white-space:nowrap;background:var(--azul-suave);color:var(--azul)}
+.verdict .pill.warnp{background:var(--rojo-suave);color:var(--rojo)}
+.verdict .pill.okp{background:var(--ok-suave);color:var(--ok)}
+@media (max-width:600px){.verdict{grid-template-columns:1fr}.verdict .pill{grid-row:auto;justify-self:start}}
+.verdict .stat{font-family:var(--f-mono);font-size:14px;font-variant-numeric:tabular-nums}
+.verdict .read{font-size:14px;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:18px}
+@media (max-width:600px){.grid2{grid-template-columns:1fr}}
+.split{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:20px;align-items:start;margin-top:10px}
+@media (max-width:860px){.split{grid-template-columns:1fr}}
+.scroll{overflow-x:auto}
+table.bt{border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:14px;width:100%;margin-top:8px}
+table.bt caption{text-align:left;font-size:13px;font-weight:600;color:var(--muted);padding-bottom:4px}
+table.bt th,table.bt td{padding:5px 7px;text-align:right;white-space:nowrap}
+table.bt th:first-child,table.bt td:first-child{text-align:left}
+table.bt thead th{border-top:2px solid var(--ink);border-bottom:1px solid var(--ink);font-weight:600}
+table.bt tbody tr:last-child td{border-bottom:2px solid var(--ink)}
+table.bt td.num{font-family:var(--f-mono);font-size:13px}
+table.bt td.l{text-align:left}
+table.bt td.wrap{white-space:normal;text-align:left;min-width:220px;font-size:13px;color:var(--muted)}
+table.bt td.b{font-weight:700}
+table.bt td.mut{color:var(--muted)}
+table.bt tr.sel td{background:var(--azul-suave)}
+table.bt tr.sep td{border-top:1px solid var(--rule)}
+table.bt td.both{color:var(--azul);font-weight:700}
+table.hm td.z{text-align:center;font-family:var(--f-mono);font-size:13px;min-width:64px}
+table.disj td,table.disj th{text-align:center}
+table.disj td.one{font-weight:700;color:var(--azul)}
+.sbar{display:flex;height:12px;width:220px;border-radius:2px;overflow:hidden;background:var(--sunk)}
+.sbar span{display:block;height:100%}
+svg{display:block;width:100%;height:auto;overflow:visible}
+svg text{fill:var(--muted);font-family:var(--f-body);font-size:12px}
+svg text.ink{fill:var(--ink)}
+svg text.lab{fill:var(--ink);font-size:11.5px}
+svg .ax{stroke:var(--rule)}
+pre.r{font-family:var(--f-mono);font-size:12.5px;background:var(--sunk);border-radius:6px;padding:10px 12px;margin:8px 0 0;overflow-x:auto;line-height:1.5}
+pre.r .c{color:var(--muted)}
+.legend{display:flex;gap:6px 16px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:6px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.legend i.o{border-radius:50%}
+.legend i.tri{width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:11px solid var(--gris);border-radius:0;background:none}
+.legend i.grad{width:70px;background:linear-gradient(90deg,color-mix(in srgb,var(--azul) 12%,var(--surface)),var(--azul))}
+.note{font-size:13.5px;color:var(--muted);border-left:3px solid var(--rule);padding:2px 0 2px 12px;margin:10px 0 0;max-width:80ch}
+.note.warn{border-left-color:var(--warn);color:var(--ink)}
+.note.good{border-left-color:var(--ok);color:var(--ink)}
+.note:empty{display:none}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.chips span{font-family:var(--f-mono);font-size:13px;background:var(--sunk);border-radius:6px;padding:5px 9px}
+.minis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:10px}
+.minis>button{font:inherit;text-align:left;color:inherit;background:none;border:1px solid var(--rule);border-radius:6px;padding:8px 10px;cursor:pointer}
+.minis>button:hover{border-color:var(--azul)}
+.minis>button.sel{border-color:var(--azul);box-shadow:0 0 0 1px var(--azul)}
+.minis h3{font-family:var(--f-body);font-size:13.5px;font-weight:700}
+.minis .sk{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.grp{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:10px}
+.grp>div{border:1px solid var(--rule);border-radius:6px;padding:8px 10px;font-size:13.5px}
+.grp h3{font-family:var(--f-body);font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px}
+.grp h3 i{display:inline-block;width:11px;height:11px;border-radius:50%}
+.grp details{margin-top:4px;font-size:12.5px;color:var(--muted)}
+.grp summary{cursor:pointer}
+.kv{display:flex;gap:6px 18px;flex-wrap:wrap;font-size:13.5px;margin-top:8px}
+.kv b{font-family:var(--f-mono);font-weight:600}
+.pers{display:grid;grid-template-columns:auto auto auto;gap:6px 12px;align-items:center;font-size:13.5px;margin-top:8px;justify-content:start}
+.pers b{font-weight:700}
+/* Quiz */
+.quiz-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.score{font-family:var(--f-mono);font-size:14px}
+.q{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:16px 18px}
+.q .num{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.q h3{font-size:17px;margin:4px 0 10px;max-width:80ch}
+.q .ops{display:flex;flex-direction:column;gap:8px}
+.q .ops button{font:inherit;font-size:14px;text-align:left;padding:9px 12px;border:1px solid var(--rule);border-radius:6px;background:var(--sunk);color:var(--ink);cursor:pointer}
+.q .ops button:hover:not(:disabled){border-color:var(--azul)}
+.q .ops button:disabled{cursor:default}
+.q .ops button.right{background:var(--ok-suave);border-color:var(--ok);color:var(--ink)}
+.q .ops button.wrong{background:var(--rojo-suave);border-color:var(--rojo);color:var(--ink)}
+.q .ops button.faded{opacity:.6}
+.q .fb{font-size:14px;margin:10px 0 0;padding:8px 12px;border-radius:6px;border-left:3px solid var(--rule);background:var(--sunk);max-width:80ch}
+.q .fb.ok{border-left-color:var(--ok)}
+.q .fb.no{border-left-color:var(--rojo)}
+.q .hintbtn{font:inherit;font-size:13px;background:none;border:0;color:var(--azul);cursor:pointer;padding:0;margin-top:8px;text-decoration:underline}
+.qlist{display:flex;flex-direction:column;gap:14px;padding:22px 0 60px;max-width:900px}
+[hidden]{display:none!important}
+footer{color:var(--muted);font-size:12.5px;padding:0 0 30px;max-width:110ch}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<header class="top">
+  <div class="curso">Ciencia de Datos para Economía y Negocios · FCE-UBA · Clase 15</div>
+  <h1>Grupos y dimensiones</h1>
+  <p>Agrupá observaciones con k-means, cluster jerárquico y DBSCAN, y resumí muchas variables con PCA y MCA. Los países (PNUD y otras fuentes vía Argendata, 2022) y los ocupados de la EPH (1er trimestre 2026) son los mismos de la clase; las formas de ejemplo se simulan en el navegador. Todo se recalcula con cada cambio.</p>
+  <nav class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-tab="dist"><b>Distancia</b><span>¿Qué es “parecido”?</span></button>
+    <button role="tab" aria-selected="false" data-tab="clu"><b>Clustering</b><span>k-means, jerárquico, DBSCAN</span></button>
+    <button role="tab" aria-selected="false" data-tab="pca"><b>PCA</b><span>Muchas variables, pocos ejes</span></button>
+    <button role="tab" aria-selected="false" data-tab="mca"><b>MCA</b><span>Categorías de la EPH</span></button>
+    <button role="tab" aria-selected="false" data-tab="dec" class="sec"><b>¿Qué harías?</b><span>Casos para decidir</span></button>
+  </nav>
+</header>
+
+<!-- ===================== DISTANCIA ===================== -->
+<section class="panel" id="tab-dist">
+  <aside class="ctrl">
+    <h3>¿A quién se parece?</h3>
+    <div class="field"><label for="d-pais">País de referencia</label><select id="d-pais"></select></div>
+    <div class="field"><span class="lbl">Variables que entran</span><div class="checks" id="d-vars"></div></div>
+    <div class="field"><span class="lbl">Escala</span>
+      <div class="seg" id="d-scale"><button data-v="raw">Unidades originales</button><button data-v="z" aria-pressed="true">Estandarizadas</button></div></div>
+    <div class="field"><span class="lbl">Ingreso y emisiones</span>
+      <div class="seg" id="d-log"><button data-v="lvl">En niveles</button><button data-v="log" aria-pressed="true">En logaritmo</button></div></div>
+    <div class="field"><span class="lbl">Distancia</span>
+      <div class="seg col" id="d-dist"><button data-v="euc" aria-pressed="true">Euclídea</button><button data-v="man">Manhattan</button><button data-v="cor">Correlación (1 − r)</button></div></div>
+    <div class="field"><label for="d-k">Vecinos a mostrar <output id="d-k-o"></output></label><input type="range" id="d-k" min="5" max="15" value="8"></div>
+    <p class="hint">Probá pasar a <b>unidades originales</b> con el ingreso <b>en niveles</b>: la distancia pasa a medir casi solo el ingreso en dólares.</p>
+  </aside>
+  <div class="results">
+    <div class="verdict" id="d-verdict"></div>
+    <div class="card">
+      <h2>Los países más cercanos</h2>
+      <p class="hint">La barra muestra qué parte de la distancia aporta cada variable: con la euclídea, la diferencia al cuadrado; con Manhattan, la diferencia en valor absoluto.</p>
+      <div class="scroll"><table class="bt" id="d-table"></table></div>
+      <div class="legend" id="d-legend"></div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h2>¿Quién manda en la distancia?</h2>
+        <p class="hint">Aporte promedio de cada variable a la distancia entre el país elegido y todos los demás. Si todas pesaran igual, cada una aportaría lo mismo.</p>
+        <div id="d-share"></div>
+      </div>
+      <div class="card">
+        <h2>¿Cambian los vecinos con la escala?</h2>
+        <p class="hint">Mismas variables y misma distancia, con y sin estandarizar. En azul, los que aparecen en las dos listas.</p>
+        <div class="scroll"><table class="bt" id="d-cmp"></table></div>
+        <p class="note" id="d-cmpnote"></p>
+      </div>
+    </div>
+    <div class="card">
+      <h2>El ejemplo de la clase: tres personas</h2>
+      <p class="hint">Cambiá las edades y los ingresos. Para estandarizar se divide por un desvío de 15 años y de $500.000.</p>
+      <div class="split">
+        <div class="pers" id="d-pers-in"></div>
+        <div id="d-pers"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>En R</h2>
+      <pre class="r" id="d-code"></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CLUSTERING ===================== -->
+<section class="panel" id="tab-clu" hidden>
+  <aside class="ctrl">
+    <h3>Los datos</h3>
+    <div class="shapes" id="c-data" role="group" aria-label="Datos"></div>
+    <p class="hint" id="c-data-desc"></p>
+    <div class="field" id="c-sep-f"><label for="c-sep">Separación entre grupos <output id="c-sep-o"></output></label><input type="range" id="c-sep" min="0.3" max="1.6" step="0.05" value="1"></div>
+    <div class="field" id="c-scale-f" hidden><span class="lbl">Variables</span>
+      <div class="seg" id="c-scale"><button data-v="raw">Sin estandarizar</button><button data-v="z" aria-pressed="true">Estandarizadas</button></div></div>
+    <button class="btn ghost" id="c-new">Nueva muestra</button>
+    <h3>El algoritmo</h3>
+    <div class="seg col" id="c-method"><button data-v="km" aria-pressed="true">k-means</button><button data-v="hc">Jerárquico</button><button data-v="db">DBSCAN</button></div>
+    <div class="field" id="c-k-f"><label for="c-k">Cantidad de grupos k <output id="c-k-o"></output></label><input type="range" id="c-k" min="2" max="8" value="3"></div>
+    <div class="field" id="c-ns-f"><label for="c-ns">Arranques al azar (nstart) <output id="c-ns-o"></output></label><input type="range" id="c-ns" min="1" max="50" value="25"></div>
+    <div class="field" id="c-link-f"><span class="lbl">Linkage</span>
+      <div class="seg col" id="c-link"><button data-v="single">Single (vecino más cercano)</button><button data-v="complete">Complete (vecino más lejano)</button><button data-v="average">Average (promedio)</button><button data-v="ward" aria-pressed="true">Ward (mínima varianza interna)</button></div></div>
+    <div class="field" id="c-eps-f"><label for="c-eps">Radio eps <output id="c-eps-o"></output></label><input type="range" id="c-eps" min="0.01" max="1" step="0.005" value="0.2"></div>
+    <div class="field" id="c-mp-f"><label for="c-mp">minPts <output id="c-mp-o"></output></label><input type="range" id="c-mp" min="3" max="15" value="5"></div>
+    <p class="hint" id="c-method-desc"></p>
+  </aside>
+  <div class="results">
+    <div class="verdict" id="c-verdict"></div>
+    <div class="card">
+      <div class="card-head"><h2>Los grupos encontrados</h2>
+        <div class="seg" id="c-color"><button data-v="cl" aria-pressed="true">Clusters</button><button data-v="true" id="c-color-true">Grupos reales</button></div></div>
+      <div id="c-scatter"></div>
+      <div class="legend" id="c-legend"></div>
+      <p class="note" id="c-scnote"></p>
+    </div>
+    <div class="card" id="c-km-card">
+      <h2>k-means paso a paso</h2>
+      <p class="hint">Un solo arranque. Cada clic alterna los dos pasos del algoritmo: asignar cada punto al centro más cercano y mover cada centro al promedio de sus puntos.</p>
+      <div class="btnrow" style="margin-top:10px"><button class="btn ghost sm" id="c-st-reset">Centros nuevos al azar</button><button class="btn sm" id="c-st-next">Siguiente paso</button><button class="btn ghost sm" id="c-st-run">Hasta converger</button></div>
+      <div class="split">
+        <div id="c-step"></div>
+        <div><div id="c-step-wss"></div><p class="note" id="c-step-note"></p></div>
+      </div>
+      <h2 style="margin-top:16px;font-size:16px">¿Importa el arranque?</h2>
+      <p class="hint">Corre k-means 100 veces con un solo arranque cada una y compara la WSS final.</p>
+      <div class="btnrow" style="margin-top:8px"><button class="btn ghost sm" id="c-starts">Correr 100 arranques</button></div>
+      <div id="c-starts-res"></div>
+    </div>
+    <div class="card" id="c-hc-card">
+      <h2>El dendrograma</h2>
+      <p class="hint">Cuanto más abajo se unen dos ramas, más parecidas son. La línea punteada es el corte que da k grupos; mové k para subirla o bajarla.</p>
+      <div id="c-dendro"></div>
+      <p class="note" id="c-hc-note"></p>
+    </div>
+    <div class="card" id="c-db-card">
+      <h2>Para elegir eps: la distancia al vecino número minPts − 1</h2>
+      <div class="split">
+        <div id="c-knn"></div>
+        <div><p class="hint" style="margin-top:0">Cada punto, ordenado por la distancia a su vecino número minPts − 1. Donde la curva se dispara están los puntos aislados: un eps cerca de ese codo deja a casi todos dentro de una zona densa y marca a los aislados como ruido.</p><div class="kv" id="c-db-kv"></div><label class="check" style="margin-top:10px"><input type="checkbox" id="c-circ">Dibujar el radio eps alrededor de cada punto núcleo</label></div>
+      </div>
+    </div>
+    <div class="card" id="c-k-card">
+      <h2>¿Cuántos grupos?</h2>
+      <p class="hint" id="c-k-hint"></p>
+      <div class="grid2"><div id="c-elbow"></div><div id="c-sil"></div></div>
+      <p class="note" id="c-k-note"></p>
+    </div>
+    <div class="card" id="c-prof-card">
+      <h2>¿Qué caracteriza a cada grupo?</h2>
+      <p class="hint">Promedio de cada variable estandarizada dentro del grupo (con la media y el desvío de todos los países). 0 = promedio general; +1 = un desvío por encima. Grupos numerados de menor a mayor ingreso.</p>
+      <div class="scroll"><table class="bt hm" id="c-prof"></table></div>
+      <div class="grp" id="c-grp"></div>
+    </div>
+    <div class="card">
+      <h2>Mismos datos, seis algoritmos</h2>
+      <p class="hint" id="c-minis-hint"></p>
+      <div class="minis" id="c-minis"></div>
+    </div>
+    <div class="card">
+      <h2>¿Los grupos existen? Un test contra datos sin grupos</h2>
+      <p class="hint">Simula 100 bases <b>sin grupos</b>: normales multivariadas con las mismas medias y covarianzas que los datos. A cada una le aplica k-means con el mismo k y calcula la silhouette. Si la observada no se destaca, la estructura de grupos no se distingue de una nube sin grupos.</p>
+      <div class="btnrow" style="margin-top:8px"><button class="btn ghost" id="c-null">Simular 100 bases sin grupos</button></div>
+      <div id="c-null-res"></div>
+    </div>
+    <div class="card">
+      <h2>En R</h2>
+      <pre class="r" id="c-code"></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== PCA ===================== -->
+<section class="panel" id="tab-pca" hidden>
+  <aside class="ctrl">
+    <h3>PCA de los países</h3>
+    <div class="field"><span class="lbl">Variables activas</span><div class="checks" id="p-vars"></div></div>
+    <div class="field"><span class="lbl">Ingreso y emisiones</span>
+      <div class="seg" id="p-log"><button data-v="lvl">En niveles</button><button data-v="log" aria-pressed="true">En logaritmo</button></div></div>
+    <div class="field"><span class="lbl">¿Estandarizar?</span>
+      <div class="seg col" id="p-scale"><button data-v="raw">No: matriz de covarianzas</button><button data-v="z" aria-pressed="true">Sí: matriz de correlaciones</button></div></div>
+    <h3>El mapa</h3>
+    <div class="field"><span class="lbl">Ejes</span>
+      <div class="seg" id="p-axes"><button data-v="0,1" aria-pressed="true">PC1-PC2</button><button data-v="0,2">PC1-PC3</button><button data-v="1,2">PC2-PC3</button></div></div>
+    <div class="field"><span class="lbl">Colorear por</span>
+      <div class="seg col" id="p-color"><button data-v="cont" aria-pressed="true">Continente</button><button data-v="cl">Grupo (Ward, k = 4)</button><button data-v="idh">IDH del PNUD</button></div></div>
+    <div class="field"><span class="lbl">Invertir el signo</span>
+      <div class="btnrow" id="p-flip"><button class="btn ghost sm" data-i="0">PC1 × (−1)</button><button class="btn ghost sm" data-i="1">PC2 × (−1)</button><button class="btn ghost sm" data-i="2">PC3 × (−1)</button></div></div>
+    <div class="field"><label for="p-pais">País a resaltar</label><select id="p-pais"></select></div>
+  </aside>
+  <div class="results">
+    <div class="card">
+      <h2>La geometría: dos variables, una recta</h2>
+      <p class="hint">Girá la recta. Cada punto se proyecta en perpendicular sobre ella (en rojo, seis ejemplos). PC1 es la dirección donde los puntos proyectados quedan <b>más dispersos</b>, que es la misma que hace <b>más cortas</b> las líneas punteadas. Las dos variables están centradas pero no estandarizadas.</p>
+      <div class="split">
+        <div id="g-plot"></div>
+        <div>
+          <div class="field"><label for="g-ang">Ángulo de la recta <output id="g-ang-o"></output></label><input type="range" id="g-ang" min="0" max="179" step="1" value="10"></div>
+          <div class="field" style="margin-top:8px"><label for="g-r">Correlación entre las variables <output id="g-r-o"></output></label><input type="range" id="g-r" min="0" max="0.98" step="0.01" value="0.8"></div>
+          <div class="field" style="margin-top:8px"><label for="g-s">Desvío de la variable 2 <output id="g-s-o"></output></label><input type="range" id="g-s" min="0.4" max="2.5" step="0.05" value="1.5"></div>
+          <div class="btnrow" style="margin-top:10px"><button class="btn sm" id="g-pc1">Llevar la recta a PC1</button></div>
+          <div class="kv" id="g-kv"></div>
+          <div id="g-curve" style="margin-top:8px"></div>
+        </div>
+      </div>
+    </div>
+    <div class="verdict" id="p-verdict"></div>
+    <div class="card">
+      <h2>El mapa de los países</h2>
+      <p class="hint">Cada punto es un país, ubicado por sus scores en dos componentes. Pasá el mouse por un punto para ver el nombre. Países cercanos tienen perfiles parecidos en las variables activas.</p>
+      <div id="p-map"></div>
+      <div class="legend" id="p-legend"></div>
+      <p class="note" id="p-mapnote"></p>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h2>¿Cuánto resume cada componente?</h2>
+        <div id="p-scree"></div>
+        <div class="scroll"><table class="bt" id="p-eig"></table></div>
+      </div>
+      <div class="card">
+        <h2>Loadings: ¿qué mide cada componente?</h2>
+        <p class="hint">Peso de cada variable en cada componente. En negrita, |carga| ≥ 0,35.</p>
+        <div class="scroll"><table class="bt" id="p-load"></table></div>
+        <p class="note" id="p-loadnote"></p>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h2>Círculo de correlaciones</h2>
+        <p class="hint">Cada flecha es la correlación de la variable con los dos ejes del mapa. Larga: bien representada. Misma dirección: correlación positiva; opuestas: negativa; perpendiculares: poca.</p>
+        <div id="p-circle"></div>
+      </div>
+      <div class="card">
+        <h2>¿Qué variables son relevantes?</h2>
+        <p class="hint" id="p-rel-hint"></p>
+        <div class="scroll"><table class="bt" id="p-rel"></table></div>
+        <div class="scroll"><table class="bt" id="p-vt"></table></div>
+        <p class="hint" style="margin-top:6px">v.test del continente (variable suplementaria): |v| &gt; 2 ≈ el promedio del continente en ese eje está lejos de 0 (5%).</p>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Correlaciones entre las variables activas</h2>
+      <p class="hint">PCA aprovecha la redundancia: si varias variables están muy correlacionadas, un solo componente las resume.</p>
+      <div class="scroll"><table class="bt hm" id="p-cor"></table></div>
+    </div>
+    <div class="card">
+      <h2>En R</h2>
+      <pre class="r" id="p-code"></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== MCA ===================== -->
+<section class="panel" id="tab-mca" hidden>
+  <aside class="ctrl">
+    <h3>Rol de cada variable</h3>
+    <div class="roles" id="m-roles"></div>
+    <p class="hint">Activas: construyen las dimensiones. Suplementarias: se proyectan después, para interpretar. Hacen falta al menos dos activas.</p>
+    <h3>El mapa</h3>
+    <div class="field"><span class="lbl">Ejes</span>
+      <div class="seg" id="m-axes"><button data-v="0,1" aria-pressed="true">Dim 1-2</button><button data-v="0,2">Dim 1-3</button><button data-v="1,2">Dim 2-3</button></div></div>
+    <label class="check"><input type="checkbox" id="m-sup" checked>Mostrar las suplementarias</label>
+    <label class="check"><input type="checkbox" id="m-lines">Unir las categorías de cada variable</label>
+    <label class="check"><input type="checkbox" id="m-size" checked>Tamaño del punto según la frecuencia</label>
+    <div class="field"><span class="lbl">Invertir el signo</span>
+      <div class="btnrow" id="m-flip"><button class="btn ghost sm" data-i="0">Dim 1 × (−1)</button><button class="btn ghost sm" data-i="1">Dim 2 × (−1)</button><button class="btn ghost sm" data-i="2">Dim 3 × (−1)</button></div></div>
+  </aside>
+  <div class="results">
+    <div class="verdict" id="m-verdict"></div>
+    <div class="card">
+      <h2>El mapa de categorías</h2>
+      <p class="hint">Categorías de variables distintas que quedan cerca tienden a darse en las mismas personas. Lejos del origen: diferencian mucho; cerca: perfil promedio. Pasá el mouse por un punto para ver su frecuencia, contribución y cos².</p>
+      <div id="m-map"></div>
+      <div class="legend" id="m-legend"></div>
+      <p class="note" id="m-mapnote"></p>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div class="card-head"><h2>Inercia por dimensión</h2>
+          <div class="seg sm" id="m-pct"><button data-v="raw" aria-pressed="true">% de inercia</button><button data-v="benz">% Benzécri</button></div></div>
+        <div id="m-scree"></div>
+        <div class="scroll"><table class="bt" id="m-eig"></table></div>
+        <p class="note" id="m-eignote"></p>
+      </div>
+      <div class="card">
+        <h2>¿Qué variables arman cada dimensión?</h2>
+        <p class="hint">Razón de correlación η²: qué parte de la variación de las coordenadas en esa dimensión explica la variable (el R² de un ANOVA coordenada ~ variable). Los triángulos son las suplementarias.</p>
+        <div id="m-eta"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Categorías activas</h2>
+      <p class="hint" id="m-cat-hint"></p>
+      <div class="scroll"><table class="bt" id="m-cat"></table></div>
+    </div>
+    <div class="card" id="m-sup-card">
+      <h2>Categorías suplementarias</h2>
+      <p class="hint">No construyen las dimensiones: se ubican en el promedio de las personas que tienen esa categoría. Cerca del origen = no se distinguen del promedio en esta estructura del empleo.</p>
+      <div class="scroll"><table class="bt" id="m-supt"></table></div>
+    </div>
+    <div class="card">
+      <h2>El truco: la tabla disyuntiva completa</h2>
+      <p class="hint">Cada categoría activa se vuelve una columna 0/1. Cuatro personas inventadas a modo de ejemplo; la última fila es el % real de ocupados en cada categoría. MCA pondera con la distancia χ², que da más peso a las categorías raras.</p>
+      <div class="scroll"><table class="bt disj" id="m-disj"></table></div>
+    </div>
+    <div class="card">
+      <h2>En R</h2>
+      <pre class="r" id="m-code"></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== DECIDIR ===================== -->
+<section id="tab-dec" hidden>
+  <div class="qlist">
+    <div class="quiz-top">
+      <p class="hint" style="max-width:62ch">Doce situaciones para decidir. En la vida real puede haber más de una respuesta defendible, pero hay una que lo visto en clase justifica mejor. Tu progreso se guarda solo en este navegador.</p>
+      <div class="btnrow"><span class="score" id="q-score"></span><button class="btn ghost" id="q-reset">Empezar de nuevo</button></div>
+    </div>
+    <div id="q-list" style="display:flex;flex-direction:column;gap:14px"></div>
+  </div>
+</section>
+
+<footer>Países: 151 con las siete variables completas (PNUD y otras fuentes vía Argendata, Fundar, 2022); ingreso y emisiones en logaritmo salvo que se indique. EPH: 14.348 ocupados (patrones, cuentapropistas y asalariados) del 1er trimestre 2026, ponderados con PONDERA; el MCA se calcula a partir de la tabla de Burt ponderada, lo que da los mismos autovalores y coordenadas de categorías que <code>FactoMineR::MCA()</code>. k-means usa el algoritmo de Lloyd (R usa Hartigan-Wong por defecto: puede dar otra solución con pocos arranques). Desvíos con n − 1. Los resultados pueden diferir de R en el último decimal.</footer>
+</div>
+
+<script>
+"use strict";
+const PAISES_RAW=[
+["AGO","Angola",0,61.93,12.17,5.84,5328,42.7,4.915,71.2,0.591],
+["ALB","Albania",4,76.83,14.49,10.12,15293,29,2.87,6.7,0.789],
+["ARG","Argentina",1,76.06,18.98,11.14,22048,36.7,9.544,12.74,0.849],
+["ARM","Armenia",3,73.37,14.41,11.33,15388,32.4,3.518,6.39,0.786],
+["AUS","Australia",5,83.58,21.08,12.73,49257,32.9,23.127,3.29,0.946],
+["AUT","Austria",4,82.41,16.37,12.31,56530,28.9,7.809,2.14,0.926],
+["AZE","Azerbaiyán",3,73.49,12.71,10.56,15018,31.8,6.971,16.4,0.76],
+["BDI","Burundi",0,61.98,9.97,3.31,712,39.2,0.715,24.43,0.42],
+["BEL","Bélgica",4,82.29,18.95,12.53,53644,26.7,9.632,2.16,0.942],
+["BEN","Benin",0,59.95,10.3,3.14,3406,47.8,1.908,38.02,0.504],
+["BFA","Burkina Faso",0,59.77,8.09,2.32,2037,35.3,2.563,42.03,0.438],
+["BGD","Bangladesh",3,73.7,11.95,7.38,6511,32.1,1.549,38.69,0.67],
+["BGR","Bulgaria",4,71.53,13.87,11.41,25921,34.8,8.415,19.9,0.799],
+["BIH","Bosnia y Herzegovina",4,75.29,13.28,10.54,16571,33.8,8.7,5.72,0.779],
+["BLR","Belarús",4,73.25,13.98,12.24,18425,26.7,11.957,4.56,0.801],
+["BLZ","Belice",2,70.96,12.43,8.85,9242,45.9,18.596,28.03,0.7],
+["BOL","Bolivia",1,64.93,15.02,9.83,7988,39.4,10.206,33.04,0.698],
+["BRA","Brasil",1,73.43,15.58,8.28,14616,44.2,11.595,22.9,0.76],
+["BTN","Bhután",3,72.23,13.06,5.84,10625,38.8,6.255,4.92,0.681],
+["BWA","Botswana",0,65.91,11.43,10.42,14842,60.5,11.378,27.77,0.708],
+["CAF","Rep. Centroafricana",0,54.48,7.29,3.95,869,56.2,5.593,81.15,0.387],
+["CAN","Canadá",2,82.85,15.96,13.87,48444,32.3,20.87,2.45,0.935],
+["CHE","Suiza",4,84.25,16.58,13.9,69433,30.8,4.556,0.69,0.967],
+["CHL","Chile",1,79.52,16.77,11.11,24431,41,5.925,3.85,0.86],
+["CHN","China",3,78.59,15.22,8.11,18025,38.6,9.405,2.63,0.788],
+["CIV","Costa de Marfil",0,58.92,10.1,4.24,5376,41.7,3.923,44.41,0.534],
+["CMR","Camerún",0,60.96,13.38,6.54,3681,46.5,2.336,53.37,0.587],
+["COL","Colombia",1,73.66,14.44,8.86,15014,44,4.856,32.6,0.758],
+["COM","Comoras",0,63.68,13.04,6.21,3261,45,1.375,27.3,0.586],
+["CPV","Cabo Verde",0,74.72,11.53,6.09,7601,47.2,1.652,19.1,0.661],
+["CRI","Costa Rica",2,77.32,16.09,8.8,20248,41.5,3.821,13.71,0.806],
+["CYP","Chipre",4,81.89,16.24,12.44,40137,33.7,7.153,3.53,0.907],
+["CZE","Chequia",4,78.13,16.35,12.92,39945,24.6,9.582,3.3,0.895],
+["DEU","Alemania",4,80.99,17.34,14.26,55340,29.8,8.895,2.82,0.95],
+["DJI","Djibouti",0,62.86,8.03,3.89,4875,44.1,1.821,9.84,0.515],
+["DNK","Dinamarca",4,81.88,18.77,12.96,62019,27.1,7.843,0.61,0.952],
+["DOM","Rep. Dominicana",2,74.17,13.56,9.15,18653,38.6,4.097,26.79,0.766],
+["DZA","Argelia",0,77.13,15.49,6.99,10978,27.6,6.384,4.03,0.745],
+["ECU","Ecuador",1,77.89,14.86,8.97,10693,40.1,5.019,29.57,0.765],
+["ESP","España",4,83.91,17.81,10.61,40043,34.2,6.171,2.42,0.911],
+["EST","Estonia",4,79.15,15.94,13.55,37152,32.2,11.628,2.55,0.899],
+["ETH","Etiopía",0,65.64,9.94,2.39,2369,33.2,1.94,35.15,0.492],
+["FIN","Finlandia",4,82.35,19.23,12.93,49522,25.4,14.851,1.6,0.942],
+["FJI","Fiji",5,68.31,13.85,10.37,11234,36.4,2.563,10.43,0.729],
+["FRA","Francia",4,83.23,15.99,11.69,47379,30.6,5.386,2.02,0.91],
+["FSM","Micronesia",5,70.93,12.62,7.33,3709,40.1,1.49,22.47,0.634],
+["GAB","Gabón",0,65.69,12.43,9.55,11194,42.2,10.22,45.2,0.693],
+["GBR","Reino Unido",4,82.16,17.63,13.41,46624,32.3,5.9,4.06,0.94],
+["GEO","Georgia",3,71.59,16.73,12.7,15952,38.5,3.028,9.75,0.814],
+["GHA","Ghana",0,63.94,11.59,6.43,5380,42.2,1.602,29.05,0.602],
+["GIN","Guinea",0,58.99,10.2,2.36,2404,33.7,3.542,59.68,0.471],
+["GNB","Guinea-Bissau",0,59.86,10.53,3.67,1880,50.7,2.352,40.67,0.483],
+["GRC","Grecia",4,80.61,20.03,11.41,31382,34,6.375,3.59,0.893],
+["GTM","Guatemala",2,68.67,10.77,5.67,8996,41.9,3.438,35.96,0.629],
+["GUY","Guyana",1,65.99,13.02,8.63,35783,38.4,13.634,34.96,0.742],
+["HND","Honduras",2,70.73,9.96,7.3,5272,43.1,3.133,42.23,0.624],
+["HRV","Croacia",4,79.24,15.57,12.33,34324,30,5.477,3.41,0.878],
+["HTI","Haití",2,63.73,11.14,5.61,2802,52.3,1.198,26.01,0.552],
+["HUN","Hungría",4,74.96,15.07,12.25,34196,28.8,5.614,9.67,0.851],
+["IDN","Indonesia",3,68.25,13.98,8.56,12046,38.6,6.517,13.08,0.713],
+["IND","India",3,67.74,12.58,6.57,6951,35.7,2.773,7.25,0.644],
+["IRL","Irlanda",4,82.72,19.13,11.66,87468,30.2,11.719,2,0.95],
+["IRQ","Iraq",3,71.34,12.22,6.81,9092,29.5,7.789,28.35,0.673],
+["ISL","Islandia",4,82.82,19.11,13.77,54688,24.3,12.883,1.77,0.959],
+["ISR","Israel",3,82.6,15.03,13.44,43588,39.2,8.944,3.23,0.915],
+["ITA","Italia",4,84.06,16.66,10.74,44284,32.9,6.533,1.51,0.906],
+["JAM","Jamaica",2,70.63,12.46,9.25,9695,45.5,2.776,19.51,0.706],
+["JOR","Jordania",3,74.21,12.63,10.45,9295,33.7,2.518,8.96,0.736],
+["JPN","Japón",3,84.82,15.46,12.67,43644,30.4,8.607,0.93,0.92],
+["KAZ","Kazajstán",3,69.49,14.82,12.43,22587,26.5,17.09,8.22,0.802],
+["KEN","Kenia",0,62.06,11.38,7.69,4808,48.5,1.972,27.89,0.601],
+["KGZ","Kirguistán",3,70.48,12.99,11.96,4782,29,2.983,13.09,0.701],
+["KIR","Kiribati",5,67.66,11.8,9.13,3440,37,0.82,20.87,0.628],
+["LAO","Laos",3,69,10.19,5.95,7745,36.4,6.346,42.13,0.62],
+["LBN","Líbano",3,74.42,12.05,8.6,12313,31.8,4.326,10.09,0.723],
+["LBR","Liberia",0,61.1,10.47,5.32,1330,33.2,4.35,62.9,0.487],
+["LCA","Santa Lucía",2,71.29,12.71,8.58,14778,36.7,3.069,15.03,0.725],
+["LKA","Sri Lanka",3,76.61,13.64,11.25,11900,39.2,1.766,7.59,0.78],
+["LSO","Lesotho",0,53.04,11.07,7.55,2709,54.2,2.757,34.93,0.521],
+["LTU","Lituania",4,74.29,16.4,13.5,38131,35.1,8.288,3.01,0.879],
+["LUX","Luxemburgo",4,82.59,14.2,12.96,78554,29.5,12.533,1.99,0.927],
+["LVA","Letonia",4,75.93,16.56,13.33,32083,32.7,7.632,4.26,0.879],
+["MAR","Marruecos",0,74.97,14.59,6.05,7955,40.7,2.866,12.4,0.698],
+["MDA","Moldavia",4,68.62,14.91,11.83,12964,27,2.267,10.53,0.763],
+["MDG","Madagascar",0,65.23,9.21,4.59,1464,42.7,1.875,67.63,0.487],
+["MDV","Maldivas",3,80.84,12.18,7.76,18847,38.4,4.318,2.51,0.762],
+["MEX","México",2,74.83,14.51,9.22,19138,42.3,5.89,30.99,0.781],
+["MLI","Malí",0,59.42,7.04,1.63,2044,33,2.916,68.26,0.41],
+["MMR","Myanmar",3,67.26,12.06,6.52,4038,38.1,3.738,17.36,0.608],
+["MNE","Montenegro",4,76.85,15.08,12.62,22513,31.9,2.57,4.93,0.844],
+["MNG","Mongolia",3,72.67,14.52,9.42,10351,32,26.868,8.69,0.741],
+["MOZ","Mozambique",0,59.63,10.73,3.86,1219,45.6,2.218,75.89,0.461],
+["MRT","Mauritania",0,64.69,8.05,4.75,5344,32.4,3.617,49.35,0.54],
+["MUS","Mauricio",0,73.97,14.61,9.99,23252,35.8,3.797,11.14,0.796],
+["MWI","Malawi",0,62.9,11.5,5.24,1432,46.1,1.415,55.57,0.508],
+["MYS","Malasia",3,76.26,12.93,10.75,27295,39.8,11.94,3.09,0.807],
+["NAM","Namibia",0,58.06,11.76,7.24,9200,61,7.19,32.35,0.61],
+["NER","Níger",0,62.08,7.19,1.34,1283,34,2.34,69.82,0.394],
+["NGA","Nigeria",0,53.63,10.51,7.59,4755,43,1.843,42.27,0.548],
+["NIC","Nicaragua",2,74.61,12.58,7.26,5427,40.1,5.957,49.1,0.669],
+["NLD","Países Bajos",4,82.45,18.58,12.58,57278,27.1,9.101,1.06,0.946],
+["NOR","Noruega",4,83.39,18.64,13.06,69190,25.4,13.273,0.7,0.966],
+["NPL","Nepal",3,70.48,12.64,4.49,4026,32.8,2.025,35.44,0.601],
+["PAK","Pakistán",3,66.43,7.9,4.42,5374,30.7,2.192,20.11,0.54],
+["PAN","Panamá",2,76.83,13.21,10.69,32029,43.9,5.155,29.42,0.82],
+["PER","Perú",1,73.39,14.8,10.02,11916,38.1,4.114,23.03,0.762],
+["PHL","Filipinas",3,72.19,12.78,8.97,9059,40.1,2.415,15.87,0.71],
+["PNG","Papúa Nueva Guinea",5,65.96,11.13,4.93,3710,41.8,4.914,27.53,0.568],
+["POL","Polonia",4,77,15.93,13.16,35151,32.1,9.503,2.84,0.881],
+["PRT","Portugal",4,82.24,16.82,9.58,35315,33.7,5.492,3.44,0.874],
+["PRY","Paraguay",1,70.47,13.91,8.86,13161,41.3,11.953,36.18,0.731],
+["ROU","Rumania",4,74.12,14.51,11.36,31641,36.4,5.329,17.41,0.827],
+["RUS","Rusia",4,70.12,15.66,12.41,26992,37.7,18.329,6.26,0.821],
+["RWA","Ruanda",0,67.13,11.38,4.88,2317,50.4,0.774,15.58,0.548],
+["SDN","Sudán",0,65.58,8.5,3.87,3515,35.4,3.008,33.43,0.516],
+["SEN","Senegal",0,67.91,9.14,2.89,3464,40.3,1.807,29.9,0.517],
+["SLB","Islas Salomón",5,70.74,10.3,5.88,2273,37,3.901,24.81,0.562],
+["SLE","Sierra Leona",0,60.41,9.02,3.52,1613,34,1.964,47.55,0.458],
+["SRB","Serbia",4,74.14,14.5,11.5,19494,29.1,6.862,7.17,0.805],
+["SSD","Sudán del Sur",0,55.57,5.63,5.73,691,46.3,6.011,52,0.381],
+["STP","Santo Tomé y Príncipe",2,68.79,12.66,5.92,4054,30.8,1.24,42.95,0.613],
+["SUR","Suriname",1,70.29,10.96,8.39,12310,49.6,10.072,25.24,0.69],
+["SVK","Eslovaquia",4,75.33,14.72,13.01,32171,24.8,5.464,11.92,0.855],
+["SVN","Eslovenia",4,82.13,17.41,12.88,41587,24.3,8.56,1.67,0.926],
+["SWE","Suecia",4,83.5,19.04,12.67,56996,25.8,6.672,0.99,0.952],
+["SWZ","Eswatini",0,56.36,14.93,5.73,8392,51.5,1.354,34.84,0.61],
+["SYC","Seychelles",0,71.74,13.89,11.2,28386,40.3,5.253,26.89,0.802],
+["SYR","Siria",3,72.3,7.42,5.74,3594,35.8,1.692,19.39,0.557],
+["TCD","Chad",0,53,8.19,2.28,1389,43.3,6.368,65.31,0.394],
+["TGO","Togo",0,61.59,12.96,5.59,2214,43,1.283,37.67,0.547],
+["THA","Tailandia",3,79.68,15.58,8.83,16887,37.8,5.943,13.85,0.803],
+["TJK","Tayikistán",3,71.29,10.86,11.29,4807,34,2.045,19.23,0.679],
+["TKM","Turkmenistán",3,69.41,13.24,11.14,12860,40.8,16.96,9.64,0.744],
+["TLS","Timor-Leste",3,69.06,13.24,6.02,1629,30.3,3.553,14.3,0.566],
+["TON","Tonga",5,71.27,16.29,10.88,6360,37.5,3.092,12.41,0.739],
+["TTO","Trinidad y Tobago",2,74.71,14.1,11.74,22473,34.7,34.942,18.5,0.814],
+["TUN","Túnez",0,74.26,14.62,7.95,10297,35.8,3.774,2.09,0.732],
+["TUR","Turquía",3,78.47,19.68,8.81,32834,41.2,6.966,6.01,0.855],
+["TUV","Tuvalu",5,64.85,12.1,10.64,4754,39.1,2.152,13.59,0.653],
+["TZA","Tanzanía",0,66.78,8.59,5.64,2578,37.8,3.198,55.56,0.532],
+["UGA","Uganda",0,63.64,11.5,6.24,2241,41,1.363,52.72,0.55],
+["UKR","Ucrania",4,68.56,13.33,11.12,11416,25.5,5.34,4.85,0.734],
+["URY","Uruguay",1,78,17.35,9.06,22207,35.9,12.144,13.58,0.83],
+["USA","Estados Unidos",2,78.2,16.41,13.58,65565,38.9,17.764,6.99,0.927],
+["UZB","Uzbekistán",3,71.67,11.99,11.91,8056,35.3,6.004,15.93,0.727],
+["VNM","Vietnam",3,74.58,13.05,8.46,10814,34.8,5.022,16.73,0.726],
+["VUT","Vanuatu",5,70.49,11.81,7.18,3244,37.3,1.9,31.78,0.614],
+["WSM","Samoa",5,72.6,12.44,11.37,4970,42,1.942,20.17,0.702],
+["ZAF","Sudáfrica",0,61.48,14.26,11.61,13186,63.4,8.296,25.71,0.717],
+["ZMB","Zambia",0,61.8,11.02,7.28,3157,57.1,4.381,56.66,0.569],
+["ZWE","Zimbabwe",0,59.39,11.03,8.81,2079,43.2,2.102,47.13,0.55]];
+const EPH={"vars":["categoria","educacion","salud","tamanio","intensidad","sexo","edad","region"],"levels":[["Patrón","Cuenta propia","Asal. registrado","Asal. no registrado"],["Hasta sec. incompleto","Sec. completo","Univ. completo"],["Obra social","Prepaga / plan estatal","Sin cobertura"],["Hasta 5 personas","6 a 40 personas","Más de 40 personas"],["Subocupado","Ocupado pleno","Sobreocupado"],["Varón","Mujer"],["Hasta 29 años","30 a 49 años","50 años y más"],["GBA","NOA","NEA","Cuyo","Pampeana","Patagonia"]],"burt":[[446207,0,0,0,86731,202268,157208,292697,53998,99512,312801,117837,15569,15413,255885,174909,281365,164842,31024,211332,203851,225278,46983,27304,28061,104703,13878],[0,3098003,0,0,1198191,1329870,569942,1273068,251895,1573040,3084814,13017,172,703726,1567800,826477,1816192,1281811,504994,1455122,1137887,1578423,313751,171553,215948,727778,90550],[0,0,3788028,0,581555,1803731,1402742,3548781,235624,3623,424016,1356981,2007031,143954,2456735,1187339,2215380,1572648,603774,2233116,951138,1947269,360633,115516,211911,899730,252969],[0,0,0,2071847,804146,988392,279309,638876,139134,1293837,1176907,649491,245449,332928,1127646,611273,1277312,794535,836625,936648,298574,1018419,256942,78840,175312,490754,51580],[86731,1198191,581555,804146,2670623,0,0,1119466,74038,1477119,1907146,452655,310822,498276,1234028,938319,1951908,718715,509017,1206896,954710,1307445,277910,119835,199888,657006,108539],[202268,1329870,1803731,988392,0,4324261,0,2692181,278447,1353633,2264929,1039113,1020219,529423,2510428,1284410,2507025,1817236,1239438,2213423,871400,2191644,481066,190254,269621,988055,203621],[157208,569942,1402742,279309,0,0,2409201,1941775,328166,139260,826463,645558,937180,168322,1663610,577269,1131316,1277885,227962,1415899,765340,1270300,219333,83124,161723,577904,96817],[292697,1273068,3548781,638876,1119466,2692181,1941775,5753422,0,0,2127435,1598732,2027255,422157,3583453,1747812,3285713,2467709,902251,3025348,1825823,2853902,533001,198559,388560,1460826,318574],[53998,251895,235624,139134,74038,278447,328166,0,680651,0,375086,164811,140754,60726,455036,164889,355048,325603,90198,366246,224207,418174,61148,34905,13366,129601,23457],[99512,1573040,3623,1293837,1477119,1353633,139260,0,0,2970012,2496017,373783,100212,713138,1369577,887297,1949488,1020524,983968,1444624,541420,1497313,384160,159749,229306,632538,66946],[312801,3084814,424016,1176907,1907146,2264929,826463,2127435,375086,2496017,4998538,0,0,955300,2569553,1473685,3010219,1988319,1133498,2325414,1539626,2532586,529515,252255,329493,1204992,149697],[117837,13017,1356981,649491,452655,1039113,645558,1598732,164811,373783,0,2137326,0,124208,1381283,631835,1211623,925703,496752,1166837,473737,1003320,227668,104143,170783,501929,129483],[15569,172,2007031,245449,310822,1020219,937180,2027255,140754,100212,0,0,2268221,116513,1457230,694478,1368407,899814,346167,1343967,578087,1233483,221126,36815,130956,516044,129797],[15413,703726,143954,332928,498276,529423,168322,422157,60726,713138,955300,124208,116513,1196021,0,0,654963,541058,334119,562417,299485,639300,111911,30661,73159,314203,26787],[255885,1567800,2456735,1127646,1234028,2510428,1663610,3583453,455036,1369577,2569553,1381283,1457230,0,5408066,0,3024009,2384057,1112224,2731408,1564434,2779020,528923,216304,352065,1290816,240938],[174909,826477,1187339,611273,938319,1284410,577269,1747812,164889,887297,1473685,631835,694478,0,0,2799998,1911277,888721,530074,1542393,727531,1351069,337475,146248,206008,617946,141252],[281365,1816192,2215380,1277312,1951908,2507025,1131316,3285713,355048,1949488,3010219,1211623,1368407,654963,3024009,1911277,5590249,0,1169587,2793085,1627577,2824433,588715,241257,379399,1304746,251699],[164842,1281811,1572648,794535,718715,1817236,1277885,2467709,325603,1020524,1988319,925703,899814,541058,2384057,888721,0,3813836,806830,2043133,963873,1944956,389594,151956,251833,918219,157278],[31024,504994,603774,836625,509017,1239438,227962,902251,90198,983968,1133498,496752,346167,334119,1112224,530074,1169587,806830,1976417,0,0,985047,226444,86816,126815,472453,78842],[211332,1455122,2233116,936648,1206896,2213423,1415899,3025348,366246,1444624,2325414,1166837,1343967,562417,2731408,1542393,2793085,2043133,0,4836218,0,2412781,505713,205936,329646,1146510,235632],[203851,1137887,951138,298574,954710,871400,765340,1825823,224207,541420,1539626,473737,578087,299485,1564434,727531,1627577,963873,0,0,2591450,1371561,246152,100461,174771,604002,94503],[225278,1578423,1947269,1018419,1307445,2191644,1270300,2853902,418174,1497313,2532586,1003320,1233483,639300,2779020,1351069,2824433,1944956,985047,2412781,1371561,4769389,0,0,0,0,0],[46983,313751,360633,256942,277910,481066,219333,533001,61148,384160,529515,227668,221126,111911,528923,337475,588715,389594,226444,505713,246152,0,978309,0,0,0,0],[27304,171553,115516,78840,119835,190254,83124,198559,34905,159749,252255,104143,36815,30661,216304,146248,241257,151956,86816,205936,100461,0,0,393213,0,0,0],[28061,215948,211911,175312,199888,269621,161723,388560,13366,229306,329493,170783,130956,73159,352065,206008,379399,251833,126815,329646,174771,0,0,0,631232,0,0],[104703,727778,899730,490754,657006,988055,577904,1460826,129601,632538,1204992,501929,516044,314203,1290816,617946,1304746,918219,472453,1146510,604002,0,0,0,0,2222965,0],[13878,90550,252969,51580,108539,203621,96817,318574,23457,66946,149697,129483,129797,26787,240938,141252,251699,157278,78842,235632,94503,0,0,0,0,0,408977]],"n":[694,4644,5860,3150,4145,6807,3396,8921,843,4584,7532,3660,3156,1559,8181,4608,8494,5854,3064,7162,4122,2102,3329,1194,1438,4454,1831],"N":[14348],"W":[9404085]};
+
+/* ---------------- Formato (es-AR) ---------------- */
+const fmt = (x, d = 2) => (isFinite(x) ? Number(x).toLocaleString("es-AR", {minimumFractionDigits: d, maximumFractionDigits: d}) : "—");
+const $ = id => document.getElementById(id);
+function fv(v){const a=Math.abs(v); return fmt(v, a>=1000?0:a>=10?1:a>=1?2:3);}
+const pctf = (v, d = 1) => fmt(v, d) + "%";
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const CL = i => `var(--c${(((i%8)+8)%8)+1})`;
+
+/* ---------------- Aleatorios ---------------- */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+let rnd = mulberry32((Date.now() % 1e9) | 0);
+function rnorm(){let u=0,v=0;while(u===0)u=rnd();while(v===0)v=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function withSeed(seed, fn){const r0=rnd; rnd=mulberry32(seed); try{return fn();} finally{rnd=r0;}}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+/* ---------------- Estadística ---------------- */
+const sum = a => {let s=0; for (const v of a) s+=v; return s;};
+const mean = a => sum(a)/a.length;
+const sdv = a => {const m=mean(a); let s=0; for (const v of a) s+=(v-m)**2; return Math.sqrt(s/(a.length-1));};
+function corr(a,b){const ma=mean(a), mb=mean(b); let sab=0,saa=0,sbb=0; for (let i=0;i<a.length;i++){const x=a[i]-ma,y=b[i]-mb; sab+=x*y; saa+=x*x; sbb+=y*y;} return saa>0&&sbb>0 ? sab/Math.sqrt(saa*sbb) : 0;}
+function minmax(a){let lo=Infinity,hi=-Infinity; for (const v of a){if(v<lo)lo=v; if(v>hi)hi=v;} return [lo,hi];}
+function quant(sorted, p){const h=(sorted.length-1)*p, lo=Math.floor(h), hi=Math.min(lo+1, sorted.length-1); return sorted[lo]+(h-lo)*(sorted[hi]-sorted[lo]);}
+
+/* Autovalores y autovectores de una matriz simétrica (Jacobi cíclico).
+   Devuelve values (de mayor a menor) y vectors[k] = autovector k */
+function eigSym(A0){
+  const n=A0.length, A=A0.map(r=>r.slice()), V=Array.from({length:n},(_,i)=>Array.from({length:n},(_,j)=>i===j?1:0));
+  for (let sweep=0; sweep<100; sweep++){
+    let off=0; for (let i=0;i<n;i++) for (let j=i+1;j<n;j++) off+=A[i][j]*A[i][j];
+    if (off<1e-24) break;
+    for (let p=0;p<n-1;p++) for (let q=p+1;q<n;q++){
+      const apq=A[p][q]; if (Math.abs(apq)<1e-300) continue;
+      const theta=(A[q][q]-A[p][p])/(2*apq);
+      const t=(theta>=0?1:-1)/(Math.abs(theta)+Math.sqrt(theta*theta+1));
+      const c=1/Math.sqrt(t*t+1), s=t*c;
+      for (let k=0;k<n;k++){const akp=A[k][p], akq=A[k][q]; A[k][p]=c*akp-s*akq; A[k][q]=s*akp+c*akq;}
+      for (let k=0;k<n;k++){const apk=A[p][k], aqk=A[q][k]; A[p][k]=c*apk-s*aqk; A[q][k]=s*apk+c*aqk;}
+      for (let k=0;k<n;k++){const vkp=V[k][p], vkq=V[k][q]; V[k][p]=c*vkp-s*vkq; V[k][q]=s*vkp+c*vkq;}
+    }
+  }
+  const idx=[...Array(n).keys()].sort((a,b)=>A[b][b]-A[a][a]);
+  return {values: idx.map(i=>A[i][i]), vectors: idx.map(i=>V.map(r=>r[i]))};
+}
+function cholesky(S){
+  const p=S.length, L=Array.from({length:p},()=>new Array(p).fill(0));
+  for (let i=0;i<p;i++) for (let j=0;j<=i;j++){
+    let s=S[i][j]; for (let k=0;k<j;k++) s-=L[i][k]*L[j][k];
+    L[i][j] = i===j ? Math.sqrt(Math.max(s,1e-12)) : s/L[j][j];
+  }
+  return L;
+}
+function covMat(X){ /* filas = observaciones */
+  const n=X.length, p=X[0].length, m=new Array(p).fill(0);
+  for (const r of X) for (let j=0;j<p;j++) m[j]+=r[j]/n;
+  const S=Array.from({length:p},()=>new Array(p).fill(0));
+  for (const r of X) for (let a=0;a<p;a++){const da=r[a]-m[a]; for (let b=a;b<p;b++) S[a][b]+=da*(r[b]-m[b]);}
+  for (let a=0;a<p;a++) for (let b=a;b<p;b++){S[a][b]/=(n-1); S[b][a]=S[a][b];}
+  return {m,S};
+}
+
+/* ---------------- Gráficos SVG ---------------- */
+function niceTicks(lo,hi,n=5){const span=hi-lo||1,step0=span/n,mag=Math.pow(10,Math.floor(Math.log10(step0))),err=step0/mag;const step=(err>=7.5?10:err>=3.5?5:err>=1.5?2:1)*mag;const t=[];for(let v=Math.ceil(lo/step-1e-9)*step;v<=hi+1e-9;v+=step)t.push(+v.toFixed(10));return {t,step};}
+function decOf(step){return Math.max(0,-Math.floor(Math.log10(step)+1e-9));}
+function fAx(v, step){return Math.abs(v)>=1000 ? fmt(v,0) : fmt(v, decOf(step));}
+function padR(a,b,f=0.06){const s=(b-a)||1; return [a-s*f, b+s*f];}
+
+/* Marco de un gráfico cartesiano. equal: misma escala en x e y */
+function frame(o){
+  const W=o.W||640, H=o.H||420, m=Object.assign({l:o.yticks===false?14:46, r:14, t:14, b:o.xlab?(o.xticks===false?26:42):(o.xticks===false?14:26)}, o.m||{});
+  let [x0,x1]=o.xr, [y0,y1]=o.yr;
+  const pw=W-m.l-m.r, ph=H-m.t-m.b;
+  if (o.equal){const s=Math.min(pw/(x1-x0), ph/(y1-y0)), cx=(x0+x1)/2, cy=(y0+y1)/2; x0=cx-pw/s/2; x1=cx+pw/s/2; y0=cy-ph/s/2; y1=cy+ph/s/2;}
+  const X=v=>m.l+pw*(v-x0)/(x1-x0), Y=v=>m.t+ph*(1-(v-y0)/(y1-y0));
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.aria||"Gráfico")}">`;
+  if (o.box) s+=`<rect x="${m.l}" y="${m.t}" width="${pw}" height="${ph}" style="fill:none;stroke:var(--rule)"/>`;
+  if (o.yticks!==false){const t=niceTicks(y0,y1,o.ny||5); t.t.forEach(v=>{s+=`<line class="ax" x1="${m.l}" x2="${W-m.r}" y1="${Y(v)}" y2="${Y(v)}" style="opacity:.6"/><text x="${m.l-6}" y="${Y(v)+4}" text-anchor="end">${(o.yfmt||(x=>fAx(x,t.step)))(v)}</text>`;});}
+  if (o.xticks!==false){const t=niceTicks(x0,x1,o.nx||6); t.t.forEach(v=>{ if (o.xgrid) s+=`<line class="ax" x1="${X(v)}" x2="${X(v)}" y1="${m.t}" y2="${H-m.b}" style="opacity:.6"/>`; s+=`<text x="${X(v)}" y="${H-m.b+16}" text-anchor="middle">${(o.xfmt||(x=>fAx(x,t.step)))(v)}</text>`;});}
+  if (o.zero){ if (y0<0&&y1>0) s+=`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(0)}" y2="${Y(0)}" style="stroke:var(--gris);opacity:.7"/>`; if (x0<0&&x1>0) s+=`<line x1="${X(0)}" x2="${X(0)}" y1="${m.t}" y2="${H-m.b}" style="stroke:var(--gris);opacity:.7"/>`; }
+  if (o.base!==false && !o.box) s+=`<line x1="${m.l}" x2="${W-m.r}" y1="${H-m.b}" y2="${H-m.b}" style="stroke:var(--muted)"/>`;
+  if (o.xlab) s+=`<text x="${m.l+pw/2}" y="${H-5}" text-anchor="middle">${o.xlab}</text>`;
+  if (o.ylab) s+=`<text transform="translate(12 ${m.t+ph/2}) rotate(-90)" text-anchor="middle">${o.ylab}</text>`;
+  if (o.title) s+=`<text x="${m.l}" y="11" class="ink" style="font-weight:600">${o.title}</text>`;
+  return {X,Y,s,W,H,m,x0,x1,y0,y1,pw,ph};
+}
+/* Ubicación de etiquetas sin superponerse (greedy) */
+function placeLabels(items, W, H, boxes0){
+  const boxes=(boxes0||[]).slice(), out=[];
+  for (const it of items){
+    const w=it.text.length*(it.cw||6.2), hh=12, r=(it.r||3)+3;
+    const cands=[[r,4,"start"],[-r,4,"end"],[0,-r-2,"middle"],[0,r+10,"middle"],[r,-6,"start"],[r,13,"start"],[-r,-6,"end"],[-r,13,"end"],[r+8,-16,"start"],[-r-8,-16,"end"],[r+8,22,"start"],[-r-8,22,"end"]];
+    let chosen=null, fallback=null;
+    for (const [dx,dy,a] of cands){
+      const tx=it.x+dx, ty=it.y+dy, bx=a==="start"?tx:a==="end"?tx-w:tx-w/2;
+      const b={x0:bx-1,x1:bx+w+1,y0:ty-hh+2,y1:ty+3};
+      if (b.x0<0||b.x1>W||b.y0<0||b.y1>H) continue;
+      if (!fallback) fallback={x:tx,y:ty,a,b};
+      if (boxes.some(o=>!(b.x1<o.x0||b.x0>o.x1||b.y1<o.y0||b.y0>o.y1))) continue;
+      chosen={x:tx,y:ty,a,b}; break;
+    }
+    if (!chosen && it.force) chosen=fallback;
+    if (chosen) boxes.push(chosen.b);
+    out.push(chosen);
+  }
+  return out;
+}
+/* Etiquetas con búsqueda en espiral y línea guía cuando quedan lejos del punto.
+   items: {x, y, text, r, force}; los puntos de todos los items funcionan como obstáculos */
+function drawLabels(items, W, H, styleFn){
+  const boxes=items.map(it=>{const r=it.r||3; return {x0:it.x-r,x1:it.x+r,y0:it.y-r,y1:it.y+r};});
+  const hit=b=>boxes.some(o=>!(b.x1<o.x0||b.x0>o.x1||b.y1<o.y0||b.y0>o.y1));
+  let s="";
+  for (const it of items){
+    const w=it.text.length*(it.cw||6.2), hh=12, r=(it.r||3)+3;
+    let chosen=null, fallback=null;
+    outer: for (const ext of [0,8,18,30,44,60,80]){
+      const R=r+ext, dirs=[];
+      if (ext===0) dirs.push([R,4,"start"],[-R,4,"end"],[0,-R-1,"middle"],[0,R+10,"middle"]);
+      else for (let k=0;k<12;k++){const t=k*Math.PI/6, c=Math.cos(t), sn=Math.sin(t); dirs.push([R*c, R*sn+4+(sn>0.3?6:0), c>0.3?"start":c<-0.3?"end":"middle"]);}
+      for (const [dx,dy,a] of dirs){
+        const tx=it.x+dx, ty=it.y+dy, bx=a==="start"?tx:a==="end"?tx-w:tx-w/2;
+        const b={x0:bx-1,x1:bx+w+1,y0:ty-hh+2,y1:ty+3};
+        if (b.x0<0||b.x1>W||b.y0<0||b.y1>H) continue;
+        if (!fallback) fallback={x:tx,y:ty,a,b,lead:false};
+        if (hit(b)) continue;
+        chosen={x:tx,y:ty,a,b,lead:ext>8}; break outer;
+      }
+    }
+    if (!chosen && it.force) chosen=fallback;
+    if (!chosen) continue;
+    boxes.push(chosen.b);
+    const b=chosen.b;
+    if (chosen.lead){const ex=Math.max(b.x0,Math.min(it.x,b.x1)), ey=Math.max(b.y0+2,Math.min(it.y,b.y1-2)); s+=`<line x1="${it.x.toFixed(1)}" y1="${it.y.toFixed(1)}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" style="stroke:var(--muted);stroke-width:.7;opacity:.8"/>`;}
+    s+=`<text x="${chosen.x.toFixed(1)}" y="${chosen.y.toFixed(1)}" text-anchor="${chosen.a}" class="lab" style="${styleFn?styleFn(it):""}">${esc(it.text)}</text>`;
+  }
+  return s;
+}
+/* Histograma simple con línea vertical */
+function histSimple(el, vals, o){
+  const W=o.W||640, H=o.H||200, bins=o.bins||25;
+  let [a,b]=minmax(vals.concat(o.line!=null?[o.line]:[])); [a,b]=padR(a,b,0.04);
+  const bw=(b-a)/bins, c=new Array(bins).fill(0);
+  for (const v of vals){let k=Math.floor((v-a)/bw); if(k>=bins)k=bins-1; if(k<0)k=0; c[k]++;}
+  const f=frame({W,H,xr:[a,b],yr:[0,Math.max(...c)*1.12],xlab:o.xlab,ny:3,yfmt:v=>fmt(v,0),aria:o.aria});
+  let s=f.s;
+  c.forEach((n,k)=>{ if(!n) return; const x0=f.X(a+k*bw)+0.5, w=Math.max(0.5,f.X(a+(k+1)*bw)-f.X(a+k*bw)-1); s+=`<rect x="${x0}" y="${f.Y(n)}" width="${w}" height="${f.Y(0)-f.Y(n)}" style="fill:var(--gris);opacity:.75"/>`; });
+  if (o.line!=null){const x=f.X(o.line); s+=`<line x1="${x}" x2="${x}" y1="${f.m.t}" y2="${f.Y(0)}" style="stroke:var(--rojo);stroke-width:2.5"/><text x="${x+(x>W*0.7?-5:5)}" y="${f.m.t+10}" text-anchor="${x>W*0.7?"end":"start"}" style="fill:var(--rojo);font-weight:600">${o.lineLab||"observado"}</text>`;}
+  el.innerHTML=s+"</svg>";
+}
+function segInit(id, onChange){
+  const el=$(id);
+  el.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{
+    el.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed", x===b?"true":"false"));
+    onChange(b.dataset.v);
+  }));
+}
+function segSet(id, v){ $(id).querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed", x.dataset.v===String(v)?"true":"false")); }
+function rangeInit(id, fmtF, onChange){
+  const el=$(id), o=$(id+"-o");
+  const upd=()=>{ if (o) o.textContent=fmtF(+el.value); };
+  el.addEventListener("input",()=>{upd(); onChange(+el.value);}); upd();
+  return upd;
+}
+
+/* ---------------- Clustering ---------------- */
+function distMatrix(X){
+  const n=X.length, p=X[0].length, D=new Float64Array(n*n);
+  for (let i=0;i<n;i++) for (let j=i+1;j<n;j++){let s=0; for (let k=0;k<p;k++){const d=X[i][k]-X[j][k]; s+=d*d;} D[i*n+j]=D[j*n+i]=Math.sqrt(s);}
+  return D;
+}
+/* Cluster jerárquico aglomerativo con Lance-Williams. Ward = ward.D2 de R */
+function hclust(D, n, method){
+  const d=new Float64Array(n*n), ward=method==="ward";
+  for (let i=0;i<n*n;i++) d[i]=ward?D[i]*D[i]:D[i];
+  const act=new Uint8Array(n).fill(1), size=new Array(n).fill(1), id=Array.from({length:n},(_,i)=>-(i+1)), merges=[];
+  for (let step=0; step<n-1; step++){
+    let best=Infinity, bi=-1, bj=-1;
+    for (let i=0;i<n;i++){ if(!act[i]) continue; const row=i*n; for (let j=i+1;j<n;j++){ if(!act[j]) continue; const v=d[row+j]; if (v<best){best=v;bi=i;bj=j;} } }
+    const ni=size[bi], nj=size[bj];
+    merges.push({a:id[bi], b:id[bj], h: ward?Math.sqrt(Math.max(best,0)):best, size:ni+nj});
+    for (let k=0;k<n;k++){
+      if (!act[k]||k===bi||k===bj) continue;
+      const dik=d[bi*n+k], djk=d[bj*n+k], nk=size[k]; let v;
+      if (method==="single") v=Math.min(dik,djk);
+      else if (method==="complete") v=Math.max(dik,djk);
+      else if (method==="average") v=(ni*dik+nj*djk)/(ni+nj);
+      else v=((ni+nk)*dik+(nj+nk)*djk-nk*best)/(ni+nj+nk);
+      d[bi*n+k]=d[k*n+bi]=v;
+    }
+    size[bi]=ni+nj; act[bj]=0; id[bi]=step+1;
+  }
+  return merges;
+}
+function cutree(merges, n, k){
+  const par=Array.from({length:n},(_,i)=>i), find=x=>{while(par[x]!==x){par[x]=par[par[x]];x=par[x];}return x;};
+  const rep=[], repOf=id=>id<0?-id-1:rep[id-1];
+  for (let m=0;m<n-k;m++){const ra=repOf(merges[m].a), rb=repOf(merges[m].b); rep[m]=ra; par[find(rb)]=find(ra);}
+  const map=new Map(), lab=new Int32Array(n);
+  for (let i=0;i<n;i++){const r=find(i); if(!map.has(r)) map.set(r,map.size); lab[i]=map.get(r);}
+  return lab;
+}
+function kmeansFrom(X, k, centers, maxIt=100){
+  const n=X.length, p=X[0].length; let C=centers.map(c=>c.slice()), lab=new Int32Array(n).fill(-1), it=0;
+  for (; it<maxIt; it++){
+    let changed=false;
+    for (let i=0;i<n;i++){let bd=Infinity,bk=0; for (let c=0;c<k;c++){let s=0; for (let j=0;j<p;j++){const d=X[i][j]-C[c][j]; s+=d*d;} if (s<bd){bd=s;bk=c;}} if (lab[i]!==bk){lab[i]=bk;changed=true;}}
+    if (!changed && it>0) break;
+    const S=Array.from({length:k},()=>new Array(p).fill(0)), cnt=new Array(k).fill(0);
+    for (let i=0;i<n;i++){cnt[lab[i]]++; for (let j=0;j<p;j++) S[lab[i]][j]+=X[i][j];}
+    for (let c=0;c<k;c++){
+      if (cnt[c]) C[c]=S[c].map(v=>v/cnt[c]);
+      else { /* grupo vacío: lo reubica en el punto más lejano de su centro */
+        let bd=-1,bi=0; for (let i=0;i<n;i++){let s=0; for (let j=0;j<p;j++){const d=X[i][j]-C[lab[i]][j]; s+=d*d;} if (s>bd){bd=s;bi=i;}} C[c]=X[bi].slice();
+      }
+    }
+  }
+  return {lab, centers:C, wss:wssOf(X,lab,k), iter:it+1};
+}
+function randCenters(X,k){const idx=shuffle([...Array(X.length).keys()]).slice(0,k); return idx.map(i=>X[i].slice());}
+function kmeans(X, k, nstart){
+  let best=null;
+  for (let s=0;s<nstart;s++){const r=kmeansFrom(X,k,randCenters(X,k)); if (!best||r.wss<best.wss-1e-12) best=r;}
+  return best;
+}
+function wssOf(X, lab, k){
+  const p=X[0].length, S=Array.from({length:k},()=>new Array(p).fill(0)), cnt=new Array(k).fill(0);
+  for (let i=0;i<X.length;i++){if(lab[i]<0)continue; cnt[lab[i]]++; for (let j=0;j<p;j++) S[lab[i]][j]+=X[i][j];}
+  let w=0; for (let i=0;i<X.length;i++){if(lab[i]<0)continue; const c=lab[i]; for (let j=0;j<p;j++){const d=X[i][j]-S[c][j]/cnt[c]; w+=d*d;}}
+  return w;
+}
+function inertia(X, lab){
+  const idx=[...Array(X.length).keys()].filter(i=>lab[i]>=0); if (!idx.length) return null;
+  const p=X[0].length, m=new Array(p).fill(0); idx.forEach(i=>{for(let j=0;j<p;j++) m[j]+=X[i][j]/idx.length;});
+  let tss=0; idx.forEach(i=>{for(let j=0;j<p;j++) tss+=(X[i][j]-m[j])**2;});
+  const k=Math.max(...lab)+1, wss=wssOf(X,lab,k);
+  return {tss,wss,bss:tss-wss,r2:tss>0?(tss-wss)/tss:0};
+}
+function silhouette(D, n, lab){
+  const k=Math.max(...lab)+1; if (k<2) return null;
+  const cnt=new Array(k).fill(0); for (let i=0;i<n;i++) if (lab[i]>=0) cnt[lab[i]]++;
+  if (cnt.filter(c=>c>0).length<2) return null;
+  const s=new Float64Array(n).fill(NaN), acc=new Float64Array(k); let tot=0, m=0;
+  for (let i=0;i<n;i++){
+    const li=lab[i]; if (li<0) continue;
+    acc.fill(0); const row=i*n;
+    for (let j=0;j<n;j++){ if (j===i||lab[j]<0) continue; acc[lab[j]]+=D[row+j]; }
+    if (cnt[li]<=1){ s[i]=0; tot+=0; m++; continue; }
+    const a=acc[li]/(cnt[li]-1); let b=Infinity;
+    for (let c=0;c<k;c++){ if (c===li||!cnt[c]) continue; b=Math.min(b, acc[c]/cnt[c]); }
+    s[i]=(b-a)/Math.max(a,b); tot+=s[i]; m++;
+  }
+  return {mean:tot/m, per:s};
+}
+function dbscan(D, n, eps, minPts){
+  const nb=[]; for (let i=0;i<n;i++){const L=[]; for (let j=0;j<n;j++) if (D[i*n+j]<=eps) L.push(j); nb.push(L);}
+  const core=nb.map(L=>L.length>=minPts), lab=new Int32Array(n).fill(-2); let c=0;
+  for (let i=0;i<n;i++){
+    if (lab[i]!==-2 || !core[i]) continue;
+    const q=[i]; lab[i]=c;
+    while (q.length){ const u=q.pop(); if (!core[u]) continue; for (const v of nb[u]){ if (lab[v]===-2||lab[v]===-1){ if (lab[v]===-2 && core[v]) q.push(v); else if (lab[v]===-2) q.push(v); lab[v]=c; } } }
+    c++;
+  }
+  for (let i=0;i<n;i++) if (lab[i]===-2) lab[i]=-1;
+  return {lab, core, nclus:c, nnoise:[...lab].filter(v=>v<0).length};
+}
+function knnDist(D, n, k){const out=new Float64Array(n); const row=new Float64Array(n); for (let i=0;i<n;i++){for (let j=0;j<n;j++) row[j]=D[i*n+j]; const s=Float64Array.from(row).sort(); out[i]=s[Math.min(k,n-1)];} return out;}
+function ari(a, b){ /* Adjusted Rand Index; ignora observaciones con etiqueta real < 0 en b */
+  const idx=[...Array(a.length).keys()].filter(i=>b[i]>=-0.5 || b[i]===undefined).filter(i=>b[i]>=0);
+  const n=idx.length; if (n<2) return NaN;
+  const ka=new Map(), kb=new Map(), kab=new Map(), c2=x=>x*(x-1)/2;
+  idx.forEach(i=>{const x=a[i], y=b[i]; ka.set(x,(ka.get(x)||0)+1); kb.set(y,(kb.get(y)||0)+1); const key=x+"|"+y; kab.set(key,(kab.get(key)||0)+1);});
+  let sab=0; kab.forEach(v=>sab+=c2(v)); let sa=0; ka.forEach(v=>sa+=c2(v)); let sb=0; kb.forEach(v=>sb+=c2(v));
+  const exp=sa*sb/c2(n), mx=(sa+sb)/2; return mx===exp?1:(sab-exp)/(mx-exp);
+}
+/* Reetiqueta grupos 0..k-1 según el promedio de una clave (ruido = -1 queda igual) */
+function relabel(lab, key){
+  const k=Math.max(...lab)+1; if (k<1) return lab;
+  const s=new Array(k).fill(0), c=new Array(k).fill(0);
+  for (let i=0;i<lab.length;i++) if (lab[i]>=0){s[lab[i]]+=key[i]; c[lab[i]]++;}
+  const ord=[...Array(k).keys()].sort((x,y)=>s[x]/c[x]-s[y]/c[y]), map=new Array(k); ord.forEach((g,i)=>map[g]=i);
+  return Int32Array.from(lab, v=>v<0?v:map[v]);
+}
+
+/* ================= Datos de países ================= */
+const CONTS=["África","Am. del Sur","Am. Norte y Central","Asia","Europa","Oceanía"];
+const VARS=[
+  {k:"v",    lab:"Esperanza de vida",   short:"Esp. vida",  r:"esp_vida"},
+  {k:"ee",   lab:"Escolariz. esperada", short:"Esc. esp.",  r:"esc_esperada"},
+  {k:"ep",   lab:"Escolariz. promedio", short:"Esc. prom.", r:"esc_promedio"},
+  {k:"inb",  lab:"INB pc",              short:"INB pc",     r:"inb_pc", log:true},
+  {k:"gini", lab:"Gini",                short:"Gini",       r:"gini"},
+  {k:"emis", lab:"Emisiones pc",        short:"Emisiones",  r:"emis_pc", log:true},
+  {k:"fec",  lab:"Fecund. adolescente", short:"Fec. adol.", r:"fec_adol"}
+];
+const lc=v=>v.k==="inb"?v.lab:v.lab.toLowerCase();
+const vlab=(v,log)=>v.log&&log?v.lab+" (log)":v.lab;
+const rname=(v,log)=>v.log&&log?"log_"+v.r.replace("_pc",""):v.r;
+const PAISES=PAISES_RAW.map(r=>({iso:r[0],pais:r[1],cont:r[2],v:r[3],ee:r[4],ep:r[5],inb:r[6],gini:r[7],emis:r[8],fec:r[9],idh:r[10]})).sort((a,b)=>a.pais.localeCompare(b.pais,"es"));
+const NP=PAISES.length;
+const ISO_LAB=["ARG","BRA","CHL","URY","MEX","USA","NOR","QAT","CHN","IND","ZAF","NGA","JPN","HTI","BOL","NER","ESP","RUS","SAU","NAM"];
+const idxIso=iso=>PAISES.findIndex(p=>p.iso===iso);
+/* columnas transformadas: keys, log, z (estandarizar) */
+function paisCols(keys, log, z){
+  return keys.map(k=>{
+    const v=VARS.find(x=>x.k===k); let a=PAISES.map(p=>p[k]); if (v.log&&log) a=a.map(Math.log);
+    if (z){const m=mean(a), s=sdv(a); a=a.map(x=>(x-m)/s);}
+    return a;
+  });
+}
+const toRows=cols=>PAISES.map((_,i)=>cols.map(c=>c[i]));
+function fillPaisSelect(id, val){ $(id).innerHTML=PAISES.map(p=>`<option value="${p.iso}"${p.iso===val?" selected":""}>${esc(p.pais)}</option>`).join(""); }
+
+/* Mapa fijo de referencia: PCA estandarizado de las 7 variables (logs), con signos como en la clase */
+const REF=(()=>{
+  const keys=VARS.map(v=>v.k), Z=toRows(paisCols(keys,true,true));
+  const {S}=covMat(Z), e=eigSym(S);
+  const V=e.vectors.slice(0,2).map(v=>v.slice());
+  if (V[0][3]<0) V[0]=V[0].map(x=>-x);
+  if (V[1][4]<0) V[1]=V[1].map(x=>-x);
+  const proj=r=>[sum(r.map((x,j)=>x*V[0][j])), sum(r.map((x,j)=>x*V[1][j]))];
+  const pts=Z.map(proj), ve=e.values.map(v=>100*v/sum(e.values));
+  /* Ward k = 4 sobre Z, numerado de menor a mayor ingreso */
+  const lab=relabel(cutree(hclust(distMatrix(Z),NP,"ward"),NP,4), PAISES.map(p=>Math.log(p.inb)));
+  return {Z, V, proj, pts, ve, ward4:lab};
+})();
+
+/* ================= DISTANCIA ================= */
+const DS={pais:"ARG", vars:new Set(VARS.map(v=>v.k)), scale:"z", log:"log", dist:"euc", k:8};
+const PERS={A:[25,1000000], B:[60,1050000], C:[27,1400000]};
+function distParts(a,b,type){
+  if (type==="cor") return {d:1-corr(a,b), parts:null};
+  const parts=a.map((x,j)=>type==="euc"?(x-b[j])**2:Math.abs(x-b[j])), s=sum(parts);
+  return {d:type==="euc"?Math.sqrt(s):s, parts};
+}
+function neighbors(keys, log, z, type, i0){
+  const rows=toRows(paisCols(keys,log,z));
+  return rows.map((r,i)=>({i, ...distParts(rows[i0],r,type)})).filter(o=>o.i!==i0).sort((a,b)=>a.d-b.d);
+}
+function initDist(){
+  fillPaisSelect("d-pais", DS.pais);
+  $("d-pais").addEventListener("change",e=>{DS.pais=e.target.value; renderDist();});
+  $("d-vars").innerHTML=VARS.map((v,j)=>`<label><input type="checkbox" data-k="${v.k}" checked><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${CL(j)}"></i>${v.lab}</label>`).join("");
+  $("d-vars").querySelectorAll("input").forEach(c=>c.addEventListener("change",()=>{
+    if (c.checked) DS.vars.add(c.dataset.k); else if (DS.vars.size>1) DS.vars.delete(c.dataset.k); else c.checked=true;
+    renderDist();
+  }));
+  segInit("d-scale",v=>{DS.scale=v; renderDist();});
+  segInit("d-log",v=>{DS.log=v; renderDist();});
+  segInit("d-dist",v=>{DS.dist=v; renderDist();});
+  rangeInit("d-k",v=>v,v=>{DS.k=v; renderDist();});
+  $("d-pers-in").innerHTML=`<span></span><b>Edad</b><b>Ingreso ($)</b>`+["A","B","C"].map(p=>`<b>${p}</b><input type="number" data-p="${p}" data-j="0" value="${PERS[p][0]}" min="0" max="110"><input type="number" data-p="${p}" data-j="1" value="${PERS[p][1]}" step="10000" min="0">`).join("");
+  $("d-pers-in").querySelectorAll("input").forEach(inp=>inp.addEventListener("input",()=>{const v=+inp.value; if (isFinite(v)){PERS[inp.dataset.p][+inp.dataset.j]=v; renderPers();}}));
+}
+function renderDist(){
+  const keys=VARS.map(v=>v.k).filter(k=>DS.vars.has(k)), log=DS.log==="log", z=DS.scale==="z", i0=idxIso(DS.pais), P0=PAISES[i0];
+  const nb=neighbors(keys,log,z,DS.dist,i0), top=nb.slice(0,DS.k), kv=keys.map(k=>VARS.find(v=>v.k===k)), colOf=k=>CL(VARS.findIndex(v=>v.k===k));
+  /* aporte promedio por variable */
+  let share=null;
+  if (DS.dist!=="cor"){ share=new Array(keys.length).fill(0); nb.forEach(o=>{const s=sum(o.parts); if (s>0) o.parts.forEach((v,j)=>share[j]+=v/s/nb.length);}); }
+  const jmax=share?share.indexOf(Math.max(...share)):-1;
+  /* veredicto */
+  const dom=share&&keys.length>1&&share[jmax]>0.6;
+  $("d-verdict").innerHTML=`<span class="pill ${dom?"warnp":""}">${dom?"Una variable manda":"Más cercano"}</span>
+    <div class="stat">${esc(P0.pais)} → ${esc(PAISES[top[0].i].pais)} · d = ${fv(top[0].d)} · ${keys.length} variable${keys.length>1?"s":""} ${z?"estandarizadas":"en unidades originales"}</div>
+    <div class="read">${dom?`<b>${vlab(kv[jmax],log)}</b> aporta en promedio el ${pctf(100*share[jmax],0)} de la distancia: los “vecinos” son en realidad los países con valores parecidos de ${lc(kv[jmax])}. Para que todas las variables cuenten, estandarizá.`:
+      DS.dist==="cor"?"Con la distancia de correlación importa la forma del perfil (en qué variables el país está arriba o abajo), no el nivel."+(z?"":" Sin estandarizar, el perfil lo arma la variable de mayor magnitud: no tiene mucho sentido."):
+      `Con estas decisiones, ninguna variable domina: la que más aporta es ${vlab(kv[jmax],log).replace(kv[jmax].lab,lc(kv[jmax]))} (${pctf(100*share[jmax],0)} en promedio).`}</div>`;
+  /* tabla */
+  const raw=k=>{const v=VARS.find(x=>x.k===k); return v.k==="inb"?fmt(PAISES[0][k],0):"";};
+  const cell=(p,k)=>{const x=p[k]; return k==="inb"?fmt(x,0):k==="emis"?fmt(x,1):fmt(x,1);};
+  let h=`<thead><tr><th>#</th><th>País</th><th>Distancia</th>${DS.dist!=="cor"?"<th style='text-align:left'>Aporte de cada variable</th>":""}${kv.map(v=>`<th>${v.short}</th>`).join("")}</tr></thead><tbody>`;
+  h+=`<tr class="sel"><td></td><td>${esc(P0.pais)}</td><td class="num">—</td>${DS.dist!=="cor"?"<td></td>":""}${keys.map(k=>`<td class="num">${cell(P0,k)}</td>`).join("")}</tr>`;
+  top.forEach((o,r)=>{const P=PAISES[o.i], s=o.parts?sum(o.parts):0;
+    h+=`<tr><td class="mut">${r+1}</td><td>${esc(P.pais)}</td><td class="num">${fv(o.d)}</td>${o.parts?`<td><div class="sbar" title="${keys.map((k,j)=>VARS.find(v=>v.k===k).short+": "+pctf(100*o.parts[j]/s,0)).join(" · ")}">${o.parts.map((v,j)=>`<span style="width:${(100*v/s).toFixed(2)}%;background:${colOf(keys[j])}"></span>`).join("")}</div></td>`:""}${keys.map(k=>`<td class="num">${cell(P,k)}</td>`).join("")}</tr>`;});
+  $("d-table").innerHTML=h+"</tbody>";
+  $("d-legend").innerHTML=DS.dist==="cor"?"":kv.map(v=>`<span><i style="background:${colOf(v.k)}"></i>${v.short}</span>`).join("");
+  /* aporte promedio */
+  if (share){
+    const W=520, rowH=26, H=keys.length*rowH+30, f=frame({W,H,xr:[0,1],yr:[0,1],xticks:false,yticks:false,base:false,m:{l:150,r:50,t:6,b:24}});
+    let s=f.s; const X=v=>f.m.l+(W-f.m.l-f.m.r)*v;
+    [0,0.25,0.5,0.75,1].forEach(t=>{s+=`<line class="ax" x1="${X(t)}" x2="${X(t)}" y1="4" y2="${H-22}"/><text x="${X(t)}" y="${H-6}" text-anchor="middle">${fmt(100*t,0)}%</text>`;});
+    const eq=1/keys.length; s+=`<line x1="${X(eq)}" x2="${X(eq)}" y1="2" y2="${H-22}" style="stroke:var(--ink);stroke-dasharray:4 3"/>`;
+    keys.forEach((k,j)=>{const y=8+j*rowH; s+=`<text x="${f.m.l-8}" y="${y+13}" text-anchor="end" class="ink">${vlab(VARS.find(v=>v.k===k),log)}</text><rect x="${X(0)}" y="${y}" width="${X(share[j])-X(0)}" height="${rowH-9}" style="fill:${colOf(k)}"/><text x="${X(share[j])+5}" y="${y+13}">${pctf(100*share[j],0)}</text>`;});
+    $("d-share").innerHTML=s+`</svg><p class="hint">La línea punteada marca el reparto parejo (${pctf(100*eq,0)} cada una).</p>`;
+  } else $("d-share").innerHTML=`<p class="note">La distancia de correlación compara los perfiles completos y no se descompone por variable.</p>`;
+  /* comparación con y sin estandarizar */
+  const nr=neighbors(keys,log,false,DS.dist,i0).slice(0,DS.k), nz=neighbors(keys,log,true,DS.dist,i0).slice(0,DS.k);
+  const setR=new Set(nr.map(o=>o.i)), setZ=new Set(nz.map(o=>o.i)), both=[...setR].filter(i=>setZ.has(i)).length;
+  let c=`<thead><tr><th>#</th><th>Sin estandarizar</th><th>Estandarizadas</th></tr></thead><tbody>`;
+  for (let r=0;r<DS.k;r++){const a=nr[r].i, b=nz[r].i; c+=`<tr><td class="mut">${r+1}</td><td class="l ${setZ.has(a)?"both":""}">${esc(PAISES[a].pais)}</td><td class="l ${setR.has(b)?"both":""}">${esc(PAISES[b].pais)}</td></tr>`;}
+  $("d-cmp").innerHTML=c+"</tbody>";
+  $("d-cmpnote").className="note"+(both<DS.k/2?" warn":"");
+  $("d-cmpnote").innerHTML=`Coinciden ${both} de ${DS.k} vecinos. ${both<DS.k/2?"Estandarizar o no <b>cambia quién se parece a quién</b>: es una decisión del análisis, no un detalle técnico.":"Con estas variables la escala cambia poco la lista."}`;
+  renderPers();
+  /* código */
+  const vr=kv.map(v=>rname(v,log));
+  $("d-code").innerHTML=`<span class="c"># paises: una fila por país, con las siete variables</span>
+X <- paises |>${log&&kv.some(v=>v.log)?`
+  mutate(${kv.filter(v=>v.log).map(v=>`${rname(v,true)} = log(${v.r})`).join(", ")}) |>`:""}
+  select(${vr.join(", ")}) |>
+  as.data.frame()
+rownames(X) <- paises$pais
+${z?"X <- scale(X)                      <span class=\"c\"># media 0, desvío 1</span>\n":""}${DS.dist==="cor"?`d <- as.dist(1 - cor(t(X)))      <span class="c"># correlación entre perfiles (filas)</span>`:`d <- dist(X, method = "${DS.dist==="euc"?"euclidean":"manhattan"}")`}
+sort(as.matrix(d)["${esc(P0.pais)}", ])[2:${DS.k+1}]   <span class="c"># los ${DS.k} más cercanos</span>`;
+}
+function renderPers(){
+  const sd=[15,500000], ids=["A","B","C"], dR=(a,b)=>Math.hypot(PERS[a][0]-PERS[b][0],PERS[a][1]-PERS[b][1]), dZ=(a,b)=>Math.hypot((PERS[a][0]-PERS[b][0])/sd[0],(PERS[a][1]-PERS[b][1])/sd[1]);
+  const pairs=[["A","B"],["A","C"],["B","C"]];
+  const near=f=>f("A","B")<f("A","C")?"B":"C";
+  let h=`<table class="bt"><thead><tr><th>Par</th><th>Sin estandarizar</th><th>Estandarizando</th></tr></thead><tbody>`;
+  pairs.forEach(([a,b])=>{h+=`<tr><td>d(${a}, ${b})</td><td class="num">${fmt(dR(a,b),0)}</td><td class="num">${fmt(dZ(a,b),2)}</td></tr>`;});
+  h+=`</tbody></table>`;
+  const nr=near(dR), nz=near(dZ);
+  h+=`<p class="note ${nr!==nz?"warn":"good"}">Sin estandarizar, A se parece a <b>${nr}</b>; estandarizando, a <b>${nz}</b>. ${nr!==nz?"La edad casi no cuenta en pesos: está en otra escala.":""}</p>`;
+  $("d-pers").innerHTML=h;
+}
+
+/* ================= CLUSTERING ================= */
+const CDATA={
+  blobs:{lab:"Nubes", k:3, eps:0.45, desc:"Tres nubes redondas del mismo tamaño. El caso fácil: casi cualquier método las encuentra si están separadas. Achicá la separación."},
+  elong:{lab:"Alargados", k:3, eps:0.4, desc:"Tres grupos largos y finitos, paralelos. k-means busca grupos redondos y los corta de través."},
+  moons:{lab:"Medialunas", k:2, eps:0.17, desc:"Dos medialunas encastradas, con algunos puntos de ruido. Ningún centro “representa” a una medialuna."},
+  rings:{lab:"Anillos", k:2, eps:0.2, desc:"Un anillo dentro de otro, con ruido. El centro de los dos grupos es el mismo punto."},
+  chain:{lab:"Cadena", k:3, eps:0.35, desc:"Dos nubes unidas por una fila de puntos (gris: no pertenecen a ningún grupo) y una tercera nube aparte. Mirá qué hace single linkage."},
+  dens:{lab:"Densidades distintas", k:3, eps:0.3, desc:"Un grupo muy denso, uno disperso y uno chico. DBSCAN usa un solo eps para todos."},
+  unif:{lab:"Sin grupos", k:3, eps:0.07, desc:"300 puntos al azar en un cuadrado. No hay ningún grupo, pero los algoritmos igual devuelven grupos."},
+  paises:{lab:"Países", k:4, eps:1.7, desc:"Los 151 países con las siete variables. Los grupos se calculan con las siete; el mapa los muestra sobre PC1 y PC2 del PCA estandarizado."}
+};
+const CS={data:"blobs", sep:1, seed:2026, scale:"z", method:"km", k:3, ns:25, link:"ward", eps:0.45, mp:5, color:"cl", circ:false};
+let CD=null, HC={}, STEP=null;
+function genData(name, seed, sep){
+  return withSeed(seed, ()=>{
+    const P=[], T=[]; const add=(x,y,t)=>{P.push([x,y]); T.push(t);};
+    const unifN=(n,lim)=>{for(let i=0;i<n;i++) add(lim[0]+rnd()*(lim[1]-lim[0]), lim[2]+rnd()*(lim[3]-lim[2]), -1);};
+    if (name==="blobs"){ [[0,0],[3,0.5],[1.5,2.6]].forEach((c,g)=>{for(let i=0;i<50;i++) add(c[0]*sep+rnorm()*0.6, c[1]*sep+rnorm()*0.6, g);}); }
+    else if (name==="elong"){ for (let g=0;g<3;g++) for (let i=0;i<60;i++) add(rnorm()*1.6, g*1.1*sep+rnorm()*0.14, g); }
+    else if (name==="moons"){ for (let i=0;i<150;i++){const t=rnd()*Math.PI; add(Math.cos(t)+rnorm()*0.08, Math.sin(t)+rnorm()*0.08, 0);} for (let i=0;i<150;i++){const t=rnd()*Math.PI; add(1-Math.cos(t)+rnorm()*0.08, 0.5-Math.sin(t)+rnorm()*0.08, 1);} unifN(12,[-1.2,2.2,-0.9,1.3]); }
+    else if (name==="rings"){ for (let i=0;i<300;i++){const g=i<100?0:1, r=g?1:0.35, t=rnd()*2*Math.PI; add(r*Math.cos(t)+rnorm()*0.07, r*Math.sin(t)+rnorm()*0.07, g);} unifN(12,[-1.4,1.4,-1.4,1.4]); }
+    else if (name==="chain"){ for(let i=0;i<40;i++) add(rnorm()*0.35, rnorm()*0.35, 0); for(let i=0;i<40;i++) add(4+rnorm()*0.35, rnorm()*0.35, 1); for(let i=0;i<14;i++) add(0.5+3*i/13, rnorm()*0.06, -1); for(let i=0;i<40;i++) add(2+rnorm()*0.45, 2.8+rnorm()*0.45, 2); }
+    else if (name==="dens"){ for(let i=0;i<110;i++) add(rnorm()*0.22, rnorm()*0.22, 0); for(let i=0;i<70;i++) add(3.2+rnorm()*0.9, 0.3+rnorm()*0.9, 1); for(let i=0;i<35;i++) add(1.2+rnorm()*0.3, 2.6+rnorm()*0.3, 2); }
+    else if (name==="unif"){ for(let i=0;i<300;i++) add(rnd(), rnd(), -1); }
+    return {P,T};
+  });
+}
+function buildCD(){
+  if (CS.data==="paises"){
+    const keys=VARS.map(v=>v.k), X=toRows(paisCols(keys,true,CS.scale==="z"));
+    const mz=paisCols(keys,true,false).map(c=>[mean(c),sdv(c)]);
+    const toZ=r=>CS.scale==="z"?r:r.map((x,j)=>(x-mz[j][0])/mz[j][1]);
+    CD={X, pts:REF.pts, truth:PAISES.map(p=>p.cont), hasTruth:true, truthName:"Continente", names:PAISES.map(p=>p.pais), proj:r=>REF.proj(toZ(r)), key:PAISES.map(p=>Math.log(p.inb)), n:NP};
+  } else {
+    const {P,T}=genData(CS.data, CS.seed, CS.sep);
+    CD={X:P, pts:P, truth:T, hasTruth:T.some(t=>t>=0), truthName:"Grupos reales", names:null, proj:r=>r, key:P.map(p=>p[0]+1e-3*p[1]), n:P.length};
+  }
+  CD.D=distMatrix(CD.X); HC={}; STEP=null; CD.knnCache={};
+}
+const getHC=link=>HC[link]||(HC[link]=hclust(CD.D,CD.n,link));
+function runMethod(method, o){
+  const n=CD.n;
+  if (method==="km"){const r=kmeans(CD.X,o.k,o.ns); const lab=relabel(r.lab,CD.key); const ord=[...Array(o.k).keys()]; const centers=new Array(o.k); for(let i=0;i<n;i++) centers[lab[i]]=r.centers[r.lab[i]]; return {lab, centers, wss:r.wss};}
+  if (method==="hc") return {lab:relabel(cutree(getHC(o.link),n,o.k),CD.key)};
+  const r=dbscan(CD.D,n,o.eps,o.mp); return {lab:relabel(r.lab,CD.key), core:r.core, nclus:r.nclus, nnoise:r.nnoise};
+}
+function scatterSVG(o){
+  /* o: lab, centers, W, H, truthMode, mini, core, circEps */
+  const pts=CD.pts, n=CD.n, xs=pts.map(p=>p[0]), ys=pts.map(p=>p[1]);
+  const f=frame({W:o.W, H:o.H, xr:padR(...minmax(xs)), yr:padR(...minmax(ys)), equal:true, xticks:CD.names?!o.mini:false, yticks:CD.names?!o.mini:false, box:!CD.names||o.mini, zero:!!CD.names&&!o.mini, xlab:CD.names&&!o.mini?`PC1 (${fmt(REF.ve[0],0)}%)`:null, ylab:CD.names&&!o.mini?`PC2 (${fmt(REF.ve[1],0)}%)`:null, m:o.mini?{l:4,r:4,t:4,b:4}:undefined, aria:"Diagrama de dispersión con los grupos"});
+  let s=f.s; const rr=o.mini?2:(n>250?3:3.6);
+  if (o.circEps && o.core){ const sc=(f.X(1)-f.X(0)); s+=`<g style="opacity:.12">`; for (let i=0;i<n;i++) if (o.core[i]) s+=`<circle cx="${f.X(pts[i][0]).toFixed(1)}" cy="${f.Y(pts[i][1]).toFixed(1)}" r="${(o.circEps*sc).toFixed(1)}" style="fill:${CL(o.lab[i])}"/>`; s+=`</g>`; }
+  for (let i=0;i<n;i++){
+    const x=f.X(pts[i][0]).toFixed(1), y=f.Y(pts[i][1]).toFixed(1), g=o.truthMode?CD.truth[i]:o.lab[i];
+    const tt=CD.names?`<title>${esc(CD.names[i])}${o.truthMode?"":" · grupo "+(g+1)}</title>`:"";
+    if (g<0){
+      if (o.truthMode||o.grey) s+=`<circle cx="${x}" cy="${y}" r="${rr}" style="fill:var(--gris);opacity:.8">${tt}</circle>`;
+      else { const d=o.mini?2:3; s+=`<path d="M${x-d},${y-d}L${+x+d},${+y+d}M${x-d},${+y+d}L${+x+d},${y-d}" style="stroke:var(--ink);stroke-width:1.4">${tt}</path>`; }
+    } else {
+      const border=o.core&&!o.core[i]&&!o.truthMode;
+      s+=`<circle cx="${x}" cy="${y}" r="${border?rr*0.8:rr}" style="${border?`fill:var(--surface);stroke:${CL(g)};stroke-width:1.5`:`fill:${CL(g)};opacity:.85`}">${tt}</circle>`;
+    }
+  }
+  if (o.centers && !o.truthMode) o.centers.forEach((c,g)=>{ if(!c) return; const [px,py]=CD.proj(c), x=f.X(px), y=f.Y(py), d=o.mini?4:7; s+=`<path d="M${x},${y-d}L${x+d},${y}L${x},${y+d}L${x-d},${y}Z" style="fill:${CL(g)};stroke:var(--ink);stroke-width:1.5"/>`; });
+  if (CD.names && !o.mini){
+    const items=ISO_LAB.map(iso=>idxIso(iso)).filter(i=>i>=0).map(i=>({x:f.X(pts[i][0]),y:f.Y(pts[i][1]),text:PAISES[i].pais,r:rr}));
+    s+=drawLabels(items,f.W,f.H);
+  }
+  return s+"</svg>";
+}
+function silText(s){ return s==null?"—":fmt(s,2); }
+function silRead(s){ if (s==null) return ""; return s>=0.7?"estructura fuerte":s>=0.5?"estructura razonable":s>=0.25?"estructura débil":"sin estructura clara"; }
+function initClu(){
+  $("c-data").innerHTML=Object.entries(CDATA).map(([k,d])=>`<button data-v="${k}" aria-pressed="${k===CS.data}">${d.lab}</button>`).join("");
+  $("c-data").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{
+    $("c-data").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));
+    CS.data=b.dataset.v; CS.k=CDATA[CS.data].k; CS.eps=CDATA[CS.data].eps; $("c-k").value=CS.k; updK();
+    CS.color="cl"; segSet("c-color","cl"); buildCD(); setEpsRange(); renderClu();
+  }));
+  const updSep=rangeInit("c-sep",v=>fmt(v,2)+"×",v=>{CS.sep=v; buildCD(); setEpsRange(); renderClu();});
+  segInit("c-scale",v=>{CS.scale=v; buildCD(); setEpsRange(); renderClu();});
+  $("c-new").addEventListener("click",()=>{CS.seed=(CS.seed*7+13)%100000; buildCD(); renderClu();});
+  segInit("c-method",v=>{CS.method=v; renderClu();});
+  const updK=rangeInit("c-k",v=>v,v=>{CS.k=v; STEP=null; renderClu();});
+  rangeInit("c-ns",v=>v,v=>{CS.ns=v; renderClu();});
+  segInit("c-link",v=>{CS.link=v; renderClu();});
+  rangeInit("c-eps",v=>fmt(v,3),v=>{CS.eps=v; renderClu();});
+  rangeInit("c-mp",v=>v,v=>{CS.mp=v; setEpsRange(true); renderClu();});
+  segInit("c-color",v=>{CS.color=v; renderClu();});
+  $("c-circ").addEventListener("change",e=>{CS.circ=e.target.checked; renderClu();});
+  $("c-st-reset").addEventListener("click",()=>{stepReset(); renderStep();});
+  $("c-st-next").addEventListener("click",()=>{if(!STEP) stepReset(); stepNext(); renderStep();});
+  $("c-st-run").addEventListener("click",()=>{if(!STEP) stepReset(); let g=0; while(!STEP.done && g++<200) stepNext(); renderStep();});
+  $("c-starts").addEventListener("click",runStarts);
+  $("c-null").addEventListener("click",runNull);
+  buildCD(); setEpsRange();
+}
+function setEpsRange(keep){
+  const kd=knnDist(CD.D,CD.n,CS.mp-1), mx=Math.max(...kd);
+  const hi=+(mx*1.25).toPrecision(2), el=$("c-eps"); el.max=hi; el.min=+(hi/100).toPrecision(2); el.step=+(hi/400).toPrecision(2);
+  if (!keep) CS.eps=Math.min(CS.eps,hi); el.value=CS.eps; $("c-eps-o").textContent=fmt(CS.eps,3);
+}
+function stepReset(){ const k=CS.k; STEP={centers:randCenters(CD.X,k), lab:null, phase:"assign", it:0, hist:[], done:false, k}; }
+function stepNext(){
+  const X=CD.X, n=X.length, p=X[0].length, k=STEP.k;
+  if (STEP.phase==="assign"){
+    const lab=new Int32Array(n); let changed=!STEP.lab;
+    for (let i=0;i<n;i++){let bd=Infinity,bk=0; for(let c=0;c<k;c++){let s=0; for(let j=0;j<p;j++){const d=X[i][j]-STEP.centers[c][j]; s+=d*d;} if(s<bd){bd=s;bk=c;}} lab[i]=bk; if(STEP.lab&&STEP.lab[i]!==bk) changed=true;}
+    STEP.lab=lab; STEP.it++; STEP.hist.push(wssCenters(X,lab,STEP.centers));
+    if (!changed){STEP.done=true; return;}
+    STEP.phase="update";
+  } else {
+    const S=Array.from({length:k},()=>new Array(p).fill(0)), cnt=new Array(k).fill(0);
+    for (let i=0;i<n;i++){cnt[STEP.lab[i]]++; for(let j=0;j<p;j++) S[STEP.lab[i]][j]+=X[i][j];}
+    STEP.centers=STEP.centers.map((c,g)=>cnt[g]?S[g].map(v=>v/cnt[g]):c);
+    STEP.hist.push(wssCenters(X,STEP.lab,STEP.centers)); STEP.phase="assign";
+  }
+}
+function wssCenters(X,lab,C){let w=0; for(let i=0;i<X.length;i++) for(let j=0;j<X[0].length;j++) w+=(X[i][j]-C[lab[i]][j])**2; return w;}
+function renderStep(){
+  if (!STEP || STEP.k!==CS.k) stepReset();
+  const lab=STEP.lab||new Int32Array(CD.n).fill(-3);
+  /* puntos sin asignar en gris */
+  $("c-step").innerHTML=scatterSVG({lab:Int32Array.from(lab,v=>v===-3?-1:v), centers:STEP.centers, W:560, H:CD.names?380:360, truthMode:false, grey:!STEP.lab});
+  const h=STEP.hist;
+  if (h.length){
+    const W=420,H=170, f=frame({W,H,xr:[0.5,Math.max(4,h.length)+0.5],yr:[0,Math.max(...h)*1.1],xlab:"paso",ny:3,nx:Math.min(8,h.length+1),xfmt:v=>Number.isInteger(v)?fmt(v,0):"",yfmt:v=>fmt(v,0),aria:"WSS por paso"});
+    let s=f.s+`<path d="${h.map((v,i)=>(i?"L":"M")+f.X(i+1)+","+f.Y(v)).join("")}" style="fill:none;stroke:var(--azul);stroke-width:2"/>`;
+    h.forEach((v,i)=>s+=`<circle cx="${f.X(i+1)}" cy="${f.Y(v)}" r="3" style="fill:var(--azul)"/>`);
+    $("c-step-wss").innerHTML=`<p class="hint" style="margin:0 0 4px">WSS después de cada paso</p>`+s+"</svg>";
+  } else $("c-step-wss").innerHTML=`<p class="hint">Los rombos son ${CS.k} centros elegidos al azar entre los puntos. Tocá “Siguiente paso”.</p>`;
+  const last=h[h.length-1];
+  $("c-step-note").className="note"+(STEP.done?" good":"");
+  $("c-step-note").innerHTML=STEP.done?`<b>Convergió</b> en ${STEP.it} asignaciones: ningún punto cambió de grupo. WSS final: ${fv(last)}. ${STEP.done&&last>lastBest()*1.001?"Es <b>peor</b> que la mejor solución con "+CS.ns+" arranques ("+fv(lastBest())+"): quedó en un óptimo local.":""}`:
+    !STEP.lab?"":STEP.phase==="update"?`Paso ${h.length}: se asignó cada punto a su centro más cercano. Próximo: mover los centros.`:`Paso ${h.length}: cada centro se movió al promedio de sus puntos. Próximo: reasignar.`;
+}
+let _best=null; const lastBest=()=>_best||Infinity;
+function runStarts(){
+  const btn=$("c-starts"); btn.disabled=true; btn.textContent="Corriendo…";
+  setTimeout(()=>{
+    const w=[]; for (let i=0;i<100;i++) w.push(kmeans(CD.X,CS.k,1).wss);
+    const best=Math.min(...w), worse=w.filter(v=>v>best*1.005).length, vals=new Map();
+    w.forEach(v=>{const key=fv(v); vals.set(key,(vals.get(key)||0)+1);});
+    const top=[...vals.entries()].sort((a,b)=>b[1]-a[1]).slice(0,8);
+    $("c-starts-res").innerHTML=`<div class="kv"><span>Mejor WSS <b>${fv(best)}</b></span><span>Peor <b>${fv(Math.max(...w))}</b></span><span>Corridas más de 0,5% peores que la mejor <b>${worse} de 100</b></span></div>
+      <div class="chips">${top.map(([k,c])=>`<span>WSS ${k}: ${c} veces</span>`).join("")}</div>
+      <p class="note ${worse>0?"warn":"good"}">${worse>0?`Con un solo arranque, ${worse}% de las corridas terminó en una solución peor (un óptimo local). Por eso se usa <code>nstart = 25</code> o más y se queda con la mejor.`:"Con estos datos y este k, todos los arranques llegan a la misma solución. No siempre pasa: probá con más grupos o con los países."}</p>`;
+    btn.disabled=false; btn.textContent="Correr 100 arranques";
+  },20);
+}
+function runNull(){
+  const btn=$("c-null"); btn.disabled=true;
+  const X=CD.X, n=X.length, p=X[0].length, k=CS.k, {m,S}=covMat(X), L=cholesky(S);
+  const obsKm=kmeans(X,k,10), obs=silhouette(CD.D,n,obsKm.lab).mean, obsR2=inertia(X,obsKm.lab).r2;
+  const sims=[]; let b=0;
+  const chunk=()=>{
+    for (let t=0;t<5&&b<100;t++,b++){
+      const Y=[]; for (let i=0;i<n;i++){const z=Array.from({length:p},rnorm); Y.push(m.map((mu,a)=>mu+sum(L[a].map((l,c)=>l*z[c]))));}
+      const r=kmeans(Y,k,5); sims.push(silhouette(distMatrix(Y),n,r.lab).mean);
+    }
+    btn.textContent=`Simulando… ${b}/100`;
+    if (b<100) setTimeout(chunk,0);
+    else {
+      const pv=sims.filter(v=>v>=obs).length/100;
+      $("c-null-res").innerHTML=`<div id="c-null-h"></div><div class="kv"><span>Silhouette observada (k-means, k = ${k}) <b>${fmt(obs,2)}</b></span><span>Promedio sin grupos <b>${fmt(mean(sims),2)}</b></span><span>Simulaciones ≥ observada <b>${fmt(100*pv,0)}%</b></span></div>
+        <p class="note ${pv<0.05?"good":"warn"}">${pv<0.05?"La silhouette observada supera a casi todas las de las bases sin grupos: hay más estructura de grupos que en una nube normal con las mismas correlaciones.":"La silhouette observada <b>no se destaca</b> de la de bases sin grupos: los clusters resumen los datos, pero no hay evidencia de que existan grupos separados."} El R² del k-means es ${pctf(100*obsR2,0)}, pero ese número no sirve como test: el algoritmo elige los grupos para que difieran.</p>`;
+      histSimple($("c-null-h"), sims, {W:640,H:190,line:obs,xlab:"Silhouette promedio en 100 bases sin grupos",aria:"Distribución de la silhouette sin grupos"});
+      btn.disabled=false; btn.textContent="Simular de nuevo";
+    }
+  };
+  setTimeout(chunk,20);
+}
+function renderClu(){
+  const d=CDATA[CS.data], isP=CS.data==="paises", M=CS.method;
+  $("c-data-desc").textContent=d.desc;
+  $("c-sep-f").hidden=!(CS.data==="blobs"||CS.data==="elong");
+  $("c-scale-f").hidden=!isP; $("c-new").hidden=isP;
+  $("c-k-f").hidden=M==="db"; $("c-ns-f").hidden=M!=="km"; $("c-link-f").hidden=M!=="hc"; $("c-eps-f").hidden=M!=="db"; $("c-mp-f").hidden=M!=="db";
+  $("c-method-desc").innerHTML={km:"Ubica k centros, asigna cada punto al más cercano y mueve los centros al promedio. Repite hasta que nada cambia. Minimiza la WSS.",
+    hc:"Arranca con cada punto solo y une, de a dos, los grupos más cercanos. El linkage define qué es “cercano” entre grupos. Después se corta el árbol en k.",
+    db:"Un punto es núcleo si tiene al menos minPts puntos (contándose) a distancia eps. Los núcleos cercanos se encadenan en un grupo; los puntos lejos de todo núcleo son ruido."}[M];
+  $("c-color-true").textContent=CD.truthName; $("c-color").hidden=!CD.hasTruth;
+  const truthMode=CS.color==="true"&&CD.hasTruth;
+  const R=runMethod(M,{k:CS.k,ns:CS.ns,link:CS.link,eps:CS.eps,mp:CS.mp});
+  _best=M==="km"?R.wss:null;
+  const sil=silhouette(CD.D,CD.n,R.lab), inr=inertia(CD.X,R.lab), nk=Math.max(...R.lab)+1;
+  const truthARI=CD.hasTruth&&!isP?ari(R.lab,CD.truth):NaN;
+  /* veredicto */
+  const sv=sil?sil.mean:null;
+  $("c-verdict").innerHTML=`<span class="pill ${sv==null||sv<0.25?"warnp":sv>=0.5?"okp":""}">${M==="db"?`${nk} grupo${nk===1?"":"s"} + ${R.nnoise} ruido`:`k = ${CS.k} grupos`}</span>
+    <div class="stat">${inr?`WSS ${fv(inr.wss)} · BSS ${fv(inr.bss)} · R² = BSS/TSS ${pctf(100*inr.r2,0)}`:""} · silhouette ${silText(sv)}${isFinite(truthARI)?` · ARI vs. grupos reales ${fmt(truthARI,2)}`:""}</div>
+    <div class="read">${sv==null?"Con menos de dos grupos la silhouette no está definida.":`Silhouette ${silText(sv)}: ${silRead(sv)}.`} ${isFinite(truthARI)?(truthARI>0.9?"Recupera casi perfecto los grupos que simulamos.":truthARI>0.7?"Recupera bien los grupos simulados; los errores están donde los grupos se tocan.":truthARI>0.4?"Recupera los grupos simulados solo en parte.":"No recupera los grupos que simulamos: este método tiene otra idea de “grupo”."):CS.data==="unif"?"Ojo: los datos no tienen ningún grupo y el algoritmo igual los encontró.":""}${M==="db"&&R.nnoise>CD.n*0.3?" Más de un 30% quedó como ruido: eps es chico para estos datos.":""}</div>`;
+  /* scatter */
+  $("c-scatter").innerHTML=scatterSVG({lab:R.lab, centers:M==="km"?R.centers:null, W:760, H:isP?470:430, truthMode, core:M==="db"?R.core:null, circEps:M==="db"&&CS.circ&&!truthMode?CS.eps:0});
+  const kk=truthMode?(isP?6:Math.max(...CD.truth)+1):nk;
+  let lg=Array.from({length:kk},(_,g)=>`<span><i class="o" style="background:${CL(g)}"></i>${truthMode&&isP?CONTS[g]:truthMode?"Grupo real "+(g+1):"Grupo "+(g+1)}</span>`).join("");
+  if (truthMode&&CD.truth.some(t=>t<0)) lg+=`<span><i class="o" style="background:var(--gris)"></i>sin grupo (ruido o puente)</span>`;
+  if (!truthMode&&M==="km") lg+=`<span>◆ centros</span>`;
+  if (!truthMode&&M==="db") lg+=`<span><i class="o" style="background:var(--surface);border:1.5px solid var(--gris)"></i>borde (no núcleo)</span><span>× ruido</span>`;
+  $("c-legend").innerHTML=lg;
+  let note="";
+  if (isP) note=`El mapa es una <b>proyección</b>: los grupos se calcularon con las siete variables${CS.scale==="z"?" estandarizadas":" sin estandarizar"}, así que dos países que se ven cerca pueden estar lejos en otras dimensiones. ${CS.scale==="raw"?"Sin estandarizar pesan más las variables con más dispersión (fecundidad adolescente, Gini, esperanza de vida): compará los grupos con la versión estandarizada.":""} Argentina queda en el grupo ${R.lab[idxIso("ARG")]+1}.`;
+  else if (truthMode) note="Así se generaron los datos. En la vida real esta vista no existe: si la tuviéramos, no haría falta clustering.";
+  $("c-scnote").innerHTML=note;
+  /* tarjetas por método */
+  $("c-km-card").hidden=M!=="km"; $("c-hc-card").hidden=M!=="hc"; $("c-db-card").hidden=M!=="db"; $("c-k-card").hidden=M==="db";
+  if (M==="km"){ renderStep(); }
+  if (M==="hc") renderDendro(R.lab);
+  if (M==="db") renderKnn(R);
+  if (M!=="db") renderKChoice();
+  /* perfil (países) */
+  $("c-prof-card").hidden=!isP;
+  if (isP) renderProfile(R.lab);
+  renderMinis(R.lab);
+  $("c-null-res").innerHTML=""; $("c-null").textContent="Simular 100 bases sin grupos"; $("c-null").disabled=false;
+  $("c-starts-res").innerHTML="";
+  renderCluCode();
+}
+function renderDendro(lab){
+  const mg=getHC(CS.link), n=CD.n, k=CS.k;
+  /* orden de las hojas y posición de cada nodo */
+  const order=[], stack=[mg.length];
+  const visit=id=>{ if (id<0){order.push(-id-1); return;} const m=mg[id-1]; visit(m.a); visit(m.b); };
+  visit(mg.length);
+  const pos=new Array(n); order.forEach((leaf,i)=>pos[leaf]=i);
+  const nx=new Array(mg.length), grp=new Array(mg.length);
+  const gx=id=>id<0?pos[-id-1]:nx[id-1], gh=id=>id<0?0:mg[id-1].h, gg=id=>id<0?lab[-id-1]:grp[id-1];
+  const W=760, H=300, hmax=mg[mg.length-1].h;
+  const f=frame({W,H,xr:[-0.5,n-0.5],yr:[0,hmax*1.05],xticks:false,ylab:"Altura de la fusión",ny:5,m:{l:52,b:12},aria:"Dendrograma"});
+  const paths={};
+  mg.forEach((m,j)=>{
+    const xa=gx(m.a), xb=gx(m.b); nx[j]=(xa+xb)/2;
+    const ga=gg(m.a), gb=gg(m.b); grp[j]=ga===gb?ga:-1;
+    const add=(g,d)=>{(paths[g]=paths[g]||[]).push(d);};
+    add(ga,`M${f.X(xa).toFixed(1)},${f.Y(gh(m.a)).toFixed(1)}V${f.Y(m.h).toFixed(1)}`);
+    add(gb,`M${f.X(xb).toFixed(1)},${f.Y(gh(m.b)).toFixed(1)}V${f.Y(m.h).toFixed(1)}`);
+    add(grp[j],`M${f.X(xa).toFixed(1)},${f.Y(m.h).toFixed(1)}H${f.X(xb).toFixed(1)}`);
+  });
+  let s=f.s;
+  Object.entries(paths).forEach(([g,ds])=>{s+=`<path d="${ds.join("")}" style="fill:none;stroke:${+g<0?"var(--muted)":CL(+g)};stroke-width:${n>200?0.9:1.2}"/>`;});
+  const hc=(mg[n-k-1].h+mg[n-k].h)/2;
+  s+=`<line x1="${f.m.l}" x2="${W-f.m.r}" y1="${f.Y(hc)}" y2="${f.Y(hc)}" style="stroke:var(--ink);stroke-dasharray:6 4;stroke-width:1.5"/><text x="${W-f.m.r}" y="${f.Y(hc)-5}" text-anchor="end" class="ink">corte: k = ${k}</text>`;
+  if (CD.names) order.forEach((leaf,i)=>{s+=`<rect x="${f.X(i-0.5)}" y="${f.Y(0)}" width="${f.X(1)-f.X(0)}" height="8" style="fill:${CL(lab[leaf])};opacity:.8"><title>${esc(CD.names[leaf])}</title></rect>`;});
+  $("c-dendro").innerHTML=s+"</svg>";
+  /* nota: saltos de altura */
+  const top=mg.slice(-9).map(m=>m.h).reverse(); /* top[0] = última fusión (k de 2 a 1) */
+  let jmax=0, gmax=-1; for (let i=0;i<top.length-1;i++){const g=top[i]-top[i+1]; if (g>gmax){gmax=g;jmax=i;}}
+  const kSug=jmax+2;
+  const sizes=new Array(k).fill(0); lab.forEach(g=>sizes[g]++);
+  const tiny=sizes.filter(c=>c<=2).length;
+  let txt=`Alturas de las últimas fusiones: ${top.slice(0,6).map(h=>fv(h)).join(" · ")}. El salto más grande entre fusiones seguidas (de ${fv(top[jmax+1])} a ${fv(top[jmax])}) queda justo arriba de la partición en ${kSug} grupos: cortar ahí sugiere <b>k = ${kSug}</b> (una guía, no una regla).`;
+  if (CS.link==="ward"){const tss=inertia(CD.X,new Int32Array(n)).tss; txt+=` Con Ward, cada altura² / 2 es la WSS que se suma en esa fusión: unir los dos últimos grupos cuesta el ${pctf(100*top[0]**2/2/tss,0)} de la inercia total.`;}
+  if (tiny>0) txt+=` <b>Ojo:</b> ${tiny} de los ${k} grupos tienen 1 o 2 observaciones. ${CS.link==="single"?"Es el efecto cadena de single linkage: une por el par más cercano y deja grupos minúsculos.":""}`;
+  $("c-hc-note").className="note"+(tiny>0?" warn":"");
+  $("c-hc-note").innerHTML=txt;
+}
+function renderKnn(R){
+  const kd=Float64Array.from(knnDist(CD.D,CD.n,CS.mp-1)).sort(), n=kd.length;
+  const W=460,H=240, f=frame({W,H,xr:[0,n],yr:[0,kd[n-1]*1.08],xlab:"puntos ordenados",ylab:"distancia",ny:4,aria:"Distancia al k-ésimo vecino"});
+  let s=f.s+`<path d="${Array.from(kd,(v,i)=>(i?"L":"M")+f.X(i).toFixed(1)+","+f.Y(v).toFixed(1)).join("")}" style="fill:none;stroke:var(--azul);stroke-width:2"/>`;
+  s+=`<line x1="${f.m.l}" x2="${W-f.m.r}" y1="${f.Y(CS.eps)}" y2="${f.Y(CS.eps)}" style="stroke:var(--rojo);stroke-dasharray:5 4;stroke-width:1.5"/><text x="${f.m.l+6}" y="${f.Y(CS.eps)-5}" style="fill:var(--rojo);font-weight:600">eps = ${fmt(CS.eps,3)}</text>`;
+  $("c-knn").innerHTML=s+"</svg>";
+  const core=R.core.filter(Boolean).length;
+  $("c-db-kv").innerHTML=`<span>Núcleos <b>${core}</b></span><span>Borde <b>${CD.n-core-R.nnoise}</b></span><span>Ruido <b>${R.nnoise}</b></span><span>Grupos <b>${R.nclus}</b></span>`;
+}
+function renderKChoice(){
+  const ks=[1,2,3,4,5,6,7,8], X=CD.X, n=CD.n, M=CS.method;
+  const labs=ks.map(k=>M==="km"?(k===1?new Int32Array(n):kmeans(X,k,Math.min(CS.ns,10)).lab):(k===1?new Int32Array(n):cutree(getHC(CS.link),n,k)));
+  const wss=labs.map(l=>inertia(X,l).wss), sil=labs.map((l,i)=>i===0?null:silhouette(CD.D,n,l).mean);
+  const chart=(el,vals,ttl,col,from)=>{
+    const W=420,H=210, vv=vals.filter(v=>v!=null), lo=Math.min(0,...vv), hi=Math.max(...vv);
+    const f=frame({W,H,xr:[0.5,8.5],yr:[lo,hi*1.1||1],xlab:"k",title:ttl,ny:4,nx:8,xfmt:v=>fmt(v,0),m:{t:24},aria:ttl});
+    let s=f.s, d=""; vals.forEach((v,i)=>{ if (v==null) return; d+=(d?"L":"M")+f.X(ks[i])+","+f.Y(v); });
+    s+=`<path d="${d}" style="fill:none;stroke:${col};stroke-width:2"/>`;
+    vals.forEach((v,i)=>{ if (v==null) return; const cur=ks[i]===CS.k; s+=`<circle cx="${f.X(ks[i])}" cy="${f.Y(v)}" r="${cur?6:3.5}" style="fill:${cur?"var(--surface)":col};stroke:${col};stroke-width:${cur?2.5:0}"/>`; });
+    if (from) s+=`<text x="${f.X(1)}" y="${f.Y(lo)-6}" text-anchor="middle" style="font-size:10.5px">no definida</text>`;
+    el.innerHTML=s+"</svg>";
+  };
+  chart($("c-elbow"),wss,"Elbow: WSS","var(--azul)");
+  chart($("c-sil"),sil,"Silhouette promedio","var(--rojo)",true);
+  const kBest=1+sil.indexOf(Math.max(...sil.filter(v=>v!=null)));
+  $("c-k-hint").innerHTML=`${M==="km"?"k-means con hasta 10 arranques por cada k":"Cortes del mismo árbol ("+CS.link+")"}. El punto hueco es el k elegido.`;
+  $("c-k-note").innerHTML=`La WSS <b>siempre</b> baja al agregar grupos: buscamos el codo, donde deja de bajar mucho. La silhouette es máxima en <b>k = ${kBest}</b> (${fmt(sil[kBest-1],2)}). ${kBest!==CS.k?`Con k = ${CS.k}: ${fmt(sil[CS.k-1],2)}.`:""} ${CS.data==="unif"?"Fijate que sin grupos no hay codo nítido y la silhouette es baja para todo k.":""} Elegir k es una decisión: las heurísticas ayudan, no deciden.`;
+}
+function renderProfile(lab){
+  const k=Math.max(...lab)+1, Z=REF.Z, cnt=new Array(k).fill(0), S=Array.from({length:k},()=>new Array(VARS.length).fill(0));
+  lab.forEach((g,i)=>{ if (g<0) return; cnt[g]++; Z[i].forEach((v,j)=>S[g][j]+=v); });
+  const zc=v=>{const a=Math.min(1,Math.abs(v)/2); return `background:color-mix(in srgb, ${v>=0?"var(--azul)":"var(--rojo)"} ${(a*70).toFixed(0)}%, var(--surface));${a>0.6?"color:#fff;":""}`;};
+  let h=`<thead><tr><th>Variable</th>${cnt.map((c,g)=>`<th style="text-align:center;color:${CL(g)}">Grupo ${g+1}<br><span style="font-weight:400">n = ${c}</span></th>`).join("")}</tr></thead><tbody>`;
+  VARS.forEach((v,j)=>{h+=`<tr><td>${vlab(v,true)}</td>${cnt.map((c,g)=>{const z=c?S[g][j]/c:NaN; return `<td class="z" style="${zc(z)}">${fmt(z,1)}</td>`;}).join("")}</tr>`;});
+  $("c-prof").innerHTML=h+"</tbody>";
+  const ia=idxIso("ARG");
+  $("c-grp").innerHTML=cnt.map((c,g)=>{
+    const mem=PAISES.map((p,i)=>({p,i})).filter(o=>lab[o.i]===g).sort((a,b)=>b.p.inb-a.p.inb);
+    const ex=mem.length<=5?mem:[0,0.25,0.5,0.75,1].map(t=>mem[Math.round(t*(mem.length-1))]);
+    const medInb=mem.length?quant(mem.map(o=>o.p.inb).sort((a,b)=>a-b),0.5):NaN;
+    return `<div><h3><i style="background:${CL(g)}"></i>Grupo ${g+1} · ${c} países${lab[ia]===g?" · <span style='color:var(--azul)'>Argentina</span>":""}</h3><div class="hint">INB pc mediano: USD ${fmt(medInb,0)}</div><div>${ex.map(o=>esc(o.p.pais)).join(", ")}</div><details><summary>Ver todos</summary>${mem.map(o=>esc(o.p.pais)).join(", ")}</details></div>`;
+  }).join("");
+}
+function renderMinis(curLab){
+  const isP=CS.data==="paises", defs=[["km","k-means"],["single","Single"],["complete","Complete"],["average","Average"],["ward","Ward"],["db","DBSCAN"]];
+  $("c-minis-hint").innerHTML=`Los mismos datos con k = ${CS.k} (y DBSCAN con eps = ${fmt(CS.eps,3)}, minPts = ${CS.mp}). ${CD.hasTruth&&!isP?"ARI mide el acuerdo con los grupos que simulamos: 1 = idénticos, 0 = como al azar.":isP?"ARI mide el acuerdo con el método elegido arriba: 1 = misma partición.":"No hay grupos reales contra los cuales comparar."} Hacé clic en uno para elegirlo.`;
+  $("c-minis").innerHTML=defs.map(([key,name])=>{
+    const R=key==="km"?runMethod("km",{k:CS.k,ns:Math.min(CS.ns,10)}):key==="db"?runMethod("db",{eps:CS.eps,mp:CS.mp}):runMethod("hc",{k:CS.k,link:key});
+    const sil=silhouette(CD.D,CD.n,R.lab), a=CD.hasTruth&&!isP?ari(R.lab,CD.truth):isP?ari(R.lab,Int32Array.from(curLab,v=>v<0?99:v)):NaN;
+    const sel=(key==="km"&&CS.method==="km")||(key==="db"&&CS.method==="db")||(CS.method==="hc"&&CS.link===key);
+    return `<button data-k="${key}" class="${sel?"sel":""}"><h3>${name}${key!=="km"&&key!=="db"?" linkage":""}</h3><div class="sk">silhouette ${silText(sil&&sil.mean)}${isFinite(a)?` · ARI ${fmt(a,2)}`:""}${key==="db"?` · ruido ${R.nnoise}`:""}</div>${scatterSVG({lab:R.lab,W:240,H:170,mini:true,centers:null})}</button>`;
+  }).join("");
+  $("c-minis").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{
+    const k=b.dataset.k; if (k==="km"||k==="db"){CS.method=k;} else {CS.method="hc"; CS.link=k; segSet("c-link",k);}
+    segSet("c-method",CS.method); renderClu(); $("c-scatter").scrollIntoView({behavior:"smooth",block:"center"});
+  }));
+}
+function renderCluCode(){
+  const isP=CS.data==="paises", M=CS.method;
+  let c=isP?`<span class="c"># X: las siete variables de los países (ingreso y emisiones en log)</span>\n${CS.scale==="z"?"Z <- scale(X)\n":"Z <- as.matrix(X)                 <span class=\"c\"># sin estandarizar</span>\n"}`:`<span class="c"># datos: data frame con las columnas x e y</span>\nZ <- as.matrix(datos[, c("x", "y")])\n`;
+  if (M==="km") c+=`set.seed(123)\nkm <- kmeans(Z, centers = ${CS.k}, nstart = ${CS.ns})\ngrupo <- km$cluster\nkm$tot.withinss / km$totss          <span class="c"># WSS / TSS</span>`;
+  if (M==="hc") c+=`d  <- dist(Z)\nhc <- hclust(d, method = "${CS.link==="ward"?"ward.D2":CS.link}")\nplot(hc)                           <span class="c"># dendrograma</span>\ngrupo <- cutree(hc, k = ${CS.k})`;
+  if (M==="db") c+=`library(dbscan)\nkNNdistplot(Z, k = ${CS.mp-1})             <span class="c"># buscar el codo</span>\nabline(h = ${fmt(CS.eps,3).replace(",",".")}, lty = 2)\ndb <- dbscan(Z, eps = ${fmt(CS.eps,3).replace(",",".")}, minPts = ${CS.mp})\ngrupo <- db$cluster                <span class="c"># 0 = ruido</span>`;
+  c+=`\n\nlibrary(cluster)\nmean(silhouette(grupo${M==="db"?"[grupo > 0]":""}, dist(Z${M==="db"?"[grupo > 0, ]":""}))[, 3])`;
+  if (isP) c+=`\n\n<span class="c"># perfil: promedio de cada variable estandarizada por grupo</span>\nas_tibble(scale(X)) |> mutate(grupo) |>\n  group_by(grupo) |> summarise(across(everything(), mean))`;
+  $("c-code").innerHTML=c;
+}
+
+/* ================= PCA: geometría con dos variables ================= */
+const GS={ang:10, r:0.8, s:1.5};
+const GZ=withSeed(77,()=>Array.from({length:150},()=>[rnorm(),rnorm()]));
+const GHI=[8,31,57,88,112,140];
+function geoData(){
+  const a=GZ.map(([z1,z2])=>[z1, GS.s*(GS.r*z1+Math.sqrt(1-GS.r*GS.r)*z2)]);
+  const m=[mean(a.map(p=>p[0])), mean(a.map(p=>p[1]))];
+  return a.map(p=>[p[0]-m[0], p[1]-m[1]]);
+}
+function initGeo(){
+  const updA=rangeInit("g-ang",v=>v+"°",v=>{GS.ang=v; renderGeo();});
+  rangeInit("g-r",v=>fmt(v,2),v=>{GS.r=v; renderGeo();});
+  rangeInit("g-s",v=>fmt(v,2),v=>{GS.s=v; renderGeo();});
+  $("g-pc1").addEventListener("click",()=>{GS.ang=Math.round(geoPC1(geoData()).ang)%180; $("g-ang").value=GS.ang; updA(); renderGeo();});
+}
+function geoPC1(P){
+  const n=P.length; let cxx=0,cyy=0,cxy=0; P.forEach(([x,y])=>{cxx+=x*x;cyy+=y*y;cxy+=x*y;}); cxx/=n-1; cyy/=n-1; cxy/=n-1;
+  let ang=0.5*Math.atan2(2*cxy,cxx-cyy)*180/Math.PI; if (ang<0) ang+=180;
+  return {ang,cxx,cyy,cxy,tot:cxx+cyy};
+}
+function renderGeo(){
+  const P=geoData(), g=geoPC1(P), th=GS.ang*Math.PI/180, u=[Math.cos(th),Math.sin(th)];
+  const share=th2=>{const c=Math.cos(th2),s=Math.sin(th2); return (g.cxx*c*c+2*g.cxy*c*s+g.cyy*s*s)/g.tot;};
+  const L=Math.max(...P.flat().map(Math.abs))*1.08;
+  const f=frame({W:520,H:440,xr:[-L,L],yr:[-L,L],equal:true,zero:true,xlab:"Variable 1 (centrada)",ylab:"Variable 2 (centrada)",ny:5,aria:"Nube de puntos y recta de proyección"});
+  let s=f.s+`<defs><clipPath id="gclip"><rect x="${f.m.l}" y="${f.m.t}" width="${f.pw}" height="${f.ph}"/></clipPath></defs><g clip-path="url(#gclip)">`;
+  const R=L*2, thp=g.ang*Math.PI/180;
+  s+=`<line x1="${f.X(-R*Math.cos(thp))}" y1="${f.Y(-R*Math.sin(thp))}" x2="${f.X(R*Math.cos(thp))}" y2="${f.Y(R*Math.sin(thp))}" style="stroke:var(--ok);stroke-width:1.5;stroke-dasharray:2 4;opacity:.9"/>`;
+  P.forEach(([x,y])=>{s+=`<circle cx="${f.X(x).toFixed(1)}" cy="${f.Y(y).toFixed(1)}" r="3" style="fill:var(--gris);opacity:.55"/>`;});
+  s+=`<line x1="${f.X(-R*u[0])}" y1="${f.Y(-R*u[1])}" x2="${f.X(R*u[0])}" y2="${f.Y(R*u[1])}" style="stroke:var(--azul);stroke-width:2.5"/></g>`;
+  GHI.forEach(i=>{const [x,y]=P[i], t=x*u[0]+y*u[1], px=t*u[0], py=t*u[1];
+    s+=`<line x1="${f.X(x)}" y1="${f.Y(y)}" x2="${f.X(px)}" y2="${f.Y(py)}" style="stroke:var(--ink);stroke-dasharray:4 3"/><circle cx="${f.X(x)}" cy="${f.Y(y)}" r="4.5" style="fill:var(--ink)"/><circle cx="${f.X(px)}" cy="${f.Y(py)}" r="4.5" style="fill:var(--rojo)"/>`;});
+  $("g-plot").innerHTML=s+"</svg>";
+  const sh=share(th), near=Math.abs(((GS.ang-g.ang+90)%180+180)%180-90)<1.5;
+  $("g-kv").innerHTML=`<span>Varianza sobre la recta <b>${pctf(100*sh,1)}</b></span><span>Perdida (perpendicular) <b>${pctf(100*(1-sh),1)}</b></span><span style="color:var(--ok)">PC1: <b>${pctf(100*share(g.ang*Math.PI/180),1)}</b> a ${fmt(g.ang,0)}°</span>`;
+  /* curva: % de varianza capturada según el ángulo */
+  const W=420,H=190, fc=frame({W,H,xr:[0,180],yr:[0,100],xlab:"ángulo de la recta",ny:4,nx:6,xfmt:v=>fmt(v,0)+"°",yfmt:v=>fmt(v,0)+"%",aria:"Varianza capturada según el ángulo"});
+  let c=fc.s, d=""; for (let a=0;a<=180;a+=2) d+=(a?"L":"M")+fc.X(a).toFixed(1)+","+fc.Y(100*share(a*Math.PI/180)).toFixed(1);
+  c+=`<path d="${d}" style="fill:none;stroke:var(--azul);stroke-width:2"/>`;
+  c+=`<line x1="${fc.X(g.ang)}" x2="${fc.X(g.ang)}" y1="${fc.m.t}" y2="${fc.Y(0)}" style="stroke:var(--ok);stroke-dasharray:2 4;stroke-width:1.5"/>`;
+  c+=`<circle cx="${fc.X(GS.ang)}" cy="${fc.Y(100*sh)}" r="6" style="fill:var(--surface);stroke:var(--rojo);stroke-width:2.5"/>`;
+  $("g-curve").innerHTML=`<p class="hint" style="margin:6px 0 2px">% de la varianza total capturada por la recta, para cada ángulo. En verde, PC1${near?" (estás ahí)":""}.</p>`+c+"</svg>";
+}
+
+/* ================= PCA de los países ================= */
+const PS={vars:new Set(VARS.map(v=>v.k)), log:"log", scale:"z", axes:[0,1], color:"cont", flip:[1,1,1], pais:"ARG"};
+function pcaCompute(){
+  const keys=VARS.map(v=>v.k).filter(k=>PS.vars.has(k)), p=keys.length, log=PS.log==="log", z=PS.scale==="z";
+  const raw=paisCols(keys,log,false), mu=raw.map(mean), sd=raw.map(sdv);
+  const cols=raw.map((c,j)=>c.map(x=>(x-mu[j])/(z?sd[j]:1))), rows=toRows(cols);
+  const {S}=covMat(rows), e=eigSym(S), values=e.values.map(v=>Math.max(v,0)), V=e.vectors.map(v=>v.slice());
+  const big=k=>{let jm=0; V[k].forEach((v,j)=>{if(Math.abs(v)>Math.abs(V[k][jm])) jm=j;}); return jm;};
+  for (let k=0;k<p;k++){
+    let j=k===0?keys.indexOf("inb"):k===1?keys.indexOf("gini"):-1; if (j<0) j=big(k);
+    let sg=V[k][j]<0?-1:1; if (k<3) sg*=PS.flip[k];
+    V[k]=V[k].map(x=>x*sg);
+  }
+  const scores=rows.map(r=>V.map(v=>sum(v.map((w,j)=>w*r[j]))));
+  const sdc=cols.map(sdv);
+  const cor=keys.map((_,j)=>V.map((v,k)=>v[j]*Math.sqrt(values[k])/sdc[j]));
+  const tot=sum(values), ve=values.map(v=>100*v/tot);
+  return {keys, kv:keys.map(k=>VARS.find(v=>v.k===k)), p, log, z, values, V, scores, cor, ve, sd, cols};
+}
+function initPCA(){
+  initGeo();
+  $("p-vars").innerHTML=VARS.map(v=>`<label><input type="checkbox" data-k="${v.k}" checked>${v.lab}</label>`).join("");
+  $("p-vars").querySelectorAll("input").forEach(c=>c.addEventListener("change",()=>{
+    if (c.checked) PS.vars.add(c.dataset.k); else if (PS.vars.size>3) PS.vars.delete(c.dataset.k); else c.checked=true;
+    renderPCA();
+  }));
+  segInit("p-log",v=>{PS.log=v; renderPCA();});
+  segInit("p-scale",v=>{PS.scale=v; renderPCA();});
+  segInit("p-axes",v=>{PS.axes=v.split(",").map(Number); renderPCA();});
+  segInit("p-color",v=>{PS.color=v; renderPCA();});
+  $("p-flip").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{const i=+b.dataset.i; PS.flip[i]*=-1; b.setAttribute("aria-pressed",PS.flip[i]<0?"true":"false"); renderPCA();}));
+  fillPaisSelect("p-pais", PS.pais);
+  $("p-pais").addEventListener("change",e=>{PS.pais=e.target.value; renderPCA();});
+}
+function renderPCA(){
+  renderGeo();
+  const R=pcaCompute(), [a,b]=PS.axes, p=R.p, va=R.ve;
+  /* veredicto */
+  const nK=R.values.filter(v=>v>1).length, j1=R.V[0].map(Math.abs), jm=j1.indexOf(Math.max(...j1)), domin=j1[jm]>0.9;
+  $("p-verdict").innerHTML=`<span class="pill ${domin?"warnp":""}">PC${a+1} + PC${b+1} = ${pctf(va[a]+va[b],0)}</span>
+    <div class="stat">${va.slice(0,Math.min(4,p)).map((v,k)=>`PC${k+1} ${pctf(v,1)}`).join(" · ")}${R.z?` · autovalores &gt; 1: ${nK}`:""}</div>
+    <div class="read">${domin?`PC1 es casi solo <b>${vlab(R.kv[jm],R.log)}</b> (carga ${fmt(R.V[0][jm],3)}): ${R.z?"esa variable no está correlacionada con el resto":"es la de mayor varianza en sus unidades y se come el análisis. Estandarizá"}.`:
+      `Con ${p} variables hay ${p} componentes. Los dos del mapa conservan el ${pctf(va[a]+va[b],0)} de la varianza ${R.z?"de las variables estandarizadas":"(en las unidades originales)"}.`} ${!R.z?"Sin estandarizar, el criterio de autovalores &gt; 1 no aplica.":""}</div>`;
+  /* mapa */
+  const sc=R.scores, xs=sc.map(r=>r[a]), ys=sc.map(r=>r[b]);
+  const f=frame({W:780,H:500,xr:padR(...minmax(xs)),yr:padR(...minmax(ys)),equal:true,zero:true,xlab:`PC${a+1} (${fmt(va[a],1)}%)`,ylab:`PC${b+1} (${fmt(va[b],1)}%)`,xgrid:true,aria:"Mapa de países en los componentes principales"});
+  let s=f.s;
+  const idh=PAISES.map(q=>q.idh).filter(v=>v!=null), [i0,i1]=minmax(idh);
+  const colOf=i=>PS.color==="cont"?CL(PAISES[i].cont):PS.color==="cl"?CL(REF.ward4[i]):PAISES[i].idh==null?"var(--gris)":`color-mix(in srgb, var(--azul) ${(12+88*(PAISES[i].idh-i0)/(i1-i0)).toFixed(0)}%, var(--surface))`;
+  const ih=idxIso(PS.pais);
+  PAISES.forEach((q,i)=>{ if (i===ih) return; s+=`<circle cx="${f.X(xs[i]).toFixed(1)}" cy="${f.Y(ys[i]).toFixed(1)}" r="4.2" style="fill:${colOf(i)};opacity:.9;${PS.color==="idh"?"stroke:var(--azul);stroke-width:.6":""}"><title>${esc(q.pais)} · PC${a+1} ${fmt(xs[i],2)} · PC${b+1} ${fmt(ys[i],2)}</title></circle>`; });
+  s+=`<circle cx="${f.X(xs[ih])}" cy="${f.Y(ys[ih])}" r="7" style="fill:${colOf(ih)};stroke:var(--ink);stroke-width:2.5"><title>${esc(PAISES[ih].pais)}</title></circle>`;
+  const labI=[ih,...ISO_LAB.map(idxIso).filter(i=>i>=0&&i!==ih)];
+  const items=labI.map((i,j)=>({x:f.X(xs[i]),y:f.Y(ys[i]),text:PAISES[i].pais,r:j===0?7:4.2,force:j===0}));
+  s+=drawLabels(items,f.W,f.H,it=>it.force?"font-weight:700":"");
+  $("p-map").innerHTML=s+"</svg>";
+  $("p-legend").innerHTML=PS.color==="cont"?CONTS.map((c,g)=>`<span><i class="o" style="background:${CL(g)}"></i>${c}</span>`).join(""):
+    PS.color==="cl"?[0,1,2,3].map(g=>`<span><i class="o" style="background:${CL(g)}"></i>Grupo ${g+1}</span>`).join("")+`<span>(Ward sobre las 7 variables estandarizadas; 1 = menor ingreso)</span>`:
+    `<span>IDH ${fmt(i0,2)} <i class="grad"></i> ${fmt(i1,2)}</span>`;
+  const pc1=sc.map(r=>r[0]), ok=PAISES.map((q,i)=>i).filter(i=>PAISES[i].idh!=null), rI=corr(ok.map(i=>pc1[i]),ok.map(i=>PAISES[i].idh));
+  $("p-mapnote").innerHTML=`PC1 tiene una correlación de <b>${fmt(rI,2)}</b> con el IDH del PNUD, que no entró al análisis.${PS.flip.some(x=>x<0)?" Invertiste algún signo: el mapa se espeja, pero las distancias entre países y lo que mide cada eje son los mismos.":" Probá invertir un signo: el mapa se espeja y nada más cambia."}`;
+  /* scree */
+  {const W=440,H=220, f2=frame({W,H,xr:[0.4,p+0.6],yr:[0,100],ny:4,nx:p,xfmt:v=>Number.isInteger(v)?"PC"+v:"",yfmt:v=>fmt(v,0)+"%",aria:"Scree plot"});
+   let s2=f2.s, bw=(f2.X(1)-f2.X(0))*0.6, acc=0, d="";
+   va.forEach((v,k)=>{acc+=v; s2+=`<rect x="${f2.X(k+1)-bw/2}" y="${f2.Y(v)}" width="${bw}" height="${f2.Y(0)-f2.Y(v)}" style="fill:var(--azul)"/><text x="${f2.X(k+1)}" y="${f2.Y(v)-4}" text-anchor="middle" style="font-size:11px">${fmt(v,0)}</text>`; d+=(k?"L":"M")+f2.X(k+1)+","+f2.Y(acc);});
+   s2+=`<path d="${d}" style="fill:none;stroke:var(--rojo);stroke-width:2"/>`; acc=0; va.forEach((v,k)=>{acc+=v; s2+=`<circle cx="${f2.X(k+1)}" cy="${f2.Y(acc)}" r="3.5" style="fill:var(--rojo)"/>`;});
+   if (R.z){const kl=100/p; s2+=`<line x1="${f2.m.l}" x2="${W-f2.m.r}" y1="${f2.Y(kl)}" y2="${f2.Y(kl)}" style="stroke:var(--ink);stroke-dasharray:4 3"/><text x="${W-f2.m.r}" y="${f2.Y(kl)-4}" text-anchor="end" style="font-size:11px">autovalor = 1</text>`;}
+   $("p-scree").innerHTML=s2+`</svg><div class="legend"><span><i style="background:var(--azul)"></i>% de la varianza</span><span><i style="background:var(--rojo)"></i>% acumulado</span></div>`;}
+  let acc=0;
+  $("p-eig").innerHTML=`<thead><tr><th>Comp.</th><th>Autovalor</th><th>% var.</th><th>% acum.</th></tr></thead><tbody>`+R.values.map((v,k)=>{acc+=va[k]; return `<tr><td>PC${k+1}</td><td class="num">${fv(v)}</td><td class="num">${fmt(va[k],1)}</td><td class="num">${fmt(acc,1)}</td></tr>`;}).join("")+"</tbody>";
+  /* loadings */
+  const nc=Math.min(3,p);
+  $("p-load").innerHTML=`<thead><tr><th>Variable</th>${[...Array(nc)].map((_,k)=>`<th>PC${k+1}</th>`).join("")}</tr></thead><tbody>`+R.kv.map((v,j)=>`<tr><td>${vlab(v,R.log)}</td>${[...Array(nc)].map((_,k)=>{const w=R.V[k][j]; return `<td class="num ${Math.abs(w)>=0.35?"b":""}">${fmt(w,R.z?2:3)}</td>`;}).join("")}</tr>`).join("")+"</tbody>";
+  const pos=R.kv.filter((v,j)=>R.V[0][j]>=0.3).map(v=>v.short.toLowerCase()), neg=R.kv.filter((v,j)=>R.V[0][j]<=-0.3).map(v=>v.short.toLowerCase());
+  $("p-loadnote").innerHTML=`PC1 = ${R.kv.slice(0,3).map((v,j)=>`${fmt(R.V[0][j],2)}·${R.z?"z":"x"}<sub>${v.short.toLowerCase()}</sub>`).join(" + ")} + … ${pos.length&&neg.length?`Suben juntas ${pos.join(", ")}; en contra, ${neg.join(", ")}. Una lectura posible: “nivel de desarrollo”. El nombre lo ponemos nosotros.`:""}`;
+  /* círculo de correlaciones */
+  {const W=440,H=440, f3=frame({W,H,xr:[-1.12,1.12],yr:[-1.12,1.12],equal:true,zero:true,xlab:`PC${a+1}`,ylab:`PC${b+1}`,ny:4,nx:4,aria:"Círculo de correlaciones"});
+   let s3=f3.s+`<circle cx="${f3.X(0)}" cy="${f3.Y(0)}" r="${f3.X(1)-f3.X(0)}" style="fill:none;stroke:var(--gris)"/><defs><marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" style="fill:var(--azul)"/></marker></defs>`;
+   const items=[]; R.kv.forEach((v,j)=>{const x=R.cor[j][a], y=R.cor[j][b]; s3+=`<line x1="${f3.X(0)}" y1="${f3.Y(0)}" x2="${f3.X(x)}" y2="${f3.Y(y)}" style="stroke:var(--azul);stroke-width:2" marker-end="url(#arw)"><title>${v.lab}: r = ${fmt(x,2)} y ${fmt(y,2)}</title></line>`; items.push({x:f3.X(x)+(x>=0?2:-2),y:f3.Y(y),text:v.short,r:2,force:true});});
+   s3+=drawLabels(items,W,H);
+   $("p-circle").innerHTML=s3+"</svg>";}
+  /* relevancia */
+  const thr=100/p;
+  $("p-rel-hint").innerHTML=`<b>Contribution</b>: % con que cada variable construye el eje (suman 100); referencia ${fmt(thr,1)}% = 100/${p}, en negrita las que la superan. <b>cos²</b>: qué tan bien representada está la variable en el plano del mapa (0 a 1).`;
+  $("p-rel").innerHTML=`<thead><tr><th>Variable</th><th>Ctr PC${a+1}</th><th>Ctr PC${b+1}</th><th>cos²</th></tr></thead><tbody>`+R.kv.map((v,j)=>{const ca=100*R.V[a][j]**2, cb=100*R.V[b][j]**2, c2=R.cor[j][a]**2+R.cor[j][b]**2; return `<tr><td>${vlab(v,R.log)}</td><td class="num ${ca>thr?"b":""}">${fmt(ca,1)}</td><td class="num ${cb>thr?"b":""}">${fmt(cb,1)}</td><td class="num">${fmt(c2,2)}</td></tr>`;}).join("")+"</tbody>";
+  const n=NP, vt=(axis,g)=>{const idx=PAISES.map((q,i)=>i).filter(i=>PAISES[i].cont===g), ng=idx.length, m=mean(idx.map(i=>sc[i][axis])), vp=R.values[axis]*(n-1)/n; return m/Math.sqrt(vp/ng*(n-ng)/(n-1));};
+  $("p-vt").innerHTML=`<thead><tr><th>Continente</th><th>n</th><th>v.test PC${a+1}</th><th>v.test PC${b+1}</th></tr></thead><tbody>`+CONTS.map((c,g)=>{const x=vt(a,g), y=vt(b,g); return `<tr><td>${c}</td><td class="num">${PAISES.filter(q=>q.cont===g).length}</td><td class="num ${Math.abs(x)>2?"b":""}">${fmt(x,1)}</td><td class="num ${Math.abs(y)>2?"b":""}">${fmt(y,1)}</td></tr>`;}).join("")+"</tbody>";
+  /* correlaciones */
+  const zc=v=>{const t=Math.min(1,Math.abs(v)); return `background:color-mix(in srgb, ${v>=0?"var(--azul)":"var(--rojo)"} ${(t*75).toFixed(0)}%, var(--surface));${t>0.6?"color:#fff;":""}`;};
+  $("p-cor").innerHTML=`<thead><tr><th></th>${R.kv.map(v=>`<th style="text-align:center">${v.short}</th>`).join("")}</tr></thead><tbody>`+R.kv.map((v,i)=>`<tr><td>${vlab(v,R.log)}</td>${R.kv.map((w,j)=>{const r=i===j?1:corr(R.cols[i],R.cols[j]); return `<td class="z" style="${zc(r)}">${fmt(r,2)}</td>`;}).join("")}</tr>`).join("")+"</tbody>";
+  /* código */
+  const vr=R.kv.map(v=>rname(v,R.log));
+  $("p-code").innerHTML=`X <- paises |>${R.log&&R.kv.some(v=>v.log)?`
+  mutate(${R.kv.filter(v=>v.log).map(v=>`${rname(v,true)} = log(${v.r})`).join(", ")}) |>`:""}
+  select(${vr.join(", ")})
+pca <- prcomp(X, scale. = ${R.z?"TRUE":"FALSE"})
+summary(pca)                    <span class="c"># % de varianza y acumulado</span>
+pca$rotation[, 1:${nc}]           <span class="c"># loadings</span>
+head(pca$x[, c(${a+1}, ${b+1})])           <span class="c"># scores de cada país</span>
+
+<span class="c"># Con FactoMineR: contribuciones, cos2 y el continente como suplementaria</span>
+library(FactoMineR)
+res <- PCA(data.frame(X, continente = factor(paises$continente)),
+           scale.unit = ${R.z?"TRUE":"FALSE"}, quali.sup = ${p+1}, graph = FALSE)
+res$var$contrib; res$var$cos2; res$quali.sup$v.test`;
+}
+
+/* ================= MCA ================= */
+const MV=EPH.vars, MNAME={categoria:"Categoría", educacion:"Educación", salud:"Cobertura de salud", tamanio:"Tamaño del establecimiento", intensidad:"Intensidad", sexo:"Sexo", edad:"Edad", region:"Región"};
+const MOFF=[]; {let o=0; EPH.levels.forEach(l=>{MOFF.push(o); o+=l.length;});}
+const MS={role:{categoria:"act",educacion:"act",salud:"act",tamanio:"act",intensidad:"act",sexo:"sup",edad:"sup",region:"sup"}, axes:[0,1], sup:true, lines:false, size:true, flip:[1,1,1], pct:"raw"};
+const EJ=[["Asal. registrado","Univ. completo","Obra social","Más de 40 personas","Ocupado pleno","Mujer","30 a 49 años","GBA"],
+  ["Cuenta propia","Hasta sec. incompleto","Sin cobertura","Hasta 5 personas","Subocupado","Varón","50 años y más","NEA"],
+  ["Asal. no registrado","Sec. completo","Sin cobertura","6 a 40 personas","Sobreocupado","Varón","Hasta 29 años","NOA"],
+  ["Patrón","Sec. completo","Prepaga / plan estatal","Hasta 5 personas","Ocupado pleno","Varón","50 años y más","Pampeana"]];
+function mcaCompute(){
+  const B=EPH.burt, W=EPH.W, act=MV.map((v,q)=>q).filter(q=>MS.role[MV[q]]==="act"), sup=MV.map((v,q)=>q).filter(q=>MS.role[MV[q]]==="sup"), Q=act.length;
+  const cats=[]; act.forEach(q=>EPH.levels[q].forEach((l,i)=>cats.push({q, lab:l, g:MOFF[q]+i})));
+  const J=cats.length; cats.forEach(c=>{c.p=B[c.g][c.g]/W; c.c=c.p/Q; c.n=EPH.n[c.g];});
+  const M=cats.map(x=>cats.map(y=>(B[x.g][y.g]/(W*Q*Q)-x.c*y.c)/Math.sqrt(x.c*y.c)));
+  const e=eigSym(M), nd=J-Q;
+  const lam=e.values.slice(0,nd).map(v=>Math.max(v,0)), U=e.vectors.slice(0,nd);
+  const A=U.map(u=>cats.map((c,j)=>u[j]/Math.sqrt(c.c)));  /* coordenadas estándar A[s][j] */
+  const find=lab=>cats.findIndex(c=>c.lab===lab);
+  for (let s=0;s<nd;s++){
+    let sg=1, j;
+    const bigCtr=()=>{let jm=0; cats.forEach((c,j)=>{if(c.p*A[s][j]**2>cats[jm].p*A[s][jm]**2) jm=j;}); return jm;};
+    if (s===0){ if ((j=find("Sin cobertura"))>=0) sg=A[s][j]<0?-1:1; else if ((j=find("Asal. registrado"))>=0) sg=A[s][j]>0?-1:1; else sg=A[s][bigCtr()]<0?-1:1; }
+    else if (s===1 && (j=find("Asal. no registrado"))>=0) sg=A[s][j]<0?-1:1;
+    else sg=A[s][bigCtr()]<0?-1:1;
+    if (s<3) sg*=MS.flip[s];
+    A[s]=A[s].map(x=>x*sg);
+  }
+  const G=A.map((a,s)=>a.map(x=>x*Math.sqrt(lam[s])));
+  cats.forEach((c,j)=>{ c.G=G.map(r=>r[j]); c.ctr=G.map((r,s)=>lam[s]>0?100*c.p*r[j]**2/(Q*lam[s]):0); c.d2=1/c.p-1; c.cos2=G.map(r=>r[j]**2/c.d2); });
+  const eta=act.map(q=>({q, sup:false, e:lam.map((l,s)=>sum(cats.filter(c=>c.q===q).map(c=>c.p*c.G[s]**2)))}));
+  const scats=[]; sup.forEach(q=>EPH.levels[q].forEach((l,i)=>{const g=MOFF[q]+i, Wk=B[g][g];
+    const co=lam.map((l2,s)=>l2>0?(sum(cats.map((c,j)=>B[g][c.g]/Wk*A[s][j]))/Q)/Math.sqrt(l2):0);
+    scats.push({q, lab:l, g, p:Wk/W, n:EPH.n[g], G:co});}));
+  sup.forEach(q=>eta.push({q, sup:true, e:lam.map((l,s)=>sum(scats.filter(c=>c.q===q).map(c=>c.p*c.G[s]**2)))}));
+  const tot=sum(lam), ve=lam.map(l=>100*l/tot);
+  const bz=lam.map(l=>l>1/Q?((Q/(Q-1))*(l-1/Q))**2:0), bzt=sum(bz), vb=bz.map(v=>bzt>0?100*v/bzt:0);
+  return {act, sup, Q, J, cats, scats, lam, ve, vb, eta, tot, nd};
+}
+function initMCA(){
+  $("m-roles").innerHTML=MV.map(v=>`<span>${MNAME[v]}</span><div class="seg sm" data-v="${v}"><button data-r="act">Activa</button><button data-r="sup">Suplem.</button><button data-r="out">Fuera</button></div>`).join("");
+  const sync=()=>$("m-roles").querySelectorAll(".seg").forEach(sg=>sg.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",MS.role[sg.dataset.v]===b.dataset.r?"true":"false")));
+  $("m-roles").querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",()=>{
+    const v=b.parentElement.dataset.v, prev=MS.role[v]; MS.role[v]=b.dataset.r;
+    if (MV.filter(x=>MS.role[x]==="act").length<2) MS.role[v]=prev;
+    sync(); renderMCA();
+  }));
+  sync();
+  segInit("m-axes",v=>{MS.axes=v.split(",").map(Number); renderMCA();});
+  segInit("m-pct",v=>{MS.pct=v; renderMCA();});
+  $("m-sup").addEventListener("change",e=>{MS.sup=e.target.checked; renderMCA();});
+  $("m-lines").addEventListener("change",e=>{MS.lines=e.target.checked; renderMCA();});
+  $("m-size").addEventListener("change",e=>{MS.size=e.target.checked; renderMCA();});
+  $("m-flip").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{const i=+b.dataset.i; MS.flip[i]*=-1; b.setAttribute("aria-pressed",MS.flip[i]<0?"true":"false"); renderMCA();}));
+}
+function renderMCA(){
+  const R=mcaCompute(), nd=R.nd;
+  let [a,b]=MS.axes; const okAx=b<nd;
+  if (!okAx){a=0;b=Math.min(1,nd-1);}
+  const pv=MS.pct==="benz"?R.vb:R.ve, cats=R.cats;
+  /* veredicto */
+  const ext=(s,sgn)=>cats.filter(c=>Math.sign(c.G[s])===sgn).sort((x,y)=>y.ctr[s]-x.ctr[s]).slice(0,2).map(c=>c.lab);
+  $("m-verdict").innerHTML=`<span class="pill">Dim 1: ${pctf(R.ve[0],1)}</span>
+    <div class="stat">λ₁ = ${fmt(R.lam[0],3)} · λ₂ = ${fmt(R.lam[1]||0,3)} · inercia total = J/Q − 1 = ${R.J}/${R.Q} − 1 = ${fmt(R.tot,2)} · Benzécri Dim 1: ${pctf(R.vb[0],0)}</div>
+    <div class="read">La Dim 1 opone ${ext(0,-1).join(" y ")} (izquierda) a ${ext(0,1).join(" y ")} (derecha).${nd>1?` La Dim 2 opone ${ext(1,-1).join(" y ")} (abajo) a ${ext(1,1).join(" y ")} (arriba).`:""} Los nombres de las dimensiones los ponemos nosotros.</div>`;
+  /* mapa */
+  const ptsA=cats.map(c=>[c.G[a],c.G[b]]), ptsS=MS.sup?R.scats.map(c=>[c.G[a],c.G[b]]):[];
+  const all=ptsA.concat(ptsS), xr=padR(...minmax(all.map(p=>p[0])),0.12), yr=padR(...minmax(all.map(p=>p[1])),0.1);
+  const f=frame({W:820,H:620,xr,yr,equal:true,zero:true,xgrid:true,xlab:`Dim ${a+1} (${fmt(R.ve[a],1)}%)`,ylab:`Dim ${b+1} (${fmt(R.ve[b],1)}%)`,aria:"Mapa de categorías del MCA"});
+  let s=f.s;
+  const rad=c=>MS.size?Math.max(3,Math.sqrt(c.p)*16):5;
+  if (MS.lines) R.act.forEach(q=>{const cs=cats.filter(c=>c.q===q); s+=`<path d="${cs.map((c,i)=>(i?"L":"M")+f.X(c.G[a]).toFixed(1)+","+f.Y(c.G[b]).toFixed(1)).join("")}" style="fill:none;stroke:${CL(q)};stroke-width:1.5;opacity:.6"/>`;});
+  const items=[];
+  cats.forEach(c=>{const x=f.X(c.G[a]), y=f.Y(c.G[b]), r=rad(c);
+    s+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" style="fill:${CL(c.q)};opacity:.85"><title>${esc(MNAME[MV[c.q]])}: ${esc(c.lab)} · ${pctf(100*c.p,1)} de los ocupados · contrib. ${fmt(c.ctr[a],1)}% y ${fmt(c.ctr[b],1)}% · cos² plano ${fmt(c.cos2[a]+c.cos2[b],2)}</title></circle>`;
+    items.push({x,y,text:c.lab,r,force:true,col:CL(c.q)});});
+  if (MS.sup) R.scats.forEach(c=>{const x=f.X(c.G[a]), y=f.Y(c.G[b]);
+    s+=`<path d="M${x},${y-6}L${x+5.5},${y+4}L${x-5.5},${y+4}Z" style="fill:var(--gris)"><title>${esc(MNAME[MV[c.q]])} (suplementaria): ${esc(c.lab)} · ${pctf(100*c.p,1)} de los ocupados</title></path>`;
+    items.push({x,y,text:c.lab,r:5,force:true,sup:true});});
+  s+=drawLabels(items,f.W,f.H,it=>it.sup?"font-style:italic;fill:var(--muted)":`fill:${it.col};font-weight:600`);
+  $("m-map").innerHTML=s+"</svg>";
+  $("m-legend").innerHTML=R.act.map(q=>`<span><i class="o" style="background:${CL(q)}"></i>${MNAME[MV[q]]}</span>`).join("")+(MS.sup&&R.sup.length?`<span><i class="tri"></i>suplementarias (${R.sup.map(q=>MNAME[MV[q]].toLowerCase()).join(", ")})</span>`:"")+(MS.size?"<span>tamaño ∝ frecuencia</span>":"");
+  const rare=cats.filter(c=>c.p<0.05);
+  const thrC=100/R.J, rareBad=rare.filter(c=>Math.max(c.ctr[a],c.ctr[b])>thrC), rareOk=rare.filter(c=>!rareBad.includes(c));
+  $("m-mapnote").className="note"+(rareBad.length?" warn":"");
+  $("m-mapnote").innerHTML=(!okAx?"Con estas variables no hay tantas dimensiones: se muestra Dim 1-2. ":"")+(rareBad.length?`Categorías raras (menos del 5% de los ocupados) que pesan en el plano: ${rareBad.map(c=>`<b>${esc(c.lab)}</b> (${pctf(100*c.p,1)}, contribución ${fmt(Math.max(c.ctr[a],c.ctr[b]),1)}%)`).join(", ")}. Con pocos casos pueden dominar una dimensión: considerá agruparlas. `:"")+(rareOk.length?`${rareOk.map(c=>`<b>${esc(c.lab)}</b> (${pctf(100*c.p,1)})`).join(", ")} tiene${rareOk.length>1?"n":""} pocos casos pero no domina${rareOk.length>1?"n":""} el plano. `:"")+`Las categorías de una misma variable no pueden darse juntas en una persona: su distancia no se lee como asociación.`;
+  /* scree */
+  {const k=Math.min(10,nd), W=440,H=220, mx=Math.max(...pv.slice(0,k)), f2=frame({W,H,xr:[0.4,k+0.6],yr:[0,mx*1.15],ny:4,nx:k,xfmt:v=>Number.isInteger(v)?fmt(v,0):"",yfmt:v=>fmt(v,0)+"%",xlab:"dimensión",aria:"Inercia por dimensión"});
+   let s2=f2.s, bw=(f2.X(1)-f2.X(0))*0.6;
+   pv.slice(0,k).forEach((v,i)=>{s2+=`<rect x="${f2.X(i+1)-bw/2}" y="${f2.Y(v)}" width="${bw}" height="${f2.Y(0)-f2.Y(v)}" style="fill:${MS.pct==="benz"?"var(--rojo)":"var(--azul)"}"/><text x="${f2.X(i+1)}" y="${f2.Y(v)-4}" text-anchor="middle" style="font-size:11px">${fmt(v,v<10?1:0)}</text>`;});
+   $("m-scree").innerHTML=s2+"</svg>";}
+  let acc=0;
+  $("m-eig").innerHTML=`<thead><tr><th>Dim.</th><th>Autovalor</th><th>% inercia</th><th>% acum.</th><th>% Benzécri</th></tr></thead><tbody>`+R.lam.slice(0,6).map((l,s)=>{acc+=R.ve[s]; return `<tr><td>Dim ${s+1}</td><td class="num">${fmt(l,3)}</td><td class="num">${fmt(R.ve[s],1)}</td><td class="num">${fmt(acc,1)}</td><td class="num">${fmt(R.vb[s],1)}</td></tr>`;}).join("")+"</tbody>";
+  const nb=R.lam.filter(l=>l>1/R.Q).length;
+  $("m-eignote").innerHTML=`Los % son bajos por construcción: con ${R.Q} variables y ${R.J} categorías hay ${nd} dimensiones, y la tabla disyuntiva infla la dimensionalidad. Benzécri solo considera los autovalores mayores que 1/Q = ${fmt(1/R.Q,3)} (acá ${nb}) y los corrige. No compares estos % con los de un PCA.`;
+  /* eta2 */
+  {const W=440,H=330, f3=frame({W,H,xr:[0,1],yr:[0,1],xlab:`Dim ${a+1}`,ylab:`Dim ${b+1}`,ny:5,nx:5,xgrid:true,aria:"Razón de correlación"});
+   let s3=f3.s; const items=[];
+   R.eta.forEach(o=>{const x=f3.X(Math.min(1,o.e[a])), y=f3.Y(Math.min(1,o.e[b]));
+     if (o.sup) s3+=`<path d="M${x},${y-6}L${x+5.5},${y+4}L${x-5.5},${y+4}Z" style="fill:var(--gris)"/>`; else s3+=`<circle cx="${x}" cy="${y}" r="6" style="fill:${CL(o.q)}"/>`;
+     items.push({x,y,text:MNAME[MV[o.q]],r:6,force:true,sup:o.sup});});
+   s3+=drawLabels(items,W,H,it=>it.sup?"font-style:italic;fill:var(--muted)":"");
+   $("m-eta").innerHTML=s3+"</svg>";}
+  /* tabla de categorías */
+  const thr=100/R.J;
+  $("m-cat-hint").innerHTML=`Coordenadas, <b>contribución</b> (% con que la categoría construye la dimensión; en negrita las que superan 100/J = ${fmt(thr,1)}%) y <b>cos²</b> en el plano (qué tan bien la representa el mapa; bajo = su posición en el mapa engaña).`;
+  let h=`<thead><tr><th>Variable</th><th style="text-align:left">Categoría</th><th>% ocup.</th><th>Dim ${a+1}</th><th>Dim ${b+1}</th><th>Contrib. ${a+1}</th><th>Contrib. ${b+1}</th><th>cos² plano</th></tr></thead><tbody>`;
+  cats.forEach((c,j)=>{const first=j===0||cats[j-1].q!==c.q, c2=c.cos2[a]+c.cos2[b];
+    h+=`<tr class="${first&&j?"sep":""}"><td>${first?`<span style="color:${CL(c.q)};font-weight:700">${MNAME[MV[c.q]]}</span>`:""}</td><td class="l">${esc(c.lab)}</td><td class="num">${fmt(100*c.p,1)}</td><td class="num">${fmt(c.G[a],2)}</td><td class="num">${fmt(c.G[b],2)}</td><td class="num ${c.ctr[a]>thr?"b":""}">${fmt(c.ctr[a],1)}</td><td class="num ${c.ctr[b]>thr?"b":""}">${fmt(c.ctr[b],1)}</td><td class="num ${c2<0.2?"mut":""}">${fmt(c2,2)}</td></tr>`;});
+  $("m-cat").innerHTML=h+"</tbody>";
+  /* suplementarias */
+  $("m-sup-card").hidden=!R.sup.length;
+  if (R.sup.length){
+    let t=`<thead><tr><th>Variable</th><th style="text-align:left">Categoría</th><th>% ocup.</th><th>Dim ${a+1}</th><th>Dim ${b+1}</th><th>Distancia al origen</th></tr></thead><tbody>`;
+    R.scats.forEach((c,j)=>{const first=j===0||R.scats[j-1].q!==c.q, d=Math.hypot(c.G[a],c.G[b]);
+      t+=`<tr class="${first&&j?"sep":""}"><td>${first?MNAME[MV[c.q]]:""}</td><td class="l">${esc(c.lab)}</td><td class="num">${fmt(100*c.p,1)}</td><td class="num">${fmt(c.G[a],2)}</td><td class="num">${fmt(c.G[b],2)}</td><td class="num ${d>0.2?"b":"mut"}">${fmt(d,2)}</td></tr>`;});
+    $("m-supt").innerHTML=t+"</tbody>";
+  }
+  /* tabla disyuntiva */
+  let dj=`<thead><tr><th></th>${R.act.map(q=>`<th colspan="${EPH.levels[q].length}" style="text-align:center;color:${CL(q)};border-left:1px solid var(--rule)">${MNAME[MV[q]]}</th>`).join("")}</tr><tr><th>Persona</th>${R.act.map(q=>EPH.levels[q].map((l,i)=>`<th style="font-weight:500;font-size:12px;white-space:normal;min-width:70px;${i===0?"border-left:1px solid var(--rule)":""}">${esc(l)}</th>`).join("")).join("")}</tr></thead><tbody>`;
+  EJ.forEach((e,r)=>{dj+=`<tr><td>${String.fromCharCode(65+r)}</td>${R.act.map(q=>EPH.levels[q].map((l,i)=>{const one=e[q]===l; return `<td class="num ${one?"one":"mut"}" style="${i===0?"border-left:1px solid var(--rule)":""}">${one?1:0}</td>`;}).join("")).join("")}</tr>`;});
+  dj+=`<tr class="sep"><td class="mut">% ocupados</td>${R.act.map(q=>EPH.levels[q].map((l,i)=>`<td class="num mut" style="${i===0?"border-left:1px solid var(--rule)":""}">${fmt(100*EPH.burt[MOFF[q]+i][MOFF[q]+i]/EPH.W,0)}</td>`).join("")).join("")}</tr>`;
+  $("m-disj").innerHTML=dj+"</tbody>";
+  /* código */
+  const va=R.act.map(q=>MV[q]), vs=R.sup.map(q=>MV[q]);
+  $("m-code").innerHTML=`library(FactoMineR)
+<span class="c"># ocup: un ocupado por fila, variables como factor, PONDERA como peso</span>
+datos <- ocup |> select(${va.concat(vs).join(", ")}) |> as.data.frame()
+mca <- MCA(datos,${vs.length?`
+           quali.sup = ${va.length+1}${vs.length>1?":"+(va.length+vs.length):""},          <span class="c"># ${vs.join(", ")}</span>`:""}
+           row.w = ocup$PONDERA, graph = FALSE)
+mca$eig                <span class="c"># autovalores y % de inercia</span>
+mca$var$coord          <span class="c"># coordenadas de las categorías activas</span>
+mca$var$contrib; mca$var$cos2; mca$var$eta2${vs.length?"\nmca$quali.sup$coord    <span class=\"c\"># suplementarias</span>":""}
+
+<span class="c"># Benzécri: solo autovalores &gt; 1/Q</span>
+Q <- ${R.Q}; l <- mca$eig[, 1]
+benz <- ifelse(l &gt; 1/Q, ((Q/(Q-1)) * (l - 1/Q))^2, 0)
+round(100 * benz / sum(benz), 1)`;
+}
+
+/* ================= ¿Qué harías? ================= */
+const CASOS=[
+ {q:"Querés agrupar clientes con k-means usando la edad (en años) y el gasto mensual (en pesos, de $50.000 a $2.000.000). ¿Qué hacés antes de correrlo?",
+  hint:"Pensá en la distancia euclídea: ¿cuánto pesa una diferencia de 10 años contra una de $100.000?",
+  ops:[["Estandarizo las dos variables (por ejemplo con scale())",true,"Sin estandarizar, la distancia la decide casi solo el gasto: está en una escala miles de veces mayor. Estandarizar hace que cada variable cuente parecido. Es una decisión que cambia el resultado y hay que reportarla."],
+       ["Nada: k-means ya tiene en cuenta las unidades",false,"k-means usa distancia euclídea sobre los números tal como vienen. No sabe qué son pesos ni años."],
+       ["Paso el gasto a miles de pesos para que los números sean más chicos",false,"Ayuda algo, pero la elección de la unidad pasaría a decidir cuánto pesa cada variable. Lo sistemático es estandarizar."],
+       ["Uso más grupos para compensar",false,"La cantidad de grupos no corrige que una variable domine la distancia."]]},
+ {q:"Corriste k-means con k = 3 sobre una nube de puntos y obtuviste tres grupos bien prolijos. ¿Eso demuestra que hay tres tipos de observaciones?",
+  hint:"Mirá la solapa de clustering con los datos “Sin grupos”.",
+  ops:[["No: k-means devuelve k grupos aunque los datos no tengan estructura. Hay que compararlo con datos sin grupos",true,"El algoritmo siempre parte los datos. La pregunta es si obtendrías grupos tan marcados en datos que no tienen grupos (test contra una referencia sin grupos, gap statistic, estabilidad)."],
+       ["Sí, si el R² = BSS/TSS es alto",false,"El R² siempre es alto en algún grado: el algoritmo elige los grupos para maximizarlo. Usarlo como evidencia es circular."],
+       ["Sí, si al repetirlo da lo mismo",false,"La estabilidad ayuda, pero un corte de una nube uniforme también puede ser estable. Falta comparar con datos sin grupos."],
+       ["Sí, porque k-means minimiza la WSS",false,"Minimizar la WSS no implica que los grupos existan: con cualquier k hay una partición que la minimiza."]]},
+ {q:"Tenés las ubicaciones de clientes de un delivery: forman dos zonas alargadas y curvas, más algunos puntos aislados. ¿Qué algoritmo probás primero?",
+  hint:"¿Qué forma de grupo supone cada algoritmo?",
+  ops:[["DBSCAN, eligiendo eps con el gráfico de distancias al k-ésimo vecino",true,"DBSCAN define grupo como zona densa: sigue formas arbitrarias y marca los aislados como ruido en lugar de forzarlos a un grupo."],
+       ["k-means con k = 2",false,"k-means corta el plano en regiones alrededor de un centro: no puede separar formas curvas encastradas."],
+       ["Ward con k = 2",false,"Ward también busca grupos compactos y redondeados, como k-means."],
+       ["k-means con k = 2 y muchos arranques",false,"Más arranques encuentran la mejor partición en regiones redondas, pero el problema es la forma, no el arranque."]]},
+ {q:"Hiciste un cluster jerárquico con single linkage y k = 3: un grupo tiene 297 observaciones y los otros dos, una cada uno. ¿Qué está pasando?",
+  hint:"¿Cómo mide single la distancia entre dos grupos?",
+  ops:[["Efecto cadena: single une por el par más cercano y va encadenando. Conviene probar Ward, complete o average",true,"Single sigue “puentes” de puntos y deja grupos minúsculos (a veces outliers). Es útil para detectar formas encadenadas, pero rara vez para segmentar."],
+       ["Los datos tienen tres grupos muy desiguales",false,"Puede ser, pero el patrón (un grupo gigante más singletons) es la firma típica de single linkage. Primero compará con otros linkages."],
+       ["Hay que subir k hasta que los grupos se equilibren",false,"Con single, subir k suele seguir separando de a un punto."],
+       ["Hay que estandarizar",false,"Estandarizar puede cambiar las distancias, pero no resuelve el efecto cadena."]]},
+ {q:"Corriste kmeans(Z, centers = 4) dos veces y te dio grupos distintos. ¿Por qué?",
+  hint:"¿Cómo arranca el algoritmo?",
+  ops:[["Arranca con centros al azar y puede terminar en un óptimo local. Uso nstart = 25 o más (y set.seed para reproducir)",true,"Con nstart, R corre varios arranques y se queda con el de menor WSS. set.seed hace que el resultado sea reproducible."],
+       ["Hay un error en los datos",false,"Es el comportamiento esperado de k-means con un solo arranque."],
+       ["Los datos no tienen 4 grupos",false,"Aun con grupos claros, un mal arranque puede terminar en una solución peor."],
+       ["Tengo que usar k = 3",false,"Cambiar k no resuelve la dependencia del arranque."]]},
+ {q:"Para “validar” tus 4 clusters de países hiciste un ANOVA de cada variable entre grupos: todos dan p < 0,001. ¿Qué concluís?",
+  hint:"¿Con qué variables se construyeron los grupos?",
+  ops:[["Nada nuevo: el test es circular, los grupos se eligieron justamente para diferir en esas variables",true,"Siempre da significativo. Sí vale testear variables que no se usaron para agrupar (validación externa, por ejemplo el IDH o el continente), o comparar con datos sin grupos."],
+       ["Que los clusters existen en la población",false,"El p-valor asume grupos fijados de antemano, no elegidos mirando los datos."],
+       ["Que k = 4 es el número correcto",false,"El ANOVA daría significativo con cualquier k."],
+       ["Que conviene usar Tukey para ver qué grupos difieren",false,"Tukey hereda el mismo problema de circularidad."]]},
+ {q:"Hacés un PCA de los países sin estandarizar, con el ingreso per cápita en dólares. PC1 explica el 99,9% de la varianza. ¿Cómo lo leés?",
+  hint:"Mirá en la solapa PCA qué pasa con “No: matriz de covarianzas” y el ingreso en niveles.",
+  ops:[["PC1 es básicamente el ingreso: es la variable con mayor varianza en sus unidades. Hay que estandarizar",true,"Con covarianzas, cada variable pesa según su varianza, y el ingreso en dólares tiene un desvío miles de veces mayor que el resto. El 99,9% no es un gran resumen: es una sola variable."],
+       ["Excelente: con una sola dimensión resumo todo",false,"Resume el ingreso, no las siete variables."],
+       ["Que las variables están muy correlacionadas",false,"No necesariamente: el resultado sale de la escala, no de la correlación."],
+       ["Que hay que sacar el ingreso",false,"El problema no es la variable sino su escala. Estandarizando (o con logaritmo), entra con un peso razonable."]]},
+ {q:"Un compañero corrió el mismo PCA en Python y su PC1 tiene todos los signos al revés que el tuyo. ¿Quién tiene razón?",
+  hint:"Probá los botones “× (−1)” en la solapa PCA.",
+  ops:[["Los dos: el signo de un componente es arbitrario. Lo que importa es qué variables van juntas y cuáles en contra",true,"Multiplicar un componente por −1 da la misma dimensión. Se puede invertir para que sea más legible, y decirlo."],
+       ["El que tiene PC1 positivo con el ingreso",false,"Es una convención cómoda, no una respuesta correcta."],
+       ["Ninguno: hay un error en alguno de los dos",false,"No hay error. Distintos programas pueden devolver signos opuestos."],
+       ["El de R, porque prcomp es el estándar",false,"No hay un estándar de signo."]]},
+ {q:"En un MCA de una encuesta, la Dim 1 explica el 12% de la inercia. Tu jefe dice que “es un análisis malo”. ¿Qué le contestás?",
+  hint:"Mirá la nota debajo de la tabla de inercia en la solapa MCA.",
+  ops:[["En MCA los % son bajos por construcción: la tabla disyuntiva infla la dimensionalidad. Se mira la corrección de Benzécri y si las dimensiones se interpretan",true,"Cada variable con J categorías aporta J − 1 dimensiones. Benzécri descuenta ese efecto. No se comparan con los % de un PCA."],
+       ["Que tiene razón: habría que sacar variables hasta que supere el 50%",false,"Sacar variables para inflar un porcentaje cambia la pregunta del análisis."],
+       ["Que el 12% es suficiente porque es mayor que 10%",false,"No existe un umbral así."],
+       ["Que hay que hacer un PCA en su lugar",false,"PCA necesita variables numéricas; con categóricas, MCA es la herramienta."]]},
+ {q:"En tu MCA, la categoría “Servicio doméstico con retiro” (0,4% de los casos) queda lejísimos del origen y arma casi sola la Dim 2. ¿Qué hacés?",
+  hint:"¿Cómo pondera la distancia χ² a las categorías raras?",
+  ops:[["La agrupo con una categoría afín antes de correr el MCA (o paso esa variable a suplementaria)",true,"La distancia χ² da más peso a las categorías raras: pocas observaciones pueden “robarse” una dimensión entera. Agrupar categorías raras es la práctica habitual."],
+       ["Nada: si está lejos es porque es muy importante",false,"Está lejos porque es rara, no necesariamente porque sea relevante para la estructura."],
+       ["Interpreto la Dim 2 como “servicio doméstico con retiro”",false,"Una dimensión que depende de un 0,4% de los casos describe una rareza, no la estructura de los datos."],
+       ["Borro esas observaciones",false,"Perdés información sin necesidad: agrupar la categoría es menos drástico."]]},
+ {q:"Querés describir la estructura del empleo con atributos del puesto y después ver dónde caen varones y mujeres, sin que el sexo arme las dimensiones. ¿Cómo entra el sexo?",
+  hint:"En la solapa MCA podés cambiar el rol de cada variable.",
+  ops:[["Como variable suplementaria",true,"Las suplementarias no construyen las dimensiones: se proyectan después, en el promedio de las personas con esa categoría. Así separás “cómo es la estructura” de “quién está en cada zona”."],
+       ["Como variable activa",false,"Si es activa, el mapa mezcla las dos preguntas: el sexo pasaría a definir los ejes."],
+       ["No entra: se analiza por separado con un chi-cuadrado",false,"Se puede hacer, pero perdés la lectura en el mismo mapa."],
+       ["Hago dos MCA, uno para varones y otro para mujeres",false,"Tendrías dos mapas con ejes distintos que no se pueden comparar directamente."]]},
+ {q:"Para elegir k, el codo de la WSS no es nítido, la silhouette es máxima en k = 2, pero k = 4 da grupos mucho más útiles para tu informe. ¿Qué hacés?",
+  hint:"¿Quién decide el número de clusters?",
+  ops:[["Elijo k = 4, lo justifico (silhouette, interpretación, estabilidad) y reporto que k = 2 tiene mejor silhouette",true,"El número de clusters es una decisión analítica: las heurísticas guían, no deciden. Lo importante es documentarla y mostrar que los grupos no se deshacen con pequeños cambios."],
+       ["Uso k = 2: la silhouette manda",false,"La silhouette es una guía más. Un k menos informativo no siempre es mejor."],
+       ["Uso k = 8 para tener más detalle",false,"Más grupos siempre bajan la WSS, pero pueden no ser interpretables ni estables."],
+       ["Hago un test de hipótesis para k",false,"No hay un test que dé “el k correcto”; el gap statistic sugiere uno, pero también es una heurística."]]}
+];
+const LSK="cdd_clase15_decidir";
+let resp={};
+try { resp=JSON.parse(localStorage.getItem(LSK)||"{}")||{}; } catch(e){ resp={}; }
+const save=()=>{ try { localStorage.setItem(LSK, JSON.stringify(resp)); } catch(e){} };
+const ORDER=CASOS.map((c,i)=>withSeed(1500+i,()=>shuffle(c.ops.map((_,j)=>j))));
+function renderQuiz(){
+  const L=$("q-list"); L.innerHTML="";
+  CASOS.forEach((c,i)=>{
+    const d=document.createElement("div"); d.className="q"; const ans=resp[i];
+    d.innerHTML=`<div class="num">Caso ${i+1} de ${CASOS.length}</div><h3>${c.q}</h3><div class="ops"></div>`;
+    const ops=d.querySelector(".ops");
+    ORDER[i].forEach(j=>{
+      const [t,ok]=c.ops[j], b=document.createElement("button"); b.textContent=t;
+      if (ans!==undefined){ b.disabled=true; if (j===ans) b.className=ok?"right":"wrong"; else if (ok) b.className="right"; else b.className="faded"; }
+      b.addEventListener("click",()=>{resp[i]=j; save(); renderQuiz();});
+      ops.appendChild(b);
+    });
+    if (ans!==undefined){
+      const [,ok,fb]=c.ops[ans], right=c.ops.find(o=>o[1]);
+      const p=document.createElement("p"); p.className="fb "+(ok?"ok":"no");
+      p.innerHTML=(ok?"<b>Bien.</b> ":"<b>No es la mejor opción.</b> ")+fb+(ok?"":` <br><b>La respuesta:</b> ${right[2]}`);
+      d.appendChild(p);
+    } else {
+      const h=document.createElement("button"); h.className="hintbtn"; h.textContent="Ver una pista";
+      h.addEventListener("click",()=>{h.outerHTML=`<p class="fb">${c.hint}</p>`;}); d.appendChild(h);
+    }
+    L.appendChild(d);
+  });
+  const done=Object.keys(resp).length, ok=Object.entries(resp).filter(([i,j])=>CASOS[i]&&CASOS[i].ops[j]&&CASOS[i].ops[j][1]).length;
+  $("q-score").textContent=`${ok} bien de ${done} respondidos · ${CASOS.length} casos`;
+}
+$("q-reset").addEventListener("click",()=>{resp={}; save(); renderQuiz();});
+
+/* ================= Pestañas ================= */
+const TABS=["dist","clu","pca","mca","dec"];
+let active="dist";
+function renderActive(){ ({dist:renderDist, clu:renderClu, pca:renderPCA, mca:renderMCA, dec:renderQuiz})[active](); }
+document.querySelectorAll("nav.tabs button").forEach(b=>b.addEventListener("click",()=>{
+  active=b.dataset.tab;
+  document.querySelectorAll("nav.tabs button").forEach(x=>x.setAttribute("aria-selected",x===b?"true":"false"));
+  TABS.forEach(t=>$("tab-"+t).hidden=(t!==active));
+  renderActive();
+}));
+initDist(); initClu(); initPCA(); initMCA();
+renderActive();
+</script>
+</body>
+</html>
