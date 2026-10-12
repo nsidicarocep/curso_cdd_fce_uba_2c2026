@@ -1,0 +1,1798 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.35">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Clase 18 · Regresión lineal y descomposiciones contables</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="clase18_regresion_descomposiciones_files/libs/clipboard/clipboard.min.js"></script>
+<script src="clase18_regresion_descomposiciones_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="clase18_regresion_descomposiciones_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="clase18_regresion_descomposiciones_files/libs/quarto-html/popper.min.js"></script>
+<script src="clase18_regresion_descomposiciones_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="clase18_regresion_descomposiciones_files/libs/quarto-html/anchor.min.js"></script>
+<link href="clase18_regresion_descomposiciones_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="clase18_regresion_descomposiciones_files/libs/quarto-html/quarto-syntax-highlighting-46f66b053e56abd73bb6e954d61a315b.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="clase18_regresion_descomposiciones_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="clase18_regresion_descomposiciones_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="clase18_regresion_descomposiciones_files/libs/bootstrap/bootstrap-efbb37e9afcc02144ebbc7afd12a776f.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="fullcontent quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Clase 18 · Regresión lineal y descomposiciones contables</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><strong>Ciencia de Datos para Economía y Negocios - FCE-UBA</strong></p>
+<p>Notebook para ir corriendo en clase, celda por celda (Shift+Enter). Tres herramientas para la misma pregunta: <strong>¿qué explica un resultado?</strong></p>
+<ol type="1">
+<li><strong>Regresión lineal</strong>: estima relaciones entre variables. La desarrollamos con la EPH y cerramos con un integrador rápido con Properati.</li>
+<li><strong>Shift-share</strong>: reparte el cambio de un promedio ponderado entre cambios <em>dentro</em> de cada componente y <em>recomposición</em>.</li>
+<li><strong>Índice de Theil</strong>: reparte la desigualdad entre la que hay <em>entre</em> grupos y la que hay <em>dentro</em> de ellos.</li>
+</ol>
+<p>La primera vez hace falta internet: los datos se bajan y quedan guardados en <code>datos_clase18/</code>.</p>
+<p><strong>En Google Colab</strong>: Entorno de ejecución → Cambiar tipo de entorno de ejecución → <strong>R</strong>.</p>
+<div id="c002" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Paquetes: instala solo los que faltan (en Colab tarda unos minutos la primera vez)</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>paquetes <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"tidyverse"</span>, <span class="st">"lmtest"</span>, <span class="st">"sandwich"</span>, <span class="st">"car"</span>, <span class="st">"tseries"</span>,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>              <span class="st">"modelsummary"</span>, <span class="st">"pandoc"</span>, <span class="st">"eph"</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>faltan <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(paquetes, <span class="fu">rownames</span>(<span class="fu">installed.packages</span>()))</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">length</span>(faltan) <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="fu">install.packages</span>(faltan)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(<span class="fu">suppressPackageStartupMessages</span>({</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(lmtest)        <span class="co"># coeftest(), bptest(), resettest(), waldtest(), coefci()</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(sandwich)      <span class="co"># vcovHC(): errores estándar robustos</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(car)           <span class="co"># vif()</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(modelsummary)  <span class="co"># tablas y gráficos de modelos</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">requireNamespace</span>(<span class="st">"tseries"</span>)  <span class="co"># jarque.bera.test()</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>}))</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">repr.plot.width =</span> <span class="dv">10</span>, <span class="at">repr.plot.height =</span> <span class="dv">5</span>, <span class="at">repr.plot.res =</span> <span class="dv">110</span>)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_set</span>(<span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">14</span>))</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Muestra una tabla de modelsummary como tabla markdown dentro del notebook.</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Recibe los mismos argumentos que modelsummary() y, opcionalmente, notas al pie.</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>mostrar_tabla <span class="ot">&lt;-</span> <span class="cf">function</span>(modelos, ..., <span class="at">notas =</span> <span class="cn">NULL</span>) {</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  df <span class="ot">&lt;-</span> <span class="fu">modelsummary</span>(modelos, ..., <span class="at">output =</span> <span class="st">"data.frame"</span>)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  df<span class="sc">$</span>term[df<span class="sc">$</span>statistic <span class="sc">==</span> <span class="st">"std.error"</span>] <span class="ot">&lt;-</span> <span class="st">""</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  df <span class="ot">&lt;-</span> df[, <span class="fu">c</span>(<span class="st">"term"</span>, <span class="fu">names</span>(modelos))]</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>(df)[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="st">" "</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  tabla <span class="ot">&lt;-</span> <span class="fu">paste</span>(knitr<span class="sc">::</span><span class="fu">kable</span>(df, <span class="at">format =</span> <span class="st">"pipe"</span>,</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>                              <span class="at">align =</span> <span class="fu">c</span>(<span class="st">"l"</span>, <span class="fu">rep</span>(<span class="st">"r"</span>, <span class="fu">length</span>(modelos)))),</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>                 <span class="at">collapse =</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>  notas <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="st">"*"</span>, <span class="st">"</span><span class="sc">\\</span><span class="st">*"</span>, notas, <span class="at">fixed =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  texto <span class="ot">&lt;-</span> <span class="fu">paste0</span>(tabla, <span class="st">"</span><span class="sc">\n\n</span><span class="st">"</span>, <span class="fu">paste</span>(notas, <span class="at">collapse =</span> <span class="st">"  </span><span class="sc">\n</span><span class="st">"</span>))</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">isTRUE</span>(<span class="fu">getOption</span>(<span class="st">"jupyter.in_kernel"</span>))) IRdisplay<span class="sc">::</span><span class="fu">display_markdown</span>(texto) <span class="cf">else</span> <span class="fu">cat</span>(texto)</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="funciones-para-bajar-y-preparar-los-datos" class="level3">
+<h3 class="anchored" data-anchor-id="funciones-para-bajar-y-preparar-los-datos">Funciones para bajar y preparar los datos</h3>
+<p>La primera vez bajan los datos de internet y los guardan limpios en <code>datos_clase18/</code>. Las veces siguientes los leen de ahí. No hace falta mirar esta celda en clase.</p>
+<div id="c004" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">timeout =</span> <span class="dv">900</span>)   <span class="co"># Properati pesa unos 65 MB: damos tiempo a la descarga</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>carpeta_datos <span class="ot">&lt;-</span> <span class="st">"datos_clase18"</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">dir.create</span>(carpeta_datos, <span class="at">showWarnings =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- Superstore --------------------------------------------------------------</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Una fila por linea de pedido. El archivo original trae filas basura al final,</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co"># por eso se leen solo las primeras 9.994 (las de la base de Tableau).</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>cargar_superstore <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  local <span class="ot">&lt;-</span> <span class="fu">file.path</span>(carpeta_datos, <span class="st">"superstore.csv"</span>)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">file.exists</span>(local)) {</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    url <span class="ot">&lt;-</span> <span class="st">"https://raw.githubusercontent.com/leonism/sample-superstore/master/data/superstore.csv"</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">read_csv</span>(url, <span class="at">n_max =</span> <span class="dv">9994</span>, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>      <span class="fu">transmute</span>(<span class="at">pedido       =</span> <span class="st">`</span><span class="at">Order ID</span><span class="st">`</span>,</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>                <span class="at">fecha        =</span> <span class="fu">mdy</span>(<span class="st">`</span><span class="at">Order Date</span><span class="st">`</span>),</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>                <span class="at">anio         =</span> <span class="fu">year</span>(fecha),</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>                <span class="at">cliente      =</span> <span class="st">`</span><span class="at">Customer ID</span><span class="st">`</span>,</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>                <span class="at">segmento     =</span> Segment,</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>                <span class="at">region       =</span> Region,</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>                <span class="at">estado       =</span> State,</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>                <span class="at">categoria    =</span> Category,</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>                <span class="at">subcategoria =</span> <span class="st">`</span><span class="at">Sub-Category</span><span class="st">`</span>,</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>                <span class="at">ventas       =</span> Sales,</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>                <span class="at">cantidad     =</span> Quantity,</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>                <span class="at">descuento    =</span> Discount,</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>                <span class="at">ganancia     =</span> Profit) <span class="sc">|&gt;</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>      <span class="fu">write_csv</span>(local)</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">read_csv</span>(local, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- Properati ---------------------------------------------------------------</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="co"># Se baja el archivo completo (con las descripciones de los avisos), se quedan</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a><span class="co"># solo los departamentos en venta en dolares y se guarda una version liviana.</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>cargar_deptos <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>  local <span class="ot">&lt;-</span> <span class="fu">file.path</span>(carpeta_datos, <span class="st">"deptos_caba.csv"</span>)</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">file.exists</span>(local)) {</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>    url <span class="ot">&lt;-</span> <span class="st">"https://raw.githubusercontent.com/martintinch0/CienciaDeDatosParaCuriosos/master/data/datosProperati.csv"</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>    tmp <span class="ot">&lt;-</span> <span class="fu">tempfile</span>(<span class="at">fileext =</span> <span class="st">".csv"</span>)</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>    <span class="fu">download.file</span>(url, tmp, <span class="at">mode =</span> <span class="st">"wb"</span>)</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>    <span class="fu">read_delim</span>(tmp, <span class="at">delim =</span> <span class="st">";"</span>, <span class="at">locale =</span> <span class="fu">locale</span>(<span class="at">encoding =</span> <span class="st">"latin1"</span>),</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>               <span class="at">show_col_types =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>      <span class="fu">filter</span>(property_type <span class="sc">==</span> <span class="st">"Departamento"</span>, operation_type <span class="sc">==</span> <span class="st">"Venta"</span>,</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>             currency <span class="sc">==</span> <span class="st">"USD"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>      <span class="fu">transmute</span>(<span class="at">fecha     =</span> <span class="fu">as.Date</span>(created_on),</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>                <span class="at">barrio    =</span> <span class="fu">str_to_title</span>(BARRIO),</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>                <span class="at">ambientes =</span> rooms,</span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>                <span class="at">banios    =</span> bathrooms,</span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>                <span class="at">m2_total  =</span> surface_total,</span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>                <span class="at">m2        =</span> surface_covered,</span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>                <span class="at">precio    =</span> price) <span class="sc">|&gt;</span></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>      <span class="fu">write_csv</span>(local)</span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unlink</span>(tmp)</span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>  <span class="fu">read_csv</span>(local, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a><span class="co"># Filtros de la clase: superficie cubierta entre 20 y 500 m2, precio entre</span></span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a><span class="co"># 20 mil y 3 millones de dolares, hasta 8 ambientes, y solo barrios con al</span></span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a><span class="co"># menos 300 avisos. Balvanera queda como barrio de referencia.</span></span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>preparar_deptos <span class="ot">&lt;-</span> <span class="cf">function</span>(deptos) {</span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>  deptos <span class="sc">|&gt;</span></span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(m2), <span class="sc">!</span><span class="fu">is.na</span>(ambientes), <span class="fu">between</span>(m2, <span class="dv">20</span>, <span class="dv">500</span>),</span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>           <span class="fu">between</span>(precio, <span class="dv">20000</span>, <span class="fl">3e6</span>), ambientes <span class="sc">&lt;=</span> <span class="dv">8</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(barrio) <span class="sc">|&gt;</span></span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(<span class="fu">n</span>() <span class="sc">&gt;=</span> <span class="dv">300</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">barrio =</span> <span class="fu">relevel</span>(<span class="fu">factor</span>(barrio), <span class="at">ref =</span> <span class="st">"Balvanera"</span>))</span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- EPH 1T2026 ----------------------------------------------------------------</span></span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a><span class="co"># Si el paquete eph no esta instalado: install.packages("eph")</span></span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>cargar_eph <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a>  local <span class="ot">&lt;-</span> <span class="fu">file.path</span>(carpeta_datos, <span class="st">"eph_1t2026.rds"</span>)</span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">file.exists</span>(local)) {</span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>    eph<span class="sc">::</span><span class="fu">get_microdata</span>(<span class="at">year =</span> <span class="dv">2026</span>, <span class="at">period =</span> <span class="dv">1</span>, <span class="at">type =</span> <span class="st">"individual"</span>,</span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>                       <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">"CODUSU"</span>, <span class="st">"NRO_HOGAR"</span>, <span class="st">"COMPONENTE"</span>, <span class="st">"ESTADO"</span>,</span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a>                                <span class="st">"CAT_OCUP"</span>, <span class="st">"P21"</span>, <span class="st">"PONDIIO"</span>, <span class="st">"PP3E_TOT"</span>,</span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>                                <span class="st">"REGION"</span>, <span class="st">"NIVEL_ED"</span>, <span class="st">"CH04"</span>, <span class="st">"CH06"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a>      <span class="fu">saveRDS</span>(local)</span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a>  <span class="fu">readRDS</span>(local)</span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a><span class="co"># Ocupados con ingreso de la ocupacion principal (P21) positivo, con variables</span></span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a><span class="co"># recodificadas. PONDIIO es el ponderador que corresponde a P21.</span></span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a>preparar_ocupados <span class="ot">&lt;-</span> <span class="cf">function</span>(eph) {</span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a>  eph <span class="sc">|&gt;</span></span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">c</span>(ESTADO, CAT_OCUP, P21, PONDIIO, PP3E_TOT, REGION,</span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a>                    NIVEL_ED, CH04, CH06), as.numeric)) <span class="sc">|&gt;</span></span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(ESTADO <span class="sc">==</span> <span class="dv">1</span>, P21 <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a>    <span class="fu">transmute</span>(</span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a>      <span class="at">ingreso =</span> P21,</span>
+<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a>      <span class="at">pondera =</span> PONDIIO,</span>
+<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a>      <span class="at">horas   =</span> <span class="fu">if_else</span>(PP3E_TOT <span class="sc">&gt;</span> <span class="dv">0</span> <span class="sc">&amp;</span> PP3E_TOT <span class="sc">&lt;</span> <span class="dv">999</span>, PP3E_TOT, <span class="cn">NA_real_</span>),</span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a>      <span class="at">edad    =</span> CH06,</span>
+<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a>      <span class="at">sexo    =</span> <span class="fu">if_else</span>(CH04 <span class="sc">==</span> <span class="dv">1</span>, <span class="st">"Varon"</span>, <span class="st">"Mujer"</span>),</span>
+<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a>      <span class="at">region  =</span> <span class="fu">factor</span>(REGION, <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">40</span>, <span class="dv">41</span>, <span class="dv">42</span>, <span class="dv">43</span>, <span class="dv">44</span>),</span>
+<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a>                       <span class="fu">c</span>(<span class="st">"GBA"</span>, <span class="st">"NOA"</span>, <span class="st">"NEA"</span>, <span class="st">"Cuyo"</span>, <span class="st">"Pampeana"</span>, <span class="st">"Patagonia"</span>)),</span>
+<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a>      <span class="at">educacion =</span> <span class="fu">factor</span>(<span class="fu">case_when</span>(NIVEL_ED <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">7</span>) <span class="sc">~</span> <span class="st">"Hasta primario"</span>,</span>
+<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a>                                   NIVEL_ED <span class="sc">==</span> <span class="dv">3</span> <span class="sc">~</span> <span class="st">"Sec. incompleto"</span>,</span>
+<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a>                                   NIVEL_ED <span class="sc">==</span> <span class="dv">4</span> <span class="sc">~</span> <span class="st">"Sec. completo"</span>,</span>
+<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a>                                   NIVEL_ED <span class="sc">==</span> <span class="dv">5</span> <span class="sc">~</span> <span class="st">"Sup. incompleto"</span>,</span>
+<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a>                                   NIVEL_ED <span class="sc">==</span> <span class="dv">6</span> <span class="sc">~</span> <span class="st">"Sup. completo"</span>),</span>
+<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a>                         <span class="fu">c</span>(<span class="st">"Hasta primario"</span>, <span class="st">"Sec. incompleto"</span>, <span class="st">"Sec. completo"</span>,</span>
+<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a>                           <span class="st">"Sup. incompleto"</span>, <span class="st">"Sup. completo"</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(educacion))</span>
+<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- Argendata: productividad sectorial de Argentina ---------------------------</span></span>
+<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a><span class="co"># El VAB (Argendata) y el empleo (GGDC) vienen con clasificaciones distintas.</span></span>
+<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a><span class="co"># Se agrupan en 9 sectores que existen en las dos fuentes. La productividad es</span></span>
+<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a><span class="co"># VAB (millones de pesos de 2004) / ocupados (miles) = miles de pesos de 2004</span></span>
+<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a><span class="co"># por ocupado.</span></span>
+<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a>leer_ad <span class="ot">&lt;-</span> <span class="cf">function</span>(ruta) {</span>
+<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a>  local <span class="ot">&lt;-</span> <span class="fu">file.path</span>(carpeta_datos, <span class="fu">basename</span>(ruta))</span>
+<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">file.exists</span>(local)) {</span>
+<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a>    url <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"https://raw.githubusercontent.com/argendatafundar/data/main/"</span>, ruta)</span>
+<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a>    <span class="fu">download.file</span>(url, local, <span class="at">mode =</span> <span class="st">"wb"</span>, <span class="at">quiet =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a>  <span class="fu">read_csv</span>(local, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a>cargar_productividad_arg <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
+<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a>  vab <span class="ot">&lt;-</span> <span class="fu">leer_ad</span>(<span class="st">"ESTPRO/vab_por_sector.csv"</span>)</span>
+<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a>  emp <span class="ot">&lt;-</span> <span class="fu">leer_ad</span>(<span class="st">"ESTPRO/empleo_sectores_ggdc_1950_2018.csv"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(geocodigoFundar <span class="sc">==</span> <span class="st">"ARG"</span>)</span>
+<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a>  sector_vab <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">A =</span> <span class="st">"Agro y pesca"</span>, <span class="at">B =</span> <span class="st">"Agro y pesca"</span>, <span class="at">C =</span> <span class="st">"Mineria"</span>,</span>
+<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a>                  <span class="at">D =</span> <span class="st">"Industria"</span>, <span class="at">E =</span> <span class="st">"Electricidad, gas y agua"</span>,</span>
+<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a>                  <span class="at">F =</span> <span class="st">"Construccion"</span>, <span class="at">GH =</span> <span class="st">"Comercio"</span>, <span class="at">I =</span> <span class="st">"Transporte y com."</span>,</span>
+<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a>                  <span class="at">J =</span> <span class="st">"Finanzas y empresas"</span>, <span class="at">K =</span> <span class="st">"Finanzas y empresas"</span>,</span>
+<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a>                  <span class="at">L =</span> <span class="st">"Gobierno y otros serv."</span>, <span class="at">Z =</span> <span class="st">"Gobierno y otros serv."</span>)</span>
+<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a>  sector_emp <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">A =</span> <span class="st">"Agro y pesca"</span>, <span class="at">B =</span> <span class="st">"Mineria"</span>, <span class="at">C =</span> <span class="st">"Industria"</span>,</span>
+<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a>                  <span class="at">DE =</span> <span class="st">"Electricidad, gas y agua"</span>, <span class="at">F =</span> <span class="st">"Construccion"</span>,</span>
+<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a>                  <span class="at">GI =</span> <span class="st">"Comercio"</span>, <span class="at">H =</span> <span class="st">"Transporte y com."</span>,</span>
+<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a>                  <span class="at">JMN =</span> <span class="st">"Finanzas y empresas"</span>, <span class="at">K =</span> <span class="st">"Finanzas y empresas"</span>,</span>
+<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a>                  <span class="at">L =</span> <span class="st">"Finanzas y empresas"</span>, <span class="at">OPQ =</span> <span class="st">"Gobierno y otros serv."</span>,</span>
+<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a>                  <span class="at">RSTU =</span> <span class="st">"Gobierno y otros serv."</span>)</span>
+<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a>  vab_s <span class="ot">&lt;-</span> vab <span class="sc">|&gt;</span></span>
+<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">sector =</span> sector_vab[letra]) <span class="sc">|&gt;</span></span>
+<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(anio, sector) <span class="sc">|&gt;</span></span>
+<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">vab =</span> <span class="fu">sum</span>(vab), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a>  emp_s <span class="ot">&lt;-</span> emp <span class="sc">|&gt;</span></span>
+<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">sector =</span> sector_emp[sector_codigo]) <span class="sc">|&gt;</span></span>
+<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(anio, sector) <span class="sc">|&gt;</span></span>
+<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">empleo =</span> <span class="fu">sum</span>(empleo_miles), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(vab_s, emp_s, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"anio"</span>, <span class="st">"sector"</span>))   <span class="co"># 1950-2018</span></span>
+<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="c005" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>ocupados   <span class="ot">&lt;-</span> <span class="fu">cargar_eph</span>() <span class="sc">|&gt;</span> <span class="fu">preparar_ocupados</span>()</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>deptos     <span class="ot">&lt;-</span> <span class="fu">cargar_deptos</span>() <span class="sc">|&gt;</span> <span class="fu">preparar_deptos</span>()</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>superstore <span class="ot">&lt;-</span> <span class="fu">cargar_superstore</span>()</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>prod_arg   <span class="ot">&lt;-</span> <span class="fu">cargar_productividad_arg</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="parte-1.-regresión-lineal-con-la-eph" class="level1">
+<h1>Parte 1. Regresión lineal con la EPH</h1>
+<p><strong>Pregunta</strong>: ¿cuánto más gana por hora una persona con más educación, a igual sexo, edad y región?</p>
+<p>El recorrido es siempre el mismo:</p>
+<ol type="1">
+<li><strong>Mirar</strong> los datos</li>
+<li><strong>Estimar</strong> con <code>lm()</code></li>
+<li><strong>Interpretar</strong> signo y magnitud de cada coeficiente</li>
+<li><strong>Testear</strong> significatividad y supuestos</li>
+<li><strong>Corregir</strong> lo que haga falta y volver a interpretar</li>
+<li><strong>Reportar</strong> en una tabla y en palabras</li>
+</ol>
+<section id="armar-la-base" class="level2">
+<h2 class="anchored" data-anchor-id="armar-la-base">1.1 Armar la base</h2>
+<p>Ocupados del 1er trimestre de 2026 con ingreso de la ocupación principal positivo (<code>clase18_datos.R</code> ya hizo ese filtro y recodificó educación, sexo y región). Para comparar personas que trabajan distinta cantidad de horas, usamos el <strong>ingreso horario</strong>. Nos quedamos con quienes tienen entre 18 y 70 años y trabajan al menos 5 horas semanales.</p>
+<div id="c007" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>eph <span class="ot">&lt;-</span> ocupados <span class="sc">|&gt;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(horas), horas <span class="sc">&gt;=</span> <span class="dv">5</span>, <span class="fu">between</span>(edad, <span class="dv">18</span>, <span class="dv">70</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">ingreso_hora =</span> ingreso <span class="sc">/</span> (horas <span class="sc">*</span> <span class="fl">4.3</span>))   <span class="co"># 4,3 semanas por mes</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(eph)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(eph)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="mirar-los-datos-antes-de-estimar" class="level2">
+<h2 class="anchored" data-anchor-id="mirar-los-datos-antes-de-estimar">1.2 Mirar los datos antes de estimar</h2>
+<p>Un <code>summary()</code>, un histograma de la variable dependiente y un gráfico contra la regresora principal ahorran muchos problemas: valores imposibles, códigos como 99 = “no sabe”, asimetrías fuertes, ceros que impiden usar logaritmo.</p>
+<div id="c009" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">select</span>(eph, ingreso_hora, edad, horas))</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">count</span>(eph, educacion)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(eph<span class="sc">$</span>ingreso_hora <span class="sc">&lt;=</span> <span class="dv">0</span>)    <span class="co"># ¿hay ceros o negativos? log() no los acepta</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="c010" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">repr.plot.height =</span> <span class="fl">3.85</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(eph<span class="sc">$</span>ingreso_hora, <span class="at">breaks =</span> <span class="dv">60</span>, <span class="at">main =</span> <span class="st">"Ingreso horario"</span>, <span class="at">xlab =</span> <span class="st">"$ por hora"</span>, <span class="at">col =</span> <span class="st">"grey80"</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(<span class="fu">log</span>(eph<span class="sc">$</span>ingreso_hora), <span class="at">breaks =</span> <span class="dv">60</span>, <span class="at">main =</span> <span class="st">"log(ingreso horario)"</span>, <span class="at">xlab =</span> <span class="st">""</span>, <span class="at">col =</span> <span class="st">"grey80"</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<blockquote class="blockquote">
+<p>💡 El ingreso es muy asimétrico: muchos valores bajos y una cola larga a la derecha. En logaritmo queda casi simétrico. Además, en log los coeficientes se leen como <strong>cambios porcentuales</strong>, que es como se piensa un ingreso. Por eso la variable dependiente va a ser <code>log(ingreso_hora)</code>.</p>
+</blockquote>
+<div id="c012" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">repr.plot.height =</span> <span class="fl">3.85</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(eph, <span class="fu">aes</span>(educacion, <span class="fu">log</span>(ingreso_hora))) <span class="sc">+</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">fill =</span> <span class="st">"grey90"</span>) <span class="sc">+</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="st">"log(ingreso horario)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="primer-modelo-solo-educación" class="level2">
+<h2 class="anchored" data-anchor-id="primer-modelo-solo-educación">1.3 Primer modelo: solo educación</h2>
+<p><code>educacion</code> es un factor con 5 niveles. <code>lm()</code> arma solo las <strong>k − 1 = 4 dummies</strong>. La que falta es la <strong>categoría base</strong> (“Hasta primario”, el primer nivel), y todos los coeficientes se leen en comparación con ella.</p>
+<div id="c014" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>e0 <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="fu">log</span>(ingreso_hora) <span class="sc">~</span> educacion, <span class="at">data =</span> eph)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(e0)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><strong>Cómo se lee la salida de <code>summary()</code></strong></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Parte</th>
+<th style="text-align: left;">Qué es</th>
+<th style="text-align: left;">Qué mirar</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>Estimate</code></td>
+<td style="text-align: left;">El coeficiente</td>
+<td style="text-align: left;">Signo y magnitud: es lo que se interpreta</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>Std. Error</code></td>
+<td style="text-align: left;">Error estándar</td>
+<td style="text-align: left;">Cuán precisa es la estimación</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>t value</code></td>
+<td style="text-align: left;">Coeficiente / EE</td>
+<td style="text-align: left;">Estadístico del test <span class="math inline">\(H_0: \beta = 0\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>Pr(&gt;|t|)</code></td>
+<td style="text-align: left;">p-valor</td>
+<td style="text-align: left;">Si es menor a 0,05, el coeficiente es significativo al 5%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>Residual standard error</code></td>
+<td style="text-align: left;">Desvío del error</td>
+<td style="text-align: left;">En unidades de <span class="math inline">\(y\)</span> (acá, log-puntos)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>Multiple R-squared</code></td>
+<td style="text-align: left;"><span class="math inline">\(R^2\)</span></td>
+<td style="text-align: left;">Proporción de la variabilidad de <span class="math inline">\(y\)</span> que explica el modelo</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>Adjusted R-squared</code></td>
+<td style="text-align: left;"><span class="math inline">\(R^2\)</span> ajustado</td>
+<td style="text-align: left;">Penaliza agregar variables; sirve para comparar modelos</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>F-statistic</code></td>
+<td style="text-align: left;">Test global</td>
+<td style="text-align: left;"><span class="math inline">\(H_0\)</span>: todos los coeficientes (menos el intercepto) son cero</td>
+</tr>
+</tbody>
+</table>
+<p>Con solo dummies, la regresión reproduce las medias de cada grupo: el intercepto es la media de la base y cada coeficiente es la diferencia con ella.</p>
+<div id="c016" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>eph <span class="sc">|&gt;</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(educacion) <span class="sc">|&gt;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">media_log =</span> <span class="fu">mean</span>(<span class="fu">log</span>(ingreso_hora))) <span class="sc">|&gt;</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">diferencia_con_base =</span> media_log <span class="sc">-</span> <span class="fu">first</span>(media_log))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="dummies-con-logy-la-diferencia-exacta" class="level3">
+<h3 class="anchored" data-anchor-id="dummies-con-logy-la-diferencia-exacta">Dummies con log(y): la diferencia exacta</h3>
+<p>Con la variable dependiente en log, el coeficiente × 100 es solo una <strong>aproximación</strong> del cambio porcentual, que empeora cuando el coeficiente es grande (más de 0,1 en valor absoluto). La diferencia exacta es</p>
+<p><span class="math display">\[\%\Delta y = 100 \cdot \left(e^{\hat\beta} - 1\right)\]</span></p>
+<div id="c018" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>b0 <span class="ot">&lt;-</span> <span class="fu">coef</span>(e0)[<span class="sc">-</span><span class="dv">1</span>]</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(<span class="at">nivel       =</span> <span class="fu">names</span>(b0),</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>       <span class="at">beta        =</span> b0,</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">aproximado  =</span> <span class="dv">100</span> <span class="sc">*</span> b0,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">exacto      =</span> <span class="dv">100</span> <span class="sc">*</span> (<span class="fu">exp</span>(b0) <span class="sc">-</span> <span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<blockquote class="blockquote">
+<p>💡 Sin controlar por nada, quien tiene universitario completo gana por hora <strong>106% más</strong> que quien tiene hasta primario (la lectura rápida, 72%, se queda muy corta).</p>
+</blockquote>
+</section>
+</section>
+<section id="agregar-controles-manteniendo-lo-demás-constante" class="level2">
+<h2 class="anchored" data-anchor-id="agregar-controles-manteniendo-lo-demás-constante">1.4 Agregar controles: “manteniendo lo demás constante”</h2>
+<p>En una regresión múltiple, cada coeficiente es el efecto de su variable <strong>manteniendo constantes las demás incluidas en el modelo</strong>. Agregamos sexo, edad (con su cuadrado, ver 1.5) y región.</p>
+<div id="c020" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>e1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="fu">log</span>(ingreso_hora) <span class="sc">~</span> educacion <span class="sc">+</span> sexo <span class="sc">+</span> edad <span class="sc">+</span> <span class="fu">I</span>(edad<span class="sc">^</span><span class="dv">2</span>) <span class="sc">+</span> region, <span class="at">data =</span> eph)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(e1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>¿Cambiaron los coeficientes de educación?</p>
+<div id="c022" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cbind</span>(<span class="at">solo_educacion =</span> <span class="fu">coef</span>(e0)[<span class="dv">2</span><span class="sc">:</span><span class="dv">5</span>], <span class="at">con_controles =</span> <span class="fu">coef</span>(e1)[<span class="dv">2</span><span class="sc">:</span><span class="dv">5</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<blockquote class="blockquote">
+<p>💡 Los coeficientes de educación <strong>suben</strong> al controlar. Las personas más educadas son, en promedio, más jóvenes que las de la base (que tienen 48 años de media) y entre ellas hay más mujeres (58% entre universitarios completos, 33% en hasta primario); las mujeres ganan menos por hora. Sin esos controles, el modelo simple le restaba a la educación parte de su asociación con el ingreso. Es el <strong>sesgo por variable omitida</strong>: cuando un coeficiente cambia mucho al agregar un control, el control importaba.</p>
+</blockquote>
+</section>
+<section id="interpretar-cada-coeficiente" class="level2">
+<h2 class="anchored" data-anchor-id="interpretar-cada-coeficiente">1.5 Interpretar cada coeficiente</h2>
+<div id="c024" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>b1 <span class="ot">&lt;-</span> <span class="fu">coef</span>(e1)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="dv">100</span> <span class="sc">*</span> (<span class="fu">exp</span>(b1[<span class="fu">c</span>(<span class="dv">2</span><span class="sc">:</span><span class="dv">6</span>, <span class="dv">9</span><span class="sc">:</span><span class="dv">13</span>)]) <span class="sc">-</span> <span class="dv">1</span>), <span class="dv">1</span>)    <span class="co"># diferencias % exactas de cada dummy</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<blockquote class="blockquote">
+<p>💡 - <strong>Educación</strong>: a igual sexo, edad y región, universitario completo gana por hora <strong>118% más</strong> que hasta primario; secundario completo, 31% más. - <strong>Sexo</strong> (base: Mujer): a igual educación, edad y región, los varones ganan por hora <strong>20% más</strong>. No alcanza para hablar de discriminación: faltan ocupación, sector, formalidad. - <strong>Región</strong> (base: GBA): a iguales características, en el NEA se gana 39% menos por hora y en la Patagonia, 20% más.</p>
+</blockquote>
+<section id="la-edad-con-un-término-cuadrático" class="level3">
+<h3 class="anchored" data-anchor-id="la-edad-con-un-término-cuadrático">La edad con un término cuadrático</h3>
+<p>El efecto de un año más de edad no es el mismo a los 25 que a los 55. Con <code>I(edad^2)</code> (el <code>I()</code> es obligatorio dentro de una fórmula), el efecto marginal depende de la edad:</p>
+<p><span class="math display">\[\frac{\partial \log(y)}{\partial\, \text{edad}} = \hat\beta_{edad} + 2\,\hat\beta_{edad^2}\cdot \text{edad}\]</span></p>
+<p><strong>El coeficiente de <code>edad</code> solo no alcanza para interpretar.</strong></p>
+<div id="c026" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>efecto_edad <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="dv">100</span> <span class="sc">*</span> (b1[<span class="st">"edad"</span>] <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> b1[<span class="st">"I(edad^2)"</span>] <span class="sc">*</span> x)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">a_los_25 =</span> <span class="fu">efecto_edad</span>(<span class="dv">25</span>), <span class="at">a_los_40 =</span> <span class="fu">efecto_edad</span>(<span class="dv">40</span>), <span class="at">a_los_55 =</span> <span class="fu">efecto_edad</span>(<span class="dv">55</span>))</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>punto_giro <span class="ot">&lt;-</span> <span class="sc">-</span>b1[<span class="st">"edad"</span>] <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> b1[<span class="st">"I(edad^2)"</span>])</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>punto_giro</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(eph<span class="sc">$</span>edad <span class="sc">&gt;</span> punto_giro)     <span class="co"># qué parte de la muestra está después del máximo</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<blockquote class="blockquote">
+<p>💡 A los 25 años, un año más se asocia con un ingreso horario 2,1% mayor; a los 40, 1%; cerca de los <strong>54 años</strong> el perfil llega a su máximo. Antes de decir que “después de los 54 el ingreso cae”, mirar cuántas observaciones hay más allá de ese punto.</p>
+</blockquote>
+<div id="c028" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">repr.plot.height =</span> <span class="fl">3.85</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>grilla <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">edad =</span> <span class="dv">18</span><span class="sc">:</span><span class="dv">70</span>, <span class="at">educacion =</span> <span class="st">"Sec. completo"</span>, <span class="at">sexo =</span> <span class="st">"Mujer"</span>, <span class="at">region =</span> <span class="st">"GBA"</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>grilla<span class="sc">$</span>pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(e1, <span class="at">newdata =</span> grilla)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(grilla, <span class="fu">aes</span>(edad, <span class="fu">exp</span>(pred))) <span class="sc">+</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">linewidth =</span> <span class="dv">1</span>, <span class="at">color =</span> <span class="st">"firebrick"</span>) <span class="sc">+</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> punto_giro, <span class="at">linetype =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Perfil de ingreso por edad"</span>,</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"Mujer, secundario completo, GBA"</span>,</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Edad"</span>, <span class="at">y =</span> <span class="st">"Ingreso horario predicho ($)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="cambiar-la-categoría-base" class="level3">
+<h3 class="anchored" data-anchor-id="cambiar-la-categoría-base">Cambiar la categoría base</h3>
+<p><code>relevel()</code> cambia la base. <strong>Cambian los coeficientes, no las predicciones.</strong></p>
+<div id="c030" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>eph_b <span class="ot">&lt;-</span> eph <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">region =</span> <span class="fu">relevel</span>(region, <span class="at">ref =</span> <span class="st">"Pampeana"</span>))</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>e1_b  <span class="ot">&lt;-</span> <span class="fu">update</span>(e1, <span class="at">data =</span> eph_b)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(e1_b)[<span class="fu">str_detect</span>(<span class="fu">names</span>(<span class="fu">coef</span>(e1_b)), <span class="st">"region"</span>)]</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="fu">all.equal</span>(<span class="fu">fitted</span>(e1), <span class="fu">fitted</span>(e1_b))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<blockquote class="blockquote">
+<p>⚠️ <strong>Nunca meter una categórica codificada como número.</strong> En la EPH, <code>REGION</code> viene como 1, 40, 41, 42, 43, 44. Si entra así, R la trata como continua y estima un único efecto por “subir un código”, que no significa nada:</p>
+</blockquote>
+<div id="c032" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>eph_mal <span class="ot">&lt;-</span> eph <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">region_codigo =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">40</span>, <span class="dv">41</span>, <span class="dv">42</span>, <span class="dv">43</span>, <span class="dv">44</span>)[<span class="fu">as.integer</span>(region)])</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(<span class="fu">lm</span>(<span class="fu">log</span>(ingreso_hora) <span class="sc">~</span> educacion <span class="sc">+</span> sexo <span class="sc">+</span> edad <span class="sc">+</span> <span class="fu">I</span>(edad<span class="sc">^</span><span class="dv">2</span>) <span class="sc">+</span> region_codigo,</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>        <span class="at">data =</span> eph_mal))[<span class="st">"region_codigo"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+</section>
+<section id="interacciones" class="level2">
+<h2 class="anchored" data-anchor-id="interacciones">1.6 Interacciones</h2>
+<p>¿La brecha por sexo es la misma en todos los niveles educativos? Una <strong>interacción</strong> permite que el efecto de una variable cambie según otra. <code>educacion * sexo</code> incluye <code>educacion</code>, <code>sexo</code> y los productos <code>educacion:sexo</code>.</p>
+<div id="c034" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>e2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="fu">log</span>(ingreso_hora) <span class="sc">~</span> educacion <span class="sc">*</span> sexo <span class="sc">+</span> edad <span class="sc">+</span> <span class="fu">I</span>(edad<span class="sc">^</span><span class="dv">2</span>) <span class="sc">+</span> region, <span class="at">data =</span> eph)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coeftest</span>(e2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<ul>
+<li><code>sexoVaron</code>: brecha por sexo <strong>en la base</strong> (hasta primario).</li>
+<li><code>educacionX:sexoVaron</code>: cuánto <strong>cambia</strong> esa brecha en el nivel X.</li>
+<li>Brecha en el nivel X = <code>sexoVaron</code> + <code>educacionX:sexoVaron</code>.</li>
+</ul>
+<div id="c036" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>b2 <span class="ot">&lt;-</span> <span class="fu">coef</span>(e2)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>niveles <span class="ot">&lt;-</span> <span class="fu">levels</span>(eph<span class="sc">$</span>educacion)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>brecha <span class="ot">&lt;-</span> <span class="fu">c</span>(b2[<span class="st">"sexoVaron"</span>],</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>            b2[<span class="st">"sexoVaron"</span>] <span class="sc">+</span> b2[<span class="fu">paste0</span>(<span class="st">"educacion"</span>, niveles[<span class="sc">-</span><span class="dv">1</span>], <span class="st">":sexoVaron"</span>)])</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(<span class="at">educacion =</span> niveles, <span class="at">brecha_exacta_pct =</span> <span class="dv">100</span> <span class="sc">*</span> (<span class="fu">exp</span>(brecha) <span class="sc">-</span> <span class="dv">1</span>))</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(e1, e2)    <span class="co"># ¿la interacción importa en conjunto?</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<blockquote class="blockquote">
+<p>💡 La brecha a favor de los varones es de 26% entre quienes tienen hasta primario y baja a 13% entre universitarios completos. El test F conjunto rechaza al 5% (p = 0,02): la interacción aporta.</p>
+</blockquote>
+</section>
+<section id="significatividad" class="level2">
+<h2 class="anchored" data-anchor-id="significatividad">1.7 Significatividad</h2>
+<ul>
+<li><strong>Cada coeficiente</strong>: test <span class="math inline">\(t\)</span>, <span class="math inline">\(H_0: \beta_j = 0\)</span>. Equivalente: si el intervalo de confianza no contiene al cero, el coeficiente es significativo.</li>
+<li><strong>Varios a la vez</strong>: test <span class="math inline">\(F\)</span>. Caso típico: todas las dummies de una categórica, o un término y su cuadrado.</li>
+</ul>
+<div id="c038" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coeftest</span>(e1)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">confint</span>(e1)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>e1_sin_region <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="fu">log</span>(ingreso_hora) <span class="sc">~</span> educacion <span class="sc">+</span> sexo <span class="sc">+</span> edad <span class="sc">+</span> <span class="fu">I</span>(edad<span class="sc">^</span><span class="dv">2</span>), <span class="at">data =</span> eph)</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(e1_sin_region, e1)     <span class="co"># H0: las 5 dummies de región son cero a la vez</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<blockquote class="blockquote">
+<p>⚠️ <strong>Significativo no es lo mismo que importante.</strong> Con casi 14 mil observaciones, efectos chicos salen significativos. Mirar siempre la magnitud y preguntarse si es económicamente relevante.</p>
+</blockquote>
+</section>
+<section id="diagnóstico-chequear-los-supuestos-y-corregir" class="level2">
+<h2 class="anchored" data-anchor-id="diagnóstico-chequear-los-supuestos-y-corregir">1.8 Diagnóstico: chequear los supuestos y corregir</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Problema</th>
+<th style="text-align: left;">Qué rompe</th>
+<th style="text-align: left;">Test en R</th>
+<th style="text-align: left;">Solución</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Forma funcional incorrecta</td>
+<td style="text-align: left;">Coeficientes (sesgo)</td>
+<td style="text-align: left;"><code>resettest()</code></td>
+<td style="text-align: left;">Logs, cuadrados, interacciones</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Multicolinealidad</td>
+<td style="text-align: left;">Nada, pero infla los EE</td>
+<td style="text-align: left;"><code>vif()</code></td>
+<td style="text-align: left;">Quitar o combinar variables</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Heteroscedasticidad</td>
+<td style="text-align: left;">EE, tests <span class="math inline">\(t\)</span> y <span class="math inline">\(F\)</span></td>
+<td style="text-align: left;"><code>bptest()</code></td>
+<td style="text-align: left;">Errores robustos: <code>vcovHC()</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">No normalidad</td>
+<td style="text-align: left;">Tests con <span class="math inline">\(n\)</span> chico</td>
+<td style="text-align: left;"><code>jarque.bera.test()</code></td>
+<td style="text-align: left;">Con <span class="math inline">\(n\)</span> grande, nada. Si no, logs</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Observaciones influyentes</td>
+<td style="text-align: left;">Coeficientes</td>
+<td style="text-align: left;"><code>cooks.distance()</code></td>
+<td style="text-align: left;">Revisar y reportar con y sin</td>
+</tr>
+</tbody>
+</table>
+<blockquote class="blockquote">
+<p>💡 <strong>La lógica de todos los tests es la misma</strong>: <span class="math inline">\(H_0\)</span> = “no hay problema”. <strong>p-valor &lt; 0,05 → se rechaza → hay evidencia del problema.</strong> Con muestras grandes casi todo test rechaza: mirar también los gráficos antes de decidir.</p>
+</blockquote>
+<section id="primera-mirada-los-gráficos-de-plot" class="level3">
+<h3 class="anchored" data-anchor-id="primera-mirada-los-gráficos-de-plot">Primera mirada: los gráficos de <code>plot()</code></h3>
+<div id="c040" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">repr.plot.height =</span> <span class="fl">7.7</span>)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(e1, <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">col =</span> <span class="fu">rgb</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="fl">0.1</span>))</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Gráfico</th>
+<th style="text-align: left;">Qué mirar</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Residuals vs Fitted</td>
+<td style="text-align: left;">Nube sin forma alrededor de 0. Una curva sugiere mala forma funcional</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Normal Q-Q</td>
+<td style="text-align: left;">Puntos sobre la diagonal: residuos aproximadamente normales</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Scale-Location</td>
+<td style="text-align: left;">Línea plana: varianza constante</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Residuals vs Leverage</td>
+<td style="text-align: left;">Puntos fuera de las líneas de Cook: muy influyentes</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="forma-funcional-test-reset" class="level3">
+<h3 class="anchored" data-anchor-id="forma-funcional-test-reset">Forma funcional: test RESET</h3>
+<p>Agrega potencias de los valores predichos (<span class="math inline">\(\hat y^2, \hat y^3\)</span>) y testea si aportan algo. Si aportan, falta alguna no linealidad. El test <strong>no dice qué</strong> falta.</p>
+<div id="c042" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">resettest</span>(e1)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">resettest</span>(e2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<blockquote class="blockquote">
+<p>💡 Rechaza, aunque con un estadístico chico para 14 mil observaciones. Ya tenemos logaritmo, el cuadrado de la edad y la interacción; el resto de la no linealidad probablemente venga de variables que no están (ocupación, formalidad). <strong>Qué hacer si rechaza</strong>: probar logs, cuadrados o interacciones con sentido económico.</p>
+</blockquote>
+</section>
+<section id="multicolinealidad-vif" class="level3">
+<h3 class="anchored" data-anchor-id="multicolinealidad-vif">Multicolinealidad: VIF</h3>
+<p>No genera sesgo: con regresoras muy correlacionadas entre sí, los errores estándar se inflan. Regla práctica: VIF &gt; 10 merece atención.</p>
+<div id="c044" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">vif</span>(e1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<blockquote class="blockquote">
+<p>💡 <code>edad</code> y <code>edad^2</code> tienen VIF altísimo <strong>por construcción</strong> (son la misma variable): no es un problema. El resto está cerca de 1. <strong>Qué hacer</strong> en general: si las variables colineales son controles, nada. Si importa separar sus efectos, quitar una redundante o combinarlas en un índice. <strong>Nunca</strong> sacar una variable relevante solo para bajar el VIF: se genera sesgo por omisión.</p>
+</blockquote>
+</section>
+<section id="heteroscedasticidad-detectar" class="level3">
+<h3 class="anchored" data-anchor-id="heteroscedasticidad-detectar">Heteroscedasticidad: detectar</h3>
+<p>La varianza del error cambia con las regresoras. Los coeficientes siguen bien, pero <strong>los errores estándar están mal</strong>, y con ellos los tests y los intervalos.</p>
+<div id="c046" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">repr.plot.height =</span> <span class="fl">3.85</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">fitted</span>(e1), <span class="fu">residuals</span>(e1), <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">col =</span> <span class="fu">rgb</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="fl">0.1</span>),</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"Valores predichos"</span>, <span class="at">ylab =</span> <span class="st">"Residuos"</span>)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">0</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><strong>Test de Breusch-Pagan</strong>: regresa los residuos al cuadrado contra las regresoras. <span class="math inline">\(H_0\)</span>: varianza constante.</p>
+<div id="c048" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bptest</span>(e1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="heteroscedasticidad-corregir-con-errores-robustos" class="level3">
+<h3 class="anchored" data-anchor-id="heteroscedasticidad-corregir-con-errores-robustos">Heteroscedasticidad: corregir con errores robustos</h3>
+<p>Errores estándar <strong>robustos de White</strong>: mismos coeficientes, errores estándar recalculados con una fórmula válida con o sin heteroscedasticidad. <code>HC1</code> es la misma corrección que usa Stata.</p>
+<div id="c050" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coeftest</span>(e1)                                        <span class="co"># errores clásicos</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coeftest</span>(e1, <span class="at">vcov =</span> <span class="fu">vcovHC</span>(e1, <span class="at">type =</span> <span class="st">"HC1"</span>))       <span class="co"># errores robustos</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="c051" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(<span class="at">termino    =</span> <span class="fu">names</span>(<span class="fu">coef</span>(e1)),</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>       <span class="at">coef       =</span> <span class="fu">coef</span>(e1),</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>       <span class="at">ee_clasico =</span> <span class="fu">sqrt</span>(<span class="fu">diag</span>(<span class="fu">vcov</span>(e1))),</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">ee_robusto =</span> <span class="fu">sqrt</span>(<span class="fu">diag</span>(<span class="fu">vcovHC</span>(e1, <span class="at">type =</span> <span class="st">"HC1"</span>)))) <span class="sc">|&gt;</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cociente =</span> ee_robusto <span class="sc">/</span> ee_clasico)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Con errores robustos también se hacen los intervalos y los tests conjuntos:</p>
+<div id="c053" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coefci</span>(e1, <span class="at">vcov. =</span> <span class="fu">vcovHC</span>(e1, <span class="at">type =</span> <span class="st">"HC1"</span>))</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="fu">waldtest</span>(e1_sin_region, e1, <span class="at">vcov =</span> <span class="fu">vcovHC</span>(e1, <span class="at">type =</span> <span class="st">"HC1"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<blockquote class="blockquote">
+<p>💡 Hay heteroscedasticidad, pero acá la corrección cambia poco los errores estándar (a lo sumo un 7%). <strong>En corte transversal se reportan casi siempre errores robustos</strong>: si no hay heteroscedasticidad dan casi lo mismo que los clásicos; si la hay, son los correctos.</p>
+</blockquote>
+</section>
+<section id="normalidad-de-los-residuos" class="level3">
+<h3 class="anchored" data-anchor-id="normalidad-de-los-residuos">Normalidad de los residuos</h3>
+<p>No afecta los coeficientes. Solo hace falta para que los tests sean exactos con <strong>muestras chicas</strong>; con más de 100 o 200 observaciones funcionan bien igual (teorema central del límite).</p>
+<div id="c055" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">repr.plot.height =</span> <span class="fl">3.85</span>)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">qqnorm</span>(<span class="fu">residuals</span>(e1), <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">col =</span> <span class="fu">rgb</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="fl">0.1</span>))</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="fu">qqline</span>(<span class="fu">residuals</span>(e1), <span class="at">col =</span> <span class="st">"firebrick"</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>tseries<span class="sc">::</span><span class="fu">jarque.bera.test</span>(<span class="fu">residuals</span>(e1))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>¿Qué hizo el logaritmo? El mismo modelo con el ingreso en niveles:</p>
+<div id="c057" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>e1_niveles <span class="ot">&lt;-</span> <span class="fu">lm</span>(ingreso_hora <span class="sc">~</span> educacion <span class="sc">+</span> sexo <span class="sc">+</span> edad <span class="sc">+</span> <span class="fu">I</span>(edad<span class="sc">^</span><span class="dv">2</span>) <span class="sc">+</span> region, <span class="at">data =</span> eph)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>tseries<span class="sc">::</span><span class="fu">jarque.bera.test</span>(<span class="fu">residuals</span>(e1_niveles))</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="fu">bptest</span>(e1_niveles)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<blockquote class="blockquote">
+<p>💡 En niveles, el Jarque-Bera es miles de veces más grande: el logaritmo <strong>corrige casi toda la asimetría</strong>. La heteroscedasticidad no mejora (incluso el BP es más alto en log), así que los errores robustos siguen haciendo falta. Con 14 mil observaciones, el rechazo de normalidad del modelo en log no es un problema.</p>
+</blockquote>
+</section>
+<section id="observaciones-influyentes" class="level3">
+<h3 class="anchored" data-anchor-id="observaciones-influyentes">Observaciones influyentes</h3>
+<p>Una observación es influyente si, al sacarla, los coeficientes se mueven mucho. La distancia de Cook lo mide; umbral habitual, <span class="math inline">\(4/n\)</span>.</p>
+<div id="c059" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>cook <span class="ot">&lt;-</span> <span class="fu">cooks.distance</span>(e1)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>influyentes <span class="ot">&lt;-</span> <span class="fu">which</span>(cook <span class="sc">&gt;</span> <span class="dv">4</span> <span class="sc">/</span> <span class="fu">nobs</span>(e1))</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(influyentes)</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>eph[influyentes, ] <span class="sc">|&gt;</span></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cook =</span> cook[influyentes]) <span class="sc">|&gt;</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(cook)) <span class="sc">|&gt;</span></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(ingreso, horas, ingreso_hora, edad, sexo, educacion, region, cook) <span class="sc">|&gt;</span></span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">10</span>)</span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>e1_sin <span class="ot">&lt;-</span> <span class="fu">update</span>(e1, <span class="at">data =</span> eph[<span class="sc">-</span>influyentes, ])</span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a><span class="fu">cbind</span>(<span class="at">con =</span> <span class="fu">coef</span>(e1), <span class="at">sin =</span> <span class="fu">coef</span>(e1_sin))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<blockquote class="blockquote">
+<p>💡 Las más influyentes son ingresos horarios extremos. Muchas son muy bajas (por ejemplo, $25.000 al mes trabajando 50 horas por semana), que probablemente sean errores de carga o ingresos mal declarados; otras, muy altas. Sin ellas, los coeficientes de educación casi no cambian y la brecha por sexo baja de 20% a 16,5%. <strong>No se sacan observaciones solo porque molestan</strong>: se revisan y se reporta el modelo con y sin ellas.</p>
+</blockquote>
+</section>
+</section>
+<section id="y-los-ponderadores-de-la-eph" class="level2">
+<h2 class="anchored" data-anchor-id="y-los-ponderadores-de-la-eph">1.9 ¿Y los ponderadores de la EPH?</h2>
+<p>La EPH es una muestra: cada persona representa a <code>pondera</code> personas. Para estimar relaciones que valgan para la población se puede usar <code>weights</code>.</p>
+<div id="c061" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>e1_w <span class="ot">&lt;-</span> <span class="fu">update</span>(e1, <span class="at">weights =</span> pondera)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cbind</span>(<span class="at">sin_pesos =</span> <span class="fu">coef</span>(e1), <span class="at">con_pesos =</span> <span class="fu">coef</span>(e1_w))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<blockquote class="blockquote">
+<p>💡 Los resultados se mueven algo (la brecha por sexo sube). Lo importante es <strong>decidir y decirlo</strong> en el informe.</p>
+</blockquote>
+</section>
+<section id="comparar-modelos-y-guardar-la-tabla" class="level2">
+<h2 class="anchored" data-anchor-id="comparar-modelos-y-guardar-la-tabla">1.10 Comparar modelos y guardar la tabla</h2>
+<p>Con distinta cantidad de variables, comparar con <strong>R² ajustado</strong> o <strong>AIC</strong> (menor es mejor), nunca con R² a secas. Solo son comparables modelos con <strong>la misma variable dependiente y la misma muestra</strong> (no se puede comparar <code>e1</code> con <code>e1_niveles</code>).</p>
+<div id="c063" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(e0, e1, e2)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sapply</span>(<span class="fu">list</span>(<span class="at">e0 =</span> e0, <span class="at">e1 =</span> e1, <span class="at">e2 =</span> e2), \(m) <span class="fu">summary</span>(m)<span class="sc">$</span>adj.r.squared)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Para un informe, en lugar de pegar salidas de <code>summary()</code>, una tabla con los modelos lado a lado y <strong>errores robustos</strong>. En el notebook la mostramos con <code>mostrar_tabla()</code> (definida en la primera celda), que recibe los mismos argumentos. Para guardarla, <code>modelsummary()</code> con <code>output = "archivo.docx"</code> (también <code>.html</code>, <code>.png</code>, <code>.tex</code>). Para Word hace falta el paquete <code>pandoc</code>. <code>coef_rename</code> cambia los nombres de los coeficientes (acepta un vector de nombres o una función) y <code>fmt</code> fija la cantidad de decimales.</p>
+<div id="c065" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>modelos <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="st">"Solo educación"</span> <span class="ot">=</span> e0, <span class="st">"Con controles"</span> <span class="ot">=</span> e1, <span class="st">"Interacción"</span> <span class="ot">=</span> e2)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mostrar_tabla</span>(modelos,</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">vcov        =</span> <span class="st">"HC1"</span>,</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">stars       =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">coef_omit   =</span> <span class="st">"region"</span>,</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">fmt         =</span> <span class="dv">4</span>,</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">coef_rename =</span> \(x) x <span class="sc">|&gt;</span> <span class="fu">str_remove_all</span>(<span class="st">"educacion"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">str_replace_all</span>(<span class="fu">c</span>(<span class="st">"sexoVaron"</span> <span class="ot">=</span> <span class="st">"Varón"</span>, <span class="st">"I</span><span class="sc">\\</span><span class="st">(edad</span><span class="sc">\\</span><span class="st">^2</span><span class="sc">\\</span><span class="st">)"</span> <span class="ot">=</span> <span class="st">"Edad²"</span>, <span class="st">"edad"</span> <span class="ot">=</span> <span class="st">"Edad"</span>)),</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">gof_map     =</span> <span class="fu">c</span>(<span class="st">"nobs"</span>, <span class="st">"r.squared"</span>, <span class="st">"adj.r.squared"</span>, <span class="st">"aic"</span>),</span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">notas       =</span> <span class="fu">c</span>(<span class="st">"Variable dependiente: log(ingreso horario). EPH 1T2026."</span>,</span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"Errores estándar robustos (HC1) entre paréntesis. Incluye efectos de región."</span>,</span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"+ p &lt; 0,1; * p &lt; 0,05; ** p &lt; 0,01; *** p &lt; 0,001"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="c066" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">modelsummary</span>(modelos,</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">vcov        =</span> <span class="st">"HC1"</span>,</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">stars       =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">coef_omit   =</span> <span class="st">"region"</span>,</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">fmt         =</span> <span class="dv">4</span>,</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">coef_rename =</span> \(x) x <span class="sc">|&gt;</span> <span class="fu">str_remove_all</span>(<span class="st">"educacion"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">str_replace_all</span>(<span class="fu">c</span>(<span class="st">"sexoVaron"</span> <span class="ot">=</span> <span class="st">"Varón"</span>, <span class="st">"I</span><span class="sc">\\</span><span class="st">(edad</span><span class="sc">\\</span><span class="st">^2</span><span class="sc">\\</span><span class="st">)"</span> <span class="ot">=</span> <span class="st">"Edad²"</span>, <span class="st">"edad"</span> <span class="ot">=</span> <span class="st">"Edad"</span>)),</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">gof_map     =</span> <span class="fu">c</span>(<span class="st">"nobs"</span>, <span class="st">"r.squared"</span>, <span class="st">"adj.r.squared"</span>, <span class="st">"aic"</span>),</span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">notes       =</span> <span class="fu">c</span>(<span class="st">"Variable dependiente: log(ingreso horario). EPH 1T2026."</span>,</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"Errores estándar robustos (HC1) entre paréntesis. Incluye efectos de región."</span>),</span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">output      =</span> <span class="st">"tabla_eph.docx"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Un gráfico de coeficientes comunica mejor que la tabla frente a públicos no técnicos:</p>
+<div id="c068" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">repr.plot.height =</span> <span class="fl">4.4</span>)</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="fu">modelplot</span>(e1, <span class="at">vcov =</span> <span class="st">"HC1"</span>, <span class="at">coef_omit =</span> <span class="st">"Intercept|edad"</span>) <span class="sc">+</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Coeficiente (log-puntos)"</span>, <span class="at">title =</span> <span class="st">"log(ingreso horario), EPH 1T2026"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<blockquote class="blockquote">
+<p>⚠️ <strong>Errores frecuentes de interpretación</strong></p>
+<ul>
+<li>Leer causalidad donde hay asociación.</li>
+<li>Extrapolar fuera del rango de los datos (el modelo no sabe nada de personas de 90 años).</li>
+<li>Confundir significancia estadística con magnitud relevante.</li>
+<li>Leer un coeficiente con interacción como si fuera el efecto general (en <code>e2</code>, <code>sexoVaron</code> es la brecha solo en “hasta primario”).</li>
+<li>Leer solo el término lineal cuando hay un cuadrado.</li>
+</ul>
+</blockquote>
+</section>
+</section>
+<section id="integrador-rápido-precios-de-departamentos-properati" class="level1">
+<h1>Integrador rápido: precios de departamentos (Properati)</h1>
+<p>Avisos de departamentos en venta en CABA (nov-2018 a may-2019), en barrios con al menos 300 avisos. El mismo recorrido, en formato checklist.</p>
+<p><strong>☐ 1. Mirar los datos.</strong> <em>Por qué</em>: detectar asimetrías y valores raros antes de elegir la forma del modelo.</p>
+<div id="c070" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">repr.plot.height =</span> <span class="fl">3.85</span>)</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">select</span>(deptos, precio, m2, ambientes))</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(<span class="fu">log</span>(deptos<span class="sc">$</span>precio), <span class="at">breaks =</span> <span class="dv">50</span>, <span class="at">main =</span> <span class="st">"log(precio)"</span>, <span class="at">xlab =</span> <span class="st">""</span>, <span class="at">col =</span> <span class="st">"grey80"</span>)</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">log</span>(deptos<span class="sc">$</span>m2), <span class="fu">log</span>(deptos<span class="sc">$</span>precio), <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">col =</span> <span class="fu">rgb</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="fl">0.05</span>),</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"log(m2)"</span>, <span class="at">ylab =</span> <span class="st">"log(precio)"</span>)</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<blockquote class="blockquote">
+<p>Precio y superficie son asimétricos y la relación entre sus logaritmos es casi una recta: modelo <strong>log-log</strong>.</p>
+</blockquote>
+<p><strong>☐ 2. Estimar e interpretar.</strong> <em>Por qué</em>: el coeficiente de <code>log(m2)</code> es una elasticidad; los de <code>barrio</code>, diferencias con Balvanera (la base).</p>
+<div id="c072" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="fu">log</span>(precio) <span class="sc">~</span> <span class="fu">log</span>(m2) <span class="sc">+</span> ambientes <span class="sc">+</span> barrio, <span class="at">data =</span> deptos)</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(p1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<blockquote class="blockquote">
+<ul>
+<li><code>log(m2)</code> ≈ 1,03: un departamento 10% más grande cuesta 10,3% más, a igual barrio y ambientes.</li>
+<li><code>ambientes</code> ≈ −0,03: a igual superficie, un ambiente más es 3% más barato (ambientes más chicos).</li>
+<li>R² ≈ 0,87: superficie y barrio explican casi toda la variabilidad del precio.</li>
+</ul>
+</blockquote>
+<p><strong>☐ 3. Primas exactas de las dummies.</strong> <em>Por qué</em>: con log(y), <span class="math inline">\(100\hat\beta\)</span> falla cuando <span class="math inline">\(\hat\beta\)</span> es grande.</p>
+<div id="c074" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(<span class="at">termino =</span> <span class="fu">names</span>(<span class="fu">coef</span>(p1)), <span class="at">beta =</span> <span class="fu">coef</span>(p1)) <span class="sc">|&gt;</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">str_starts</span>(termino, <span class="st">"barrio"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">aproximado =</span> <span class="dv">100</span> <span class="sc">*</span> beta, <span class="at">exacto =</span> <span class="dv">100</span> <span class="sc">*</span> (<span class="fu">exp</span>(beta) <span class="sc">-</span> <span class="dv">1</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(beta))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<blockquote class="blockquote">
+<p>Puerto Madero: β ≈ 1. La lectura rápida dice “100% más caro que Balvanera”; la exacta, <strong>173%</strong>.</p>
+</blockquote>
+<p><strong>☐ 4. Significatividad conjunta del barrio.</strong> <em>Por qué</em>: una categórica se decide con el test conjunto, no dummy por dummy.</p>
+<div id="c076" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>p0 <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="fu">log</span>(precio) <span class="sc">~</span> <span class="fu">log</span>(m2) <span class="sc">+</span> ambientes, <span class="at">data =</span> deptos)</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="fu">waldtest</span>(p0, p1, <span class="at">vcov =</span> <span class="fu">vcovHC</span>(p1, <span class="at">type =</span> <span class="st">"HC1"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<blockquote class="blockquote">
+<p>F enorme: el barrio importa, aunque un par de dummies sueltas no sean significativas.</p>
+</blockquote>
+<p><strong>☐ 5. Forma funcional.</strong> <em>Por qué</em>: si falta una no linealidad, los coeficientes están sesgados.</p>
+<div id="c078" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">resettest</span>(p1)</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="fu">log</span>(precio) <span class="sc">~</span> <span class="fu">log</span>(m2) <span class="sc">+</span> <span class="fu">I</span>(<span class="fu">log</span>(m2)<span class="sc">^</span><span class="dv">2</span>) <span class="sc">+</span> ambientes <span class="sc">+</span> barrio, <span class="at">data =</span> deptos)</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a><span class="fu">coeftest</span>(p2)[<span class="st">"I(log(m2)^2)"</span>, ]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<blockquote class="blockquote">
+<p>Rechaza. El cuadrado de <code>log(m2)</code> es significativo: la elasticidad crece con el tamaño (≈ 0,96 en 40 m² y ≈ 1,11 en 150 m²).</p>
+</blockquote>
+<p><strong>☐ 6. Multicolinealidad.</strong> <em>Por qué</em>: errores estándar inflados.</p>
+<div id="c080" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">vif</span>(p1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<blockquote class="blockquote">
+<p>Superficie y ambientes están correlacionados (VIF ≈ 4), lejos de 10. No se hace nada.</p>
+</blockquote>
+<p><strong>☐ 7. Heteroscedasticidad.</strong> <em>Por qué</em>: si está, los errores estándar clásicos están mal.</p>
+<div id="c082" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bptest</span>(p1)</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cbind</span>(<span class="at">clasico =</span> <span class="fu">sqrt</span>(<span class="fu">diag</span>(<span class="fu">vcov</span>(p1))), <span class="at">robusto =</span> <span class="fu">sqrt</span>(<span class="fu">diag</span>(<span class="fu">vcovHC</span>(p1, <span class="at">type =</span> <span class="st">"HC1"</span>))))[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, ]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<blockquote class="blockquote">
+<p>Rechaza. Los errores robustos de <code>log(m2)</code> y <code>ambientes</code> son ~40% más grandes: <strong>se reportan los robustos</strong>.</p>
+</blockquote>
+<p><strong>☐ 8. Normalidad.</strong> <em>Por qué</em>: solo importa con muestras chicas.</p>
+<div id="c084" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>tseries<span class="sc">::</span><span class="fu">jarque.bera.test</span>(<span class="fu">residuals</span>(p1))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<blockquote class="blockquote">
+<p>Rechaza (colas pesadas), pero con 36 mil observaciones no importa.</p>
+</blockquote>
+<p><strong>☐ 9. Influyentes.</strong> <em>Por qué</em>: que unos pocos avisos no definan el resultado.</p>
+<div id="c086" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>cook_p <span class="ot">&lt;-</span> <span class="fu">cooks.distance</span>(p1)</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>p1_sin <span class="ot">&lt;-</span> <span class="fu">update</span>(p1, <span class="at">data =</span> deptos[cook_p <span class="sc">&lt;=</span> <span class="dv">4</span> <span class="sc">/</span> <span class="fu">nobs</span>(p1), ])</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a><span class="fu">cbind</span>(<span class="at">con =</span> <span class="fu">coef</span>(p1), <span class="at">sin =</span> <span class="fu">coef</span>(p1_sin))[<span class="fu">c</span>(<span class="st">"log(m2)"</span>, <span class="st">"ambientes"</span>, <span class="st">"barrioPuerto Madero"</span>), ]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<blockquote class="blockquote">
+<p>Los coeficientes casi no cambian.</p>
+</blockquote>
+<p><strong>☐ 10. Reportar.</strong> <em>Por qué</em>: el resultado tiene que poder leerse sin R.</p>
+<div id="c088" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Verla en el notebook</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mostrar_tabla</span>(<span class="fu">list</span>(<span class="st">"Sin barrio"</span> <span class="ot">=</span> p0, <span class="st">"Con barrio"</span> <span class="ot">=</span> p1, <span class="st">"Con cuadrático"</span> <span class="ot">=</span> p2),</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">vcov     =</span> <span class="st">"HC1"</span>,</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">stars    =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">coef_map =</span> <span class="fu">c</span>(<span class="st">"log(m2)"</span> <span class="ot">=</span> <span class="st">"Log superficie"</span>, <span class="st">"I(log(m2)^2)"</span> <span class="ot">=</span> <span class="st">"Log superficie²"</span>,</span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>               <span class="st">"ambientes"</span> <span class="ot">=</span> <span class="st">"Ambientes"</span>, <span class="st">"barrioPuerto Madero"</span> <span class="ot">=</span> <span class="st">"Puerto Madero"</span>,</span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>               <span class="st">"barrioPalermo"</span> <span class="ot">=</span> <span class="st">"Palermo"</span>),</span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">gof_map  =</span> <span class="fu">c</span>(<span class="st">"nobs"</span>, <span class="st">"adj.r.squared"</span>, <span class="st">"aic"</span>),</span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">notas    =</span> <span class="st">"Errores robustos (HC1) entre paréntesis."</span>)</span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Guardarla en Word</span></span>
+<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a><span class="fu">modelsummary</span>(<span class="fu">list</span>(<span class="st">"Sin barrio"</span> <span class="ot">=</span> p0, <span class="st">"Con barrio"</span> <span class="ot">=</span> p1, <span class="st">"Con cuadrático"</span> <span class="ot">=</span> p2),</span>
+<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">vcov     =</span> <span class="st">"HC1"</span>,</span>
+<span id="cb46-14"><a href="#cb46-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">stars    =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb46-15"><a href="#cb46-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">coef_map =</span> <span class="fu">c</span>(<span class="st">"log(m2)"</span> <span class="ot">=</span> <span class="st">"Log superficie"</span>, <span class="st">"I(log(m2)^2)"</span> <span class="ot">=</span> <span class="st">"Log superficie²"</span>,</span>
+<span id="cb46-16"><a href="#cb46-16" aria-hidden="true" tabindex="-1"></a>               <span class="st">"ambientes"</span> <span class="ot">=</span> <span class="st">"Ambientes"</span>, <span class="st">"barrioPuerto Madero"</span> <span class="ot">=</span> <span class="st">"Puerto Madero"</span>,</span>
+<span id="cb46-17"><a href="#cb46-17" aria-hidden="true" tabindex="-1"></a>               <span class="st">"barrioPalermo"</span> <span class="ot">=</span> <span class="st">"Palermo"</span>),</span>
+<span id="cb46-18"><a href="#cb46-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">gof_map  =</span> <span class="fu">c</span>(<span class="st">"nobs"</span>, <span class="st">"adj.r.squared"</span>, <span class="st">"aic"</span>),</span>
+<span id="cb46-19"><a href="#cb46-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">output   =</span> <span class="st">"tabla_deptos.docx"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<blockquote class="blockquote">
+<p>En palabras: a igual barrio y ambientes, un departamento 10% más grande cuesta cerca de 10% más; Puerto Madero es 173% más caro que Balvanera y Palermo, 65% más.</p>
+</blockquote>
+</section>
+<section id="parte-2.-shift-share" class="level1">
+<h1>Parte 2. Shift-share</h1>
+<section id="la-pregunta" class="level2">
+<h2 class="anchored" data-anchor-id="la-pregunta">La pregunta</h2>
+<p>Cuando cambia un agregado que es un <strong>promedio ponderado</strong>, ¿cuánto vino de cambios <strong>dentro</strong> de cada componente y cuánto de la <strong>recomposición</strong> entre componentes?</p>
+<ul>
+<li>Productividad de un país: promedio de la productividad de cada sector, ponderada por empleo.</li>
+<li>Margen de una empresa: promedio del margen de cada producto, ponderado por ventas.</li>
+<li>Salario medio: promedio por ocupación, ponderado por cantidad de ocupados.</li>
+</ul>
+<p>El agregado puede caer aunque <strong>todos</strong> los componentes mejoren, si el peso se mueve hacia los de nivel más bajo (paradoja de Simpson). El shift-share mide exactamente cuánto de cada cosa.</p>
+</section>
+<section id="la-identidad-y-su-descomposición" class="level2">
+<h2 class="anchored" data-anchor-id="la-identidad-y-su-descomposición">La identidad y su descomposición</h2>
+<p>La productividad agregada es el producto total sobre el empleo total. Escrita como promedio ponderado, con <span class="math inline">\(s_i = L_i / L\)</span> la participación del sector <span class="math inline">\(i\)</span> en el empleo y <span class="math inline">\(p_i = Y_i / L_i\)</span> su productividad:</p>
+<p><span class="math display">\[P = \frac{\sum_i Y_i}{\sum_i L_i} = \sum_i s_i \, p_i\]</span></p>
+<p>Entre el año 0 y el año 1, <span class="math inline">\(s_{i1} = s_{i0} + \Delta s_i\)</span> y <span class="math inline">\(p_{i1} = p_{i0} + \Delta p_i\)</span>. Para cada sector:</p>
+<p><span class="math display">\[s_{i1}\,p_{i1} - s_{i0}\,p_{i0} = (s_{i0} + \Delta s_i)(p_{i0} + \Delta p_i) - s_{i0}\,p_{i0} = s_{i0}\,\Delta p_i + \Delta s_i\, p_{i0} + \Delta s_i\, \Delta p_i\]</span></p>
+<p>Sumando sobre los sectores:</p>
+<p><span class="math display">\[\Delta P = \underbrace{\sum_i s_{i0}\,\Delta p_i}_{\text{intrasectorial}} + \underbrace{\sum_i \Delta s_i \, p_{i0}}_{\text{estático}} + \underbrace{\sum_i \Delta s_i \, \Delta p_i}_{\text{dinámico}}\]</span></p>
+<ul>
+<li><strong>Intrasectorial</strong>: mejoras dentro de cada sector, con la estructura del año inicial.</li>
+<li><strong>Estático</strong>: reasignación del empleo hacia sectores que <strong>ya eran</strong> más productivos.</li>
+<li><strong>Dinámico</strong>: positivo si el empleo va hacia sectores cuya productividad <strong>crece</strong>.</li>
+</ul>
+<p>Es pura álgebra: los tres términos suman <strong>exacto</strong> el cambio total. No hay nada estimado, no hay errores estándar.</p>
+<div id="c090" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>shift_share <span class="ot">&lt;-</span> <span class="cf">function</span>(d) {</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>  d <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">intra    =</span> s0 <span class="sc">*</span> (p1 <span class="sc">-</span> p0),</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>              <span class="at">estatico =</span> (s1 <span class="sc">-</span> s0) <span class="sc">*</span> p0,</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">dinamico =</span> (s1 <span class="sc">-</span> s0) <span class="sc">*</span> (p1 <span class="sc">-</span> p0))</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="ejemplo-de-pizarrón" class="level2">
+<h2 class="anchored" data-anchor-id="ejemplo-de-pizarrón">Ejemplo de pizarrón</h2>
+<div id="c092" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>ej <span class="ot">&lt;-</span> <span class="fu">tribble</span>(</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>  <span class="sc">~</span>sector,     <span class="sc">~</span>s0, <span class="sc">~</span>s1, <span class="sc">~</span>p0, <span class="sc">~</span>p1,</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Industria"</span>, <span class="fl">0.5</span>, <span class="fl">0.3</span>, <span class="dv">100</span>, <span class="dv">120</span>,</span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Servicios"</span>, <span class="fl">0.5</span>, <span class="fl">0.7</span>,  <span class="dv">50</span>,  <span class="dv">55</span></span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span> <span class="fu">shift_share</span>()</span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>ej</span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">P0 =</span> <span class="fu">sum</span>(ej<span class="sc">$</span>s0 <span class="sc">*</span> ej<span class="sc">$</span>p0), <span class="at">P1 =</span> <span class="fu">sum</span>(ej<span class="sc">$</span>s1 <span class="sc">*</span> ej<span class="sc">$</span>p1))</span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a>ej <span class="sc">|&gt;</span> <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">c</span>(intra, estatico, dinamico), sum))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<blockquote class="blockquote">
+<p>💡 Los dos sectores mejoran (+20 y +5) y la productividad agregada <strong>cae</strong> de 75 a 74,5: el empleo se va al sector menos productivo (estático −10) y justo al que menos mejora (dinámico −3). Intrasectorial (+12,5) + estático (−10) + dinámico (−3) = −0,5 = <span class="math inline">\(P_1 - P_0\)</span>.</p>
+</blockquote>
+</section>
+<section id="productividad-de-argentina" class="level2">
+<h2 class="anchored" data-anchor-id="productividad-de-argentina">Productividad de Argentina</h2>
+<p>VAB a precios de 2004 (Argendata) y ocupados (GGDC), en 9 sectores compatibles entre ambas fuentes. La productividad está en miles de pesos de 2004 por ocupado.</p>
+<div id="c094" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>prod_arg <span class="ot">&lt;-</span> prod_arg <span class="sc">|&gt;</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(anio) <span class="sc">|&gt;</span></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">s =</span> empleo <span class="sc">/</span> <span class="fu">sum</span>(empleo), <span class="at">p =</span> vab <span class="sc">/</span> empleo) <span class="sc">|&gt;</span></span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Chequeo: el promedio ponderado es igual al cociente de totales</span></span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>prod_arg <span class="sc">|&gt;</span></span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(anio) <span class="sc">|&gt;</span></span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">P_ponderado =</span> <span class="fu">sum</span>(s <span class="sc">*</span> p), <span class="at">P_cociente =</span> <span class="fu">sum</span>(vab) <span class="sc">/</span> <span class="fu">sum</span>(empleo)) <span class="sc">|&gt;</span></span>
+<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(anio <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">1950</span>, <span class="dv">1990</span>, <span class="dv">2018</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Una función que arma la tabla ancha (una fila por sector, columnas <code>s0, s1, p0, p1</code>) y descompone:</p>
+<div id="c096" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>ss_periodo <span class="ot">&lt;-</span> <span class="cf">function</span>(datos, a0, a1) {</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>  datos <span class="sc">|&gt;</span></span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(anio <span class="sc">%in%</span> <span class="fu">c</span>(a0, a1)) <span class="sc">|&gt;</span></span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">t =</span> <span class="fu">if_else</span>(anio <span class="sc">==</span> a0, <span class="st">"0"</span>, <span class="st">"1"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(sector, t, s, p) <span class="sc">|&gt;</span></span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> t, <span class="at">values_from =</span> <span class="fu">c</span>(s, p), <span class="at">names_sep =</span> <span class="st">""</span>) <span class="sc">|&gt;</span></span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">shift_share</span>()</span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a>arg <span class="ot">&lt;-</span> <span class="fu">ss_periodo</span>(prod_arg, <span class="dv">1990</span>, <span class="dv">2018</span>)</span>
+<span id="cb50-11"><a href="#cb50-11" aria-hidden="true" tabindex="-1"></a>arg</span>
+<span id="cb50-12"><a href="#cb50-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-13"><a href="#cb50-13" aria-hidden="true" tabindex="-1"></a>totales <span class="ot">&lt;-</span> arg <span class="sc">|&gt;</span> <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">c</span>(intra, estatico, dinamico), sum))</span>
+<span id="cb50-14"><a href="#cb50-14" aria-hidden="true" tabindex="-1"></a>totales</span>
+<span id="cb50-15"><a href="#cb50-15" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">suma_terminos =</span> <span class="fu">sum</span>(totales),</span>
+<span id="cb50-16"><a href="#cb50-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">P1_menos_P0   =</span> <span class="fu">sum</span>(arg<span class="sc">$</span>s1 <span class="sc">*</span> arg<span class="sc">$</span>p1) <span class="sc">-</span> <span class="fu">sum</span>(arg<span class="sc">$</span>s0 <span class="sc">*</span> arg<span class="sc">$</span>p0))   <span class="co"># chequeo obligatorio</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="c097" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">repr.plot.height =</span> <span class="fl">4.4</span>)</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>arg <span class="sc">|&gt;</span></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(sector, intra, estatico, dinamico) <span class="sc">|&gt;</span></span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="sc">-</span>sector, <span class="at">names_to =</span> <span class="st">"termino"</span>, <span class="at">values_to =</span> <span class="st">"aporte"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">termino =</span> <span class="fu">factor</span>(termino, <span class="fu">c</span>(<span class="st">"intra"</span>, <span class="st">"estatico"</span>, <span class="st">"dinamico"</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(aporte, <span class="fu">reorder</span>(sector, aporte, sum), <span class="at">fill =</span> aporte <span class="sc">&gt;</span> <span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>() <span class="sc">+</span></span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> termino) <span class="sc">+</span></span>
+<span id="cb51-10"><a href="#cb51-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">guides</span>(<span class="at">fill =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb51-11"><a href="#cb51-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Miles de pesos de 2004 por ocupado"</span>, <span class="at">y =</span> <span class="cn">NULL</span>,</span>
+<span id="cb51-12"><a href="#cb51-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Aporte de cada sector al cambio de la productividad, 1990-2018"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<blockquote class="blockquote">
+<p>💡 La productividad pasó de 23,6 a 29,2. El grueso es intrasectorial (+8,7). El dinámico es negativo (−3,9): industria y agro casi duplicaron su productividad mientras <strong>perdían</strong> participación en el empleo. Es el “cambio estructural que reduce el crecimiento” de McMillan y Rodrik (2011).</p>
+</blockquote>
+<p>Por períodos:</p>
+<div id="c099" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>periodos <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="fu">c</span>(<span class="dv">1950</span>, <span class="dv">1975</span>), <span class="fu">c</span>(<span class="dv">1975</span>, <span class="dv">1990</span>), <span class="fu">c</span>(<span class="dv">1990</span>, <span class="dv">2002</span>), <span class="fu">c</span>(<span class="dv">2002</span>, <span class="dv">2018</span>))</span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a><span class="fu">map_dfr</span>(periodos, \(pp) <span class="fu">ss_periodo</span>(prod_arg, pp[<span class="dv">1</span>], pp[<span class="dv">2</span>]) <span class="sc">|&gt;</span></span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>          <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">c</span>(intra, estatico, dinamico), sum)) <span class="sc">|&gt;</span></span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>          <span class="fu">mutate</span>(<span class="at">periodo =</span> <span class="fu">paste</span>(pp, <span class="at">collapse =</span> <span class="st">"-"</span>), <span class="at">.before =</span> <span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="el-problema-del-año-base" class="level2">
+<h2 class="anchored" data-anchor-id="el-problema-del-año-base">El problema del año base</h2>
+<p>El término dinámico es un “sobrante” que no pertenece naturalmente a ninguno de los otros dos. Hay varias formas de repartirlo, <strong>todas exactas</strong>:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Variante</th>
+<th style="text-align: left;">Dentro de sectores</th>
+<th style="text-align: left;">Reasignación</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Tres términos</td>
+<td style="text-align: left;"><span class="math inline">\(\sum s_{i0}\Delta p_i\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(\sum \Delta s_i\, p_{i0}\)</span> y <span class="math inline">\(\sum \Delta s_i \Delta p_i\)</span> por separado</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Pesos finales en el intra</td>
+<td style="text-align: left;"><span class="math inline">\(\sum s_{i1}\Delta p_i\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(\sum \Delta s_i\, p_{i0}\)</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Productividad final en la reasignación (McMillan y Rodrik)</td>
+<td style="text-align: left;"><span class="math inline">\(\sum s_{i0}\Delta p_i\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(\sum \Delta s_i\, p_{i1}\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Promedios de los dos años</td>
+<td style="text-align: left;"><span class="math inline">\(\sum \bar s_i \Delta p_i\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(\sum \Delta s_i\, \bar p_i\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>Es el mismo problema de los números índice (Laspeyres vs Paasche).</p>
+<div id="c101" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(</span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">variante     =</span> <span class="fu">c</span>(<span class="st">"pesos finales en el intra"</span>, <span class="st">"McMillan-Rodrik"</span>, <span class="st">"promedios"</span>),</span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">dentro       =</span> <span class="fu">c</span>(<span class="fu">sum</span>(arg<span class="sc">$</span>s1 <span class="sc">*</span> (arg<span class="sc">$</span>p1 <span class="sc">-</span> arg<span class="sc">$</span>p0)),</span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>                   <span class="fu">sum</span>(arg<span class="sc">$</span>s0 <span class="sc">*</span> (arg<span class="sc">$</span>p1 <span class="sc">-</span> arg<span class="sc">$</span>p0)),</span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>                   <span class="fu">sum</span>((arg<span class="sc">$</span>s0 <span class="sc">+</span> arg<span class="sc">$</span>s1) <span class="sc">/</span> <span class="dv">2</span> <span class="sc">*</span> (arg<span class="sc">$</span>p1 <span class="sc">-</span> arg<span class="sc">$</span>p0))),</span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">reasignacion =</span> <span class="fu">c</span>(<span class="fu">sum</span>((arg<span class="sc">$</span>s1 <span class="sc">-</span> arg<span class="sc">$</span>s0) <span class="sc">*</span> arg<span class="sc">$</span>p0),</span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a>                   <span class="fu">sum</span>((arg<span class="sc">$</span>s1 <span class="sc">-</span> arg<span class="sc">$</span>s0) <span class="sc">*</span> arg<span class="sc">$</span>p1),</span>
+<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a>                   <span class="fu">sum</span>((arg<span class="sc">$</span>s1 <span class="sc">-</span> arg<span class="sc">$</span>s0) <span class="sc">*</span> (arg<span class="sc">$</span>p0 <span class="sc">+</span> arg<span class="sc">$</span>p1) <span class="sc">/</span> <span class="dv">2</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<blockquote class="blockquote">
+<p>💡 Según la variante, la reasignación <strong>suma</strong> (+0,9) o <strong>resta</strong> (−3,1). Hay que decir siempre qué variante se usó.</p>
+</blockquote>
+</section>
+<section id="en-negocios-el-margen-de-superstore-precio-volumen-mix" class="level2">
+<h2 class="anchored" data-anchor-id="en-negocios-el-margen-de-superstore-precio-volumen-mix">En negocios: el margen de Superstore (precio-volumen-mix)</h2>
+<p>El margen total es un promedio de los márgenes de cada producto, ponderado por su participación en las ventas:</p>
+<p><span class="math display">\[M = \frac{\sum_i G_i}{\sum_i V_i} = \sum_i w_i \, m_i \qquad w_i = \frac{V_i}{V}, \quad m_i = \frac{G_i}{V_i}\]</span></p>
+<p>¿Cambió el margen porque cada producto rinde distinto o porque cambió <strong>qué</strong> se vende? En finanzas corporativas es el <strong>análisis precio-volumen-mix</strong>: el término estático es el “efecto mix”. Se usa la misma función, con <span class="math inline">\(s\)</span> = participación en ventas y <span class="math inline">\(p\)</span> = margen.</p>
+<div id="c103" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>margen <span class="ot">&lt;-</span> superstore <span class="sc">|&gt;</span></span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(anio, <span class="at">sector =</span> subcategoria) <span class="sc">|&gt;</span></span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">ventas =</span> <span class="fu">sum</span>(ventas), <span class="at">ganancia =</span> <span class="fu">sum</span>(ganancia), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(anio) <span class="sc">|&gt;</span></span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">s =</span> ventas <span class="sc">/</span> <span class="fu">sum</span>(ventas), <span class="at">p =</span> ganancia <span class="sc">/</span> ventas) <span class="sc">|&gt;</span></span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a>mg <span class="ot">&lt;-</span> <span class="fu">ss_periodo</span>(margen, <span class="dv">2015</span>, <span class="dv">2018</span>)</span>
+<span id="cb54-9"><a href="#cb54-9" aria-hidden="true" tabindex="-1"></a>mg <span class="sc">|&gt;</span> <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">c</span>(intra, estatico, dinamico), sum)) <span class="sc">*</span> <span class="dv">100</span>     <span class="co"># en puntos porcentuales</span></span>
+<span id="cb54-10"><a href="#cb54-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-11"><a href="#cb54-11" aria-hidden="true" tabindex="-1"></a>mg <span class="sc">|&gt;</span> <span class="fu">arrange</span>(<span class="fu">desc</span>(<span class="fu">abs</span>(estatico))) <span class="sc">|&gt;</span> <span class="fu">select</span>(sector, s0, s1, p0, p1, estatico) <span class="sc">|&gt;</span> <span class="fu">head</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<blockquote class="blockquote">
+<p>💡 El margen sube de 10,2% a 12,7%. Dentro de cada subcategoría el margen <strong>cae</strong> (−1,8 p.p.); todo el aumento viene del mix: Copiers pasó de 2% a 9% de las ventas y además es la de margen más alto.</p>
+</blockquote>
+</section>
+<section id="versión-regional-o-por-sucursal" class="level2">
+<h2 class="anchored" data-anchor-id="versión-regional-o-por-sucursal">Versión regional o por sucursal</h2>
+<p>Para el cambio de las ventas (o del empleo) de una región <span class="math inline">\(r\)</span> en el sector <span class="math inline">\(i\)</span>, con <span class="math inline">\(g\)</span> = tasa de crecimiento entre los dos años:</p>
+<p><span class="math display">\[\Delta e_{ri} = e_{ri0}\, g_{ri}\]</span></p>
+<p>Sumando y restando el crecimiento total (<span class="math inline">\(g_N\)</span>) y el del sector en el total (<span class="math inline">\(g_{Ni}\)</span>):</p>
+<p><span class="math display">\[\Delta e_{ri} = \underbrace{e_{ri0}\, g_N}_{\text{nacional}} + \underbrace{e_{ri0}\,(g_{Ni} - g_N)}_{\text{composición}} + \underbrace{e_{ri0}\,(g_{ri} - g_{Ni})}_{\text{competitivo}}\]</span></p>
+<ul>
+<li><strong>Nacional o de cadena</strong>: lo que habría crecido al ritmo del total.</li>
+<li><strong>Composición</strong>: lo que aporta estar especializado en sectores o categorías dinámicas.</li>
+<li><strong>Competitivo</strong>: desempeño propio respecto del mismo sector en el total.</li>
+</ul>
+<div id="c105" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>reg <span class="ot">&lt;-</span> superstore <span class="sc">|&gt;</span></span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(anio <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">2015</span>, <span class="dv">2018</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(region, categoria, anio) <span class="sc">|&gt;</span></span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">v =</span> <span class="fu">sum</span>(ventas), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> anio, <span class="at">values_from =</span> v, <span class="at">names_prefix =</span> <span class="st">"v"</span>)</span>
+<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a>g_N <span class="ot">&lt;-</span> <span class="fu">sum</span>(reg<span class="sc">$</span>v2018) <span class="sc">/</span> <span class="fu">sum</span>(reg<span class="sc">$</span>v2015) <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb55-8"><a href="#cb55-8" aria-hidden="true" tabindex="-1"></a>g_N</span>
+<span id="cb55-9"><a href="#cb55-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-10"><a href="#cb55-10" aria-hidden="true" tabindex="-1"></a>reg <span class="sc">|&gt;</span></span>
+<span id="cb55-11"><a href="#cb55-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(categoria) <span class="sc">|&gt;</span></span>
+<span id="cb55-12"><a href="#cb55-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">g_Ni =</span> <span class="fu">sum</span>(v2018) <span class="sc">/</span> <span class="fu">sum</span>(v2015) <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb55-13"><a href="#cb55-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
+<span id="cb55-14"><a href="#cb55-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">g_ri        =</span> v2018 <span class="sc">/</span> v2015 <span class="sc">-</span> <span class="dv">1</span>,</span>
+<span id="cb55-15"><a href="#cb55-15" aria-hidden="true" tabindex="-1"></a>         <span class="at">nacional    =</span> v2015 <span class="sc">*</span> g_N,</span>
+<span id="cb55-16"><a href="#cb55-16" aria-hidden="true" tabindex="-1"></a>         <span class="at">composicion =</span> v2015 <span class="sc">*</span> (g_Ni <span class="sc">-</span> g_N),</span>
+<span id="cb55-17"><a href="#cb55-17" aria-hidden="true" tabindex="-1"></a>         <span class="at">competitivo =</span> v2015 <span class="sc">*</span> (g_ri <span class="sc">-</span> g_Ni)) <span class="sc">|&gt;</span></span>
+<span id="cb55-18"><a href="#cb55-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(region) <span class="sc">|&gt;</span></span>
+<span id="cb55-19"><a href="#cb55-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">cambio =</span> <span class="fu">sum</span>(v2018 <span class="sc">-</span> v2015),</span>
+<span id="cb55-20"><a href="#cb55-20" aria-hidden="true" tabindex="-1"></a>            <span class="fu">across</span>(<span class="fu">c</span>(nacional, composicion, competitivo), sum))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<blockquote class="blockquote">
+<p>💡 La cadena creció 51%. Este y Oeste crecen por encima por desempeño propio; el Sur queda muy por debajo. La composición casi no aporta: todas las regiones venden una mezcla parecida.</p>
+</blockquote>
+</section>
+<section id="cuidados" class="level2">
+<h2 class="anchored" data-anchor-id="cuidados">Cuidados</h2>
+<ul>
+<li><strong>El resultado depende del año base</strong> y de cómo se reparte el término cruzado.</li>
+<li><strong>El nivel de agregación cambia el reparto</strong>: lo que con 9 sectores es “intrasectorial” puede ser reasignación entre ramas con 50 sectores.</li>
+<li><strong>Unidades comparables</strong>: productividad a precios constantes. Con precios corrientes, el cambio de precios relativos se mezcla con la productividad.</li>
+<li><strong>Es una identidad</strong>: describe dónde está el cambio y deja abierta la pregunta por su causa.</li>
+</ul>
+</section>
+</section>
+<section id="parte-3.-entropía-e-índice-de-theil" class="level1">
+<h1>Parte 3. Entropía e índice de Theil</h1>
+<section id="antes-qué-es-la-entropía" class="level2">
+<h2 class="anchored" data-anchor-id="antes-qué-es-la-entropía">Antes: qué es la entropía</h2>
+<p>Viene de la teoría de la información (Shannon, 1948). Si un evento tiene probabilidad <span class="math inline">\(p\)</span>, la <strong>información</strong> (o sorpresa) que aporta enterarse de que ocurrió es</p>
+<p><span class="math display">\[h(p) = -\ln p\]</span></p>
+<p>Un evento seguro (<span class="math inline">\(p = 1\)</span>) no sorprende: <span class="math inline">\(h = 0\)</span>. Uno rarísimo sorprende mucho. La <strong>entropía</strong> es la sorpresa esperada de una distribución <span class="math inline">\((p_1, \dots, p_N)\)</span>:</p>
+<p><span class="math display">\[H = -\sum_i p_i \ln p_i\]</span></p>
+<ul>
+<li><span class="math inline">\(H = 0\)</span> si un resultado tiene toda la probabilidad: no hay incertidumbre.</li>
+<li><span class="math inline">\(H = \ln N\)</span>, su máximo, si todos los resultados son igual de probables.</li>
+<li>Mide cuán “repartida” está una distribución.</li>
+</ul>
+<div id="c107" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>entropia <span class="ot">&lt;-</span> <span class="cf">function</span>(p) { p <span class="ot">&lt;-</span> p <span class="sc">/</span> <span class="fu">sum</span>(p); <span class="sc">-</span><span class="fu">sum</span>(p <span class="sc">*</span> <span class="fu">log</span>(p)) }</span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a><span class="fu">entropia</span>(<span class="fu">c</span>(<span class="fl">0.5</span>, <span class="fl">0.5</span>))      <span class="co"># moneda justa: ln 2</span></span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a><span class="fu">entropia</span>(<span class="fu">c</span>(<span class="fl">0.99</span>, <span class="fl">0.01</span>))    <span class="co"># moneda cargada: casi no hay nada que adivinar</span></span>
+<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a><span class="fu">entropia</span>(<span class="fu">rep</span>(<span class="dv">1</span>, <span class="dv">6</span>))        <span class="co"># dado: ln 6</span></span>
+<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a><span class="fu">log</span>(<span class="dv">6</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="de-la-entropía-a-la-desigualdad" class="level2">
+<h2 class="anchored" data-anchor-id="de-la-entropía-a-la-desigualdad">De la entropía a la desigualdad</h2>
+<p>Theil (1967) reemplazó probabilidades por <strong>participaciones en el ingreso</strong>, <span class="math inline">\(q_i = y_i / \sum_j y_j\)</span>:</p>
+<ul>
+<li>Si todos ganan lo mismo, <span class="math inline">\(q_i = 1/N\)</span> y la entropía es máxima: <span class="math inline">\(\ln N\)</span>.</li>
+<li>Si una persona se queda con todo, la entropía es 0.</li>
+</ul>
+<p>La desigualdad es lo que le <strong>falta</strong> a la entropía para llegar al máximo:</p>
+<p><span class="math display">\[T = \ln N - H(q) = \ln N + \sum_i q_i \ln q_i = \sum_i q_i \ln (N q_i)\]</span></p>
+<p>Como <span class="math inline">\(q_i = \dfrac{y_i}{N \bar y}\)</span>, reemplazando se llega a la fórmula usual:</p>
+<p><span class="math display">\[T = \frac{1}{N} \sum_i \frac{y_i}{\bar{y}} \ln\left(\frac{y_i}{\bar{y}}\right)\]</span></p>
+<p><strong>Otra lectura</strong>: <span class="math inline">\(T = \sum_i q_i \ln\left(\dfrac{q_i}{1/N}\right)\)</span> es la divergencia de Kullback-Leibler entre la distribución del ingreso (<span class="math inline">\(q_i\)</span>) y la de la población (<span class="math inline">\(1/N\)</span>). Mide qué tan distinto es “quién tiene el ingreso” de “quién es la gente”.</p>
+<div id="c109" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>theil <span class="ot">&lt;-</span> <span class="cf">function</span>(y, <span class="at">w =</span> <span class="fu">rep</span>(<span class="dv">1</span>, <span class="fu">length</span>(y))) {</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> <span class="fu">weighted.mean</span>(y, w)</span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sum</span>(w <span class="sc">*</span> (y <span class="sc">/</span> mu) <span class="sc">*</span> <span class="fu">log</span>(y <span class="sc">/</span> mu)) <span class="sc">/</span> <span class="fu">sum</span>(w)</span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">30</span>, <span class="dv">40</span>)</span>
+<span id="cb57-7"><a href="#cb57-7" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">theil =</span> <span class="fu">theil</span>(y), <span class="at">lnN_menos_H =</span> <span class="fu">log</span>(<span class="fu">length</span>(y)) <span class="sc">-</span> <span class="fu">entropia</span>(y))   <span class="co"># iguales</span></span>
+<span id="cb57-8"><a href="#cb57-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-9"><a href="#cb57-9" aria-hidden="true" tabindex="-1"></a><span class="fu">theil</span>(<span class="fu">c</span>(<span class="dv">25</span>, <span class="dv">25</span>, <span class="dv">25</span>, <span class="dv">25</span>))           <span class="co"># igualdad perfecta: 0</span></span>
+<span id="cb57-10"><a href="#cb57-10" aria-hidden="true" tabindex="-1"></a><span class="fu">theil</span>(<span class="fu">c</span>(<span class="fl">0.001</span>, <span class="fl">0.001</span>, <span class="fl">0.001</span>, <span class="dv">100</span>)) <span class="co"># casi todo en una persona...</span></span>
+<span id="cb57-11"><a href="#cb57-11" aria-hidden="true" tabindex="-1"></a><span class="fu">log</span>(<span class="dv">4</span>)                             <span class="co"># ...se acerca al máximo, ln N</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="propiedades" class="level2">
+<h2 class="anchored" data-anchor-id="propiedades">Propiedades</h2>
+<p>Un buen índice de desigualdad cumple:</p>
+<ul>
+<li><strong>Independencia de escala</strong>: multiplicar todos los ingresos por una constante no cambia el índice.</li>
+<li><strong>Principio de población</strong>: replicar la población no cambia el índice.</li>
+<li><strong>Transferencias (Pigou-Dalton)</strong>: pasar ingreso de alguien más rico a alguien más pobre baja el índice.</li>
+</ul>
+<div id="c111" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">theil</span>(y <span class="sc">*</span> <span class="dv">1000</span>)              <span class="co"># escala</span></span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a><span class="fu">theil</span>(<span class="fu">rep</span>(y, <span class="dv">3</span>))             <span class="co"># población</span></span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a><span class="fu">theil</span>(<span class="fu">c</span>(<span class="dv">15</span>, <span class="dv">20</span>, <span class="dv">30</span>, <span class="dv">35</span>))     <span class="co"># transferencia de 5 del más rico al más pobre: baja</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>El Theil T es parte de la familia de <strong>entropía generalizada</strong>:</p>
+<p><span class="math display">\[GE(\alpha) = \frac{1}{\alpha(\alpha-1)} \frac{1}{N}\sum_i \left[\left(\frac{y_i}{\bar y}\right)^\alpha - 1\right]\]</span></p>
+<ul>
+<li><span class="math inline">\(\alpha = 0\)</span>: desvío logarítmico medio (Theil L), más sensible a la parte baja de la distribución.</li>
+<li><span class="math inline">\(\alpha = 1\)</span>: Theil T.</li>
+<li><span class="math inline">\(\alpha = 2\)</span>: la mitad del cuadrado del coeficiente de variación, sensible a la parte alta.</li>
+</ul>
+</section>
+<section id="desigualdad-del-ingreso-laboral-eph-1t2026" class="level2">
+<h2 class="anchored" data-anchor-id="desigualdad-del-ingreso-laboral-eph-1t2026">Desigualdad del ingreso laboral (EPH 1T2026)</h2>
+<p>Con microdatos de encuesta hay que usar el <strong>ponderador</strong> (<code>PONDIIO</code> para el ingreso de la ocupación principal). Sin pesos se calcula la desigualdad de la muestra, no la de la población.</p>
+<div id="c113" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>mld <span class="ot">&lt;-</span> <span class="cf">function</span>(y, <span class="at">w =</span> <span class="fu">rep</span>(<span class="dv">1</span>, <span class="fu">length</span>(y))) {</span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> <span class="fu">weighted.mean</span>(y, w)</span>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sum</span>(w <span class="sc">*</span> <span class="fu">log</span>(mu <span class="sc">/</span> y)) <span class="sc">/</span> <span class="fu">sum</span>(w)</span>
+<span id="cb59-4"><a href="#cb59-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb59-5"><a href="#cb59-5" aria-hidden="true" tabindex="-1"></a>gini <span class="ot">&lt;-</span> <span class="cf">function</span>(y, <span class="at">w =</span> <span class="fu">rep</span>(<span class="dv">1</span>, <span class="fu">length</span>(y))) {</span>
+<span id="cb59-6"><a href="#cb59-6" aria-hidden="true" tabindex="-1"></a>  o <span class="ot">&lt;-</span> <span class="fu">order</span>(y); y <span class="ot">&lt;-</span> y[o]; w <span class="ot">&lt;-</span> w[o]</span>
+<span id="cb59-7"><a href="#cb59-7" aria-hidden="true" tabindex="-1"></a>  pw <span class="ot">&lt;-</span> w <span class="sc">/</span> <span class="fu">sum</span>(w); L <span class="ot">&lt;-</span> <span class="fu">cumsum</span>(w <span class="sc">*</span> y) <span class="sc">/</span> <span class="fu">sum</span>(w <span class="sc">*</span> y)</span>
+<span id="cb59-8"><a href="#cb59-8" aria-hidden="true" tabindex="-1"></a>  <span class="dv">1</span> <span class="sc">-</span> <span class="fu">sum</span>(pw <span class="sc">*</span> (L <span class="sc">+</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">head</span>(L, <span class="sc">-</span><span class="dv">1</span>))))</span>
+<span id="cb59-9"><a href="#cb59-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb59-10"><a href="#cb59-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-11"><a href="#cb59-11" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">theil_T =</span> <span class="fu">theil</span>(ocupados<span class="sc">$</span>ingreso, ocupados<span class="sc">$</span>pondera),</span>
+<span id="cb59-12"><a href="#cb59-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">theil_L =</span> <span class="fu">mld</span>(ocupados<span class="sc">$</span>ingreso, ocupados<span class="sc">$</span>pondera),</span>
+<span id="cb59-13"><a href="#cb59-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">gini    =</span> <span class="fu">gini</span>(ocupados<span class="sc">$</span>ingreso, ocupados<span class="sc">$</span>pondera),</span>
+<span id="cb59-14"><a href="#cb59-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">theil_T_sin_pesos =</span> <span class="fu">theil</span>(ocupados<span class="sc">$</span>ingreso))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="descomposición-entre-y-dentro-de-grupos" class="level2">
+<h2 class="anchored" data-anchor-id="descomposición-entre-y-dentro-de-grupos">Descomposición entre y dentro de grupos</h2>
+<p>Con <span class="math inline">\(s_g\)</span> la participación del grupo <span class="math inline">\(g\)</span> en el ingreso total, <span class="math inline">\(T_g\)</span> el Theil dentro del grupo y <span class="math inline">\(\bar y_g\)</span> su media:</p>
+<p><span class="math display">\[T = \underbrace{\sum_g s_g \, T_g}_{\text{dentro}} + \underbrace{\sum_g s_g \ln\left(\frac{\bar{y}_g}{\bar{y}}\right)}_{\text{entre}}\]</span></p>
+<ul>
+<li><strong>Dentro</strong>: desigualdad al interior de cada grupo, ponderada por el peso del grupo en el ingreso.</li>
+<li><strong>Entre</strong>: la desigualdad que quedaría si todos en un grupo ganaran la media del grupo.</li>
+</ul>
+<p><strong>Por qué es exacta</strong>: escribiendo <span class="math inline">\(\dfrac{y_i}{\bar y} = \dfrac{y_i}{\bar y_g} \cdot \dfrac{\bar y_g}{\bar y}\)</span>, el logaritmo del producto se separa en una suma: un término con la distancia de cada persona a la media de su grupo y otro con la distancia entre la media del grupo y la general.</p>
+<p>El Gini no tiene una descomposición exacta así (queda un residuo cuando los grupos se superponen): por eso para esta pregunta se usa Theil.</p>
+<div id="c115" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>theil_desc <span class="ot">&lt;-</span> <span class="cf">function</span>(d, grupo) {</span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> <span class="fu">weighted.mean</span>(d<span class="sc">$</span>ingreso, d<span class="sc">$</span>pondera)</span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a>  d <span class="sc">|&gt;</span></span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(<span class="at">grupo =</span> {{ grupo }}) <span class="sc">|&gt;</span></span>
+<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">pob   =</span> <span class="fu">sum</span>(pondera),</span>
+<span id="cb60-6"><a href="#cb60-6" aria-hidden="true" tabindex="-1"></a>              <span class="at">media =</span> <span class="fu">weighted.mean</span>(ingreso, pondera),</span>
+<span id="cb60-7"><a href="#cb60-7" aria-hidden="true" tabindex="-1"></a>              <span class="at">T_g   =</span> <span class="fu">theil</span>(ingreso, pondera),</span>
+<span id="cb60-8"><a href="#cb60-8" aria-hidden="true" tabindex="-1"></a>              <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb60-9"><a href="#cb60-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">s_g    =</span> pob <span class="sc">*</span> media <span class="sc">/</span> <span class="fu">sum</span>(pob <span class="sc">*</span> media),</span>
+<span id="cb60-10"><a href="#cb60-10" aria-hidden="true" tabindex="-1"></a>           <span class="at">dentro =</span> s_g <span class="sc">*</span> T_g,</span>
+<span id="cb60-11"><a href="#cb60-11" aria-hidden="true" tabindex="-1"></a>           <span class="at">entre  =</span> s_g <span class="sc">*</span> <span class="fu">log</span>(media <span class="sc">/</span> mu))</span>
+<span id="cb60-12"><a href="#cb60-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb60-13"><a href="#cb60-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-14"><a href="#cb60-14" aria-hidden="true" tabindex="-1"></a>por_educ <span class="ot">&lt;-</span> <span class="fu">theil_desc</span>(ocupados, educacion)</span>
+<span id="cb60-15"><a href="#cb60-15" aria-hidden="true" tabindex="-1"></a>por_educ</span>
+<span id="cb60-16"><a href="#cb60-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-17"><a href="#cb60-17" aria-hidden="true" tabindex="-1"></a>por_educ <span class="sc">|&gt;</span></span>
+<span id="cb60-18"><a href="#cb60-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">dentro =</span> <span class="fu">sum</span>(dentro), <span class="at">entre =</span> <span class="fu">sum</span>(entre)) <span class="sc">|&gt;</span></span>
+<span id="cb60-19"><a href="#cb60-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">total       =</span> dentro <span class="sc">+</span> entre,</span>
+<span id="cb60-20"><a href="#cb60-20" aria-hidden="true" tabindex="-1"></a>         <span class="at">chequeo     =</span> <span class="fu">theil</span>(ocupados<span class="sc">$</span>ingreso, ocupados<span class="sc">$</span>pondera),</span>
+<span id="cb60-21"><a href="#cb60-21" aria-hidden="true" tabindex="-1"></a>         <span class="at">share_entre =</span> entre <span class="sc">/</span> total)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="c116" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">repr.plot.height =</span> <span class="fl">3.3</span>)</span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>resumen <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(</span>
+<span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theil_desc</span>(ocupados, region)    <span class="sc">|&gt;</span> <span class="fu">summarise</span>(<span class="at">dentro =</span> <span class="fu">sum</span>(dentro), <span class="at">entre =</span> <span class="fu">sum</span>(entre)) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">particion =</span> <span class="st">"Región (6)"</span>),</span>
+<span id="cb61-4"><a href="#cb61-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theil_desc</span>(ocupados, sexo)      <span class="sc">|&gt;</span> <span class="fu">summarise</span>(<span class="at">dentro =</span> <span class="fu">sum</span>(dentro), <span class="at">entre =</span> <span class="fu">sum</span>(entre)) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">particion =</span> <span class="st">"Sexo (2)"</span>),</span>
+<span id="cb61-5"><a href="#cb61-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theil_desc</span>(ocupados, educacion) <span class="sc">|&gt;</span> <span class="fu">summarise</span>(<span class="at">dentro =</span> <span class="fu">sum</span>(dentro), <span class="at">entre =</span> <span class="fu">sum</span>(entre)) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">particion =</span> <span class="st">"Nivel educativo (5)"</span>)</span>
+<span id="cb61-6"><a href="#cb61-6" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb61-7"><a href="#cb61-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">share_entre =</span> entre <span class="sc">/</span> (dentro <span class="sc">+</span> entre))</span>
+<span id="cb61-8"><a href="#cb61-8" aria-hidden="true" tabindex="-1"></a>resumen</span>
+<span id="cb61-9"><a href="#cb61-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-10"><a href="#cb61-10" aria-hidden="true" tabindex="-1"></a>resumen <span class="sc">|&gt;</span></span>
+<span id="cb61-11"><a href="#cb61-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">c</span>(dentro, entre)) <span class="sc">|&gt;</span></span>
+<span id="cb61-12"><a href="#cb61-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(value, particion, <span class="at">fill =</span> name)) <span class="sc">+</span></span>
+<span id="cb61-13"><a href="#cb61-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>() <span class="sc">+</span></span>
+<span id="cb61-14"><a href="#cb61-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="at">dentro =</span> <span class="st">"grey70"</span>, <span class="at">entre =</span> <span class="st">"steelblue"</span>)) <span class="sc">+</span></span>
+<span id="cb61-15"><a href="#cb61-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Theil T"</span>, <span class="at">y =</span> <span class="cn">NULL</span>, <span class="at">fill =</span> <span class="cn">NULL</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<blockquote class="blockquote">
+<p>💡 La proporción <strong>entre / total</strong> dice cuánto de la desigualdad se explica por pertenecer a un grupo. La educación explica 14%; la región y el sexo, menos de 5%. La mayor parte de la desigualdad está <strong>dentro</strong> de los grupos.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>⚠️ <strong>Cuidados</strong></p>
+<ul>
+<li>Hay que filtrar ceros y negativos (<span class="math inline">\(\ln 0\)</span> no existe).</li>
+<li>El Theil T es más sensible a lo que pasa en la parte alta de la distribución.</li>
+<li>El “entre” crece mecánicamente con la cantidad de grupos. Educación × región tiene 30 grupos:</li>
+</ul>
+</blockquote>
+<div id="c118" class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="fu">theil_desc</span>(ocupados, <span class="fu">interaction</span>(educacion, region)) <span class="sc">|&gt;</span></span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">entre =</span> <span class="fu">sum</span>(entre)) <span class="sc">|&gt;</span></span>
+<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">share_entre =</span> entre <span class="sc">/</span> <span class="fu">theil</span>(ocupados<span class="sc">$</span>ingreso, ocupados<span class="sc">$</span>pondera))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+</section>
+<section id="cierre" class="level1">
+<h1>Cierre</h1>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Herramienta</th>
+<th style="text-align: left;">Pregunta que responde</th>
+<th style="text-align: left;">Lo que hay que reportar</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Regresión</td>
+<td style="text-align: left;">¿Cómo se relaciona <span class="math inline">\(Y\)</span> con <span class="math inline">\(X\)</span>, manteniendo lo demás constante?</td>
+<td style="text-align: left;">Coeficientes interpretados, errores robustos, diagnóstico</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Shift-share</td>
+<td style="text-align: left;">¿El cambio de un agregado vino de adentro de cada componente o de su recomposición?</td>
+<td style="text-align: left;">Año base, variante, nivel de agregación</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Theil</td>
+<td style="text-align: left;">¿Cuánta desigualdad hay entre grupos y cuánta dentro de ellos?</td>
+<td style="text-align: left;">Ponderadores, filtros, cantidad de grupos</td>
+</tr>
+</tbody>
+</table>
+<p>Las descomposiciones parten de una identidad, suman exacto y describen <strong>dónde</strong> está el cambio o la desigualdad. La pregunta por la <strong>causa</strong> requiere otras herramientas.</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
