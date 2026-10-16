@@ -38,6 +38,7 @@ Las clases se organizan en dos instancias semanales:
 | Grupos y temas de TP | [Link](https://docs.google.com/spreadsheets/d/1Cf-dAd_aeXrxqNIXj0BfbEHx0bvvJ5ivllRVjEYSwvk/edit?gid=0#gid=0) |
 | Consignas primera entrega | [Link](https://github.com/nsidicarocep/curso_cdd_fce_uba_2c2026/blob/main/trabajo_practico/consignas_instancia_1.md) |
 | Devoluciones TP | [Link](https://drive.google.com/drive/u/0/folders/1pAJ5mkK5VvDBm8otpN1R-Z2LIkI2y13_) |
+| Paginas interactivas econometría | [Link] (https://nsidicarocep.github.io/econometria_interactiva/) |
 
 ### Materiales por clase
 
