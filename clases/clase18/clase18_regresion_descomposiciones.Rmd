@@ -1,0 +1,1209 @@
+---
+title: "Clase 18 · Regresión lineal y descomposiciones contables"
+subtitle: "Ciencia de Datos para Economía y Negocios - FCE-UBA"
+output:
+  html_notebook:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    theme: flatly
+    highlight: tango
+---
+
+<style>
+.lectura { background: #eef5fb; border-left: 5px solid #2c7bb6; padding: 0.7em 1em; margin: 1em 0; border-radius: 4px; }
+.atencion { background: #fdf0ef; border-left: 5px solid #c0392b; padding: 0.7em 1em; margin: 1em 0; border-radius: 4px; }
+.lectura p:last-child, .atencion p:last-child { margin-bottom: 0; }
+</style>
+
+Notebook para ir corriendo en clase, celda por celda (en RStudio, Ctrl+Shift+Enter dentro de cada chunk; en Jupyter o Colab, Shift+Enter). Tres herramientas para la misma pregunta: **¿qué explica un resultado?**
+
+1. **Regresión lineal**: estima relaciones entre variables. La desarrollamos con la EPH y cerramos con un integrador rápido con Properati.
+2. **Shift-share**: reparte el cambio de un promedio ponderado entre cambios *dentro* de cada componente y *recomposición*.
+3. **Índice de Theil**: reparte la desigualdad entre la que hay *entre* grupos y la que hay *dentro* de ellos.
+
+La primera vez hace falta internet: los datos se bajan y quedan guardados en `datos_clase18/`.
+
+**En Google Colab** (versión `.ipynb`): Entorno de ejecución → Cambiar tipo de entorno de ejecución → **R**.
+
+```{r setup, message=FALSE, warning=FALSE}
+# Paquetes: instala solo los que faltan
+paquetes <- c("tidyverse", "lmtest", "sandwich", "car", "tseries",
+              "modelsummary", "pandoc", "eph")
+faltan <- setdiff(paquetes, rownames(installed.packages()))
+if (length(faltan) > 0) install.packages(faltan)
+
+suppressWarnings(suppressPackageStartupMessages({
+  library(tidyverse)
+  library(lmtest)        # coeftest(), bptest(), resettest(), waldtest(), coefci()
+  library(sandwich)      # vcovHC(): errores estándar robustos
+  library(car)           # vif()
+  library(modelsummary)  # tablas y gráficos de modelos
+  requireNamespace("tseries")  # jarque.bera.test()
+}))
+
+options(repr.plot.width = 10, repr.plot.height = 5, repr.plot.res = 110)   # tamaño de gráficos en Jupyter
+theme_set(theme_minimal(base_size = 12))
+
+# Muestra una tabla de modelsummary. En RStudio es la tabla de siempre; en un
+# notebook de Jupyter o Colab la convierte en tabla markdown para que se vea bien.
+mostrar_tabla <- function(modelos, ..., notas = NULL) {
+  if (!isTRUE(getOption("jupyter.in_kernel"))) {
+    return(modelsummary(modelos, ..., notes = notas))
+  }
+  df <- modelsummary(modelos, ..., output = "data.frame")
+  df$term[df$statistic == "std.error"] <- ""
+  df <- df[, c("term", names(modelos))]
+  names(df)[1] <- " "
+  tabla <- paste(knitr::kable(df, format = "pipe",
+                              align = c("l", rep("r", length(modelos)))),
+                 collapse = "\n")
+  notas <- gsub("*", "\\*", notas, fixed = TRUE)
+  IRdisplay::display_markdown(paste0(tabla, "\n\n", paste(notas, collapse = "  \n")))
+}
+```
+
+### Funciones para bajar y preparar los datos
+
+La primera vez bajan los datos de internet y los guardan limpios en `datos_clase18/` (al lado de este archivo). Las veces siguientes los leen de ahí.
+
+```{r datos, message=FALSE}
+options(timeout = 900)   # Properati pesa unos 65 MB: damos tiempo a la descarga
+
+carpeta_datos <- "datos_clase18"
+dir.create(carpeta_datos, showWarnings = FALSE)
+
+
+# ---- Superstore --------------------------------------------------------------
+# Una fila por linea de pedido. El archivo original trae filas basura al final,
+# por eso se leen solo las primeras 9.994 (las de la base de Tableau).
+
+cargar_superstore <- function() {
+  local <- file.path(carpeta_datos, "superstore.csv")
+  if (!file.exists(local)) {
+    url <- "https://raw.githubusercontent.com/leonism/sample-superstore/master/data/superstore.csv"
+    read_csv(url, n_max = 9994, show_col_types = FALSE) |>
+      transmute(pedido       = `Order ID`,
+                fecha        = mdy(`Order Date`),
+                anio         = year(fecha),
+                cliente      = `Customer ID`,
+                segmento     = Segment,
+                region       = Region,
+                estado       = State,
+                categoria    = Category,
+                subcategoria = `Sub-Category`,
+                ventas       = Sales,
+                cantidad     = Quantity,
+                descuento    = Discount,
+                ganancia     = Profit) |>
+      write_csv(local)
+  }
+  read_csv(local, show_col_types = FALSE)
+}
+
+
+# ---- Properati ---------------------------------------------------------------
+# Se baja el archivo completo (con las descripciones de los avisos), se quedan
+# solo los departamentos en venta en dolares y se guarda una version liviana.
+
+cargar_deptos <- function() {
+  local <- file.path(carpeta_datos, "deptos_caba.csv")
+  if (!file.exists(local)) {
+    url <- "https://raw.githubusercontent.com/martintinch0/CienciaDeDatosParaCuriosos/master/data/datosProperati.csv"
+    tmp <- tempfile(fileext = ".csv")
+    download.file(url, tmp, mode = "wb")
+    read_delim(tmp, delim = ";", locale = locale(encoding = "latin1"),
+               show_col_types = FALSE) |>
+      filter(property_type == "Departamento", operation_type == "Venta",
+             currency == "USD") |>
+      transmute(fecha     = as.Date(created_on),
+                barrio    = str_to_title(BARRIO),
+                ambientes = rooms,
+                banios    = bathrooms,
+                m2_total  = surface_total,
+                m2        = surface_covered,
+                precio    = price) |>
+      write_csv(local)
+    unlink(tmp)
+  }
+  read_csv(local, show_col_types = FALSE)
+}
+
+# Filtros de la clase: superficie cubierta entre 20 y 500 m2, precio entre
+# 20 mil y 3 millones de dolares, hasta 8 ambientes, y solo barrios con al
+# menos 300 avisos. Balvanera queda como barrio de referencia.
+preparar_deptos <- function(deptos) {
+  deptos |>
+    filter(!is.na(m2), !is.na(ambientes), between(m2, 20, 500),
+           between(precio, 20000, 3e6), ambientes <= 8) |>
+    group_by(barrio) |>
+    filter(n() >= 300) |>
+    ungroup() |>
+    mutate(barrio = relevel(factor(barrio), ref = "Balvanera"))
+}
+
+
+# ---- EPH 1T2026 ----------------------------------------------------------------
+# Si el paquete eph no esta instalado: install.packages("eph")
+
+cargar_eph <- function() {
+  local <- file.path(carpeta_datos, "eph_1t2026.rds")
+  if (!file.exists(local)) {
+    eph::get_microdata(year = 2026, period = 1, type = "individual",
+                       vars = c("CODUSU", "NRO_HOGAR", "COMPONENTE", "ESTADO",
+                                "CAT_OCUP", "P21", "PONDIIO", "PP3E_TOT",
+                                "REGION", "NIVEL_ED", "CH04", "CH06")) |>
+      saveRDS(local)
+  }
+  readRDS(local)
+}
+
+# Ocupados con ingreso de la ocupacion principal (P21) positivo, con variables
+# recodificadas. PONDIIO es el ponderador que corresponde a P21.
+preparar_ocupados <- function(eph) {
+  eph |>
+    mutate(across(c(ESTADO, CAT_OCUP, P21, PONDIIO, PP3E_TOT, REGION,
+                    NIVEL_ED, CH04, CH06), as.numeric)) |>
+    filter(ESTADO == 1, P21 > 0) |>
+    transmute(
+      ingreso = P21,
+      pondera = PONDIIO,
+      horas   = if_else(PP3E_TOT > 0 & PP3E_TOT < 999, PP3E_TOT, NA_real_),
+      edad    = CH06,
+      sexo    = if_else(CH04 == 1, "Varon", "Mujer"),
+      region  = factor(REGION, c(1, 40, 41, 42, 43, 44),
+                       c("GBA", "NOA", "NEA", "Cuyo", "Pampeana", "Patagonia")),
+      educacion = factor(case_when(NIVEL_ED %in% c(1, 2, 7) ~ "Hasta primario",
+                                   NIVEL_ED == 3 ~ "Sec. incompleto",
+                                   NIVEL_ED == 4 ~ "Sec. completo",
+                                   NIVEL_ED == 5 ~ "Sup. incompleto",
+                                   NIVEL_ED == 6 ~ "Sup. completo"),
+                         c("Hasta primario", "Sec. incompleto", "Sec. completo",
+                           "Sup. incompleto", "Sup. completo"))) |>
+    filter(!is.na(educacion))
+}
+
+
+# ---- Argendata: productividad sectorial de Argentina ---------------------------
+# El VAB (Argendata) y el empleo (GGDC) vienen con clasificaciones distintas.
+# Se agrupan en 9 sectores que existen en las dos fuentes. La productividad es
+# VAB (millones de pesos de 2004) / ocupados (miles) = miles de pesos de 2004
+# por ocupado.
+
+leer_ad <- function(ruta) {
+  local <- file.path(carpeta_datos, basename(ruta))
+  if (!file.exists(local)) {
+    url <- paste0("https://raw.githubusercontent.com/argendatafundar/data/main/", ruta)
+    download.file(url, local, mode = "wb", quiet = TRUE)
+  }
+  read_csv(local, show_col_types = FALSE)
+}
+
+cargar_productividad_arg <- function() {
+  vab <- leer_ad("ESTPRO/vab_por_sector.csv")
+  emp <- leer_ad("ESTPRO/empleo_sectores_ggdc_1950_2018.csv") |>
+    filter(geocodigoFundar == "ARG")
+
+  sector_vab <- c(A = "Agro y pesca", B = "Agro y pesca", C = "Mineria",
+                  D = "Industria", E = "Electricidad, gas y agua",
+                  F = "Construccion", GH = "Comercio", I = "Transporte y com.",
+                  J = "Finanzas y empresas", K = "Finanzas y empresas",
+                  L = "Gobierno y otros serv.", Z = "Gobierno y otros serv.")
+  sector_emp <- c(A = "Agro y pesca", B = "Mineria", C = "Industria",
+                  DE = "Electricidad, gas y agua", F = "Construccion",
+                  GI = "Comercio", H = "Transporte y com.",
+                  JMN = "Finanzas y empresas", K = "Finanzas y empresas",
+                  L = "Finanzas y empresas", OPQ = "Gobierno y otros serv.",
+                  RSTU = "Gobierno y otros serv.")
+
+  vab_s <- vab |>
+    mutate(sector = sector_vab[letra]) |>
+    group_by(anio, sector) |>
+    summarise(vab = sum(vab), .groups = "drop")
+  emp_s <- emp |>
+    mutate(sector = sector_emp[sector_codigo]) |>
+    group_by(anio, sector) |>
+    summarise(empleo = sum(empleo_miles), .groups = "drop")
+
+  inner_join(vab_s, emp_s, by = c("anio", "sector"))   # 1950-2018
+}
+```
+
+```{r cargar, message=FALSE}
+ocupados   <- cargar_eph() |> preparar_ocupados()
+deptos     <- cargar_deptos() |> preparar_deptos()
+superstore <- cargar_superstore()
+prod_arg   <- cargar_productividad_arg()
+```
+
+# Parte 1. Regresión lineal con la EPH
+
+**Pregunta**: ¿cuánto más gana por hora una persona con más educación, a igual sexo, edad y región?
+
+El recorrido es siempre el mismo:
+
+1. **Mirar** los datos
+2. **Estimar** con `lm()`
+3. **Interpretar** signo y magnitud de cada coeficiente
+4. **Testear** significatividad y supuestos
+5. **Corregir** lo que haga falta y volver a interpretar
+6. **Reportar** en una tabla y en palabras
+
+## 1.1 Armar la base
+
+Ocupados del 1er trimestre de 2026 con ingreso de la ocupación principal positivo (la función `preparar_ocupados()` ya hizo ese filtro y recodificó educación, sexo y región). Para comparar personas que trabajan distinta cantidad de horas, usamos el **ingreso horario**. Nos quedamos con quienes tienen entre 18 y 70 años y trabajan al menos 5 horas semanales.
+
+```{r}
+eph <- ocupados |>
+  filter(!is.na(horas), horas >= 5, between(edad, 18, 70)) |>
+  mutate(ingreso_hora = ingreso / (horas * 4.3))   # 4,3 semanas por mes
+
+nrow(eph)
+glimpse(eph)
+```
+
+## 1.2 Mirar los datos antes de estimar
+
+Un `summary()`, un histograma de la variable dependiente y un gráfico contra la regresora principal ahorran muchos problemas: valores imposibles, códigos como 99 = "no sabe", asimetrías fuertes, ceros que impiden usar logaritmo.
+
+```{r}
+summary(select(eph, ingreso_hora, edad, horas))
+count(eph, educacion)
+sum(eph$ingreso_hora <= 0)    # ¿hay ceros o negativos? log() no los acepta
+```
+
+```{r fig.height=3.5}
+par(mfrow = c(1, 2))
+hist(eph$ingreso_hora, breaks = 60, main = "Ingreso horario", xlab = "$ por hora", col = "grey80")
+hist(log(eph$ingreso_hora), breaks = 60, main = "log(ingreso horario)", xlab = "", col = "grey80")
+par(mfrow = c(1, 1))
+```
+
+<div class="lectura">
+El ingreso es muy asimétrico: muchos valores bajos y una cola larga a la derecha. En logaritmo queda casi simétrico. Además, en log los coeficientes se leen como **cambios porcentuales**, que es como se piensa un ingreso. Por eso la variable dependiente va a ser `log(ingreso_hora)`.
+</div>
+
+```{r fig.height=3.5}
+ggplot(eph, aes(educacion, log(ingreso_hora))) +
+  geom_boxplot(fill = "grey90") +
+  labs(x = NULL, y = "log(ingreso horario)")
+```
+
+## 1.3 Primer modelo: solo educación
+
+`educacion` es un factor con 5 niveles. `lm()` arma solo las **k − 1 = 4 dummies**. La que falta es la **categoría base** ("Hasta primario", el primer nivel), y todos los coeficientes se leen en comparación con ella.
+
+```{r}
+e0 <- lm(log(ingreso_hora) ~ educacion, data = eph)
+summary(e0)
+```
+
+**Cómo se lee la salida de `summary()`**
+
+| Parte | Qué es | Qué mirar |
+|:--|:--|:--|
+| `Estimate` | El coeficiente | Signo y magnitud: es lo que se interpreta |
+| `Std. Error` | Error estándar | Cuán precisa es la estimación |
+| `t value` | Coeficiente / EE | Estadístico del test $H_0: \beta = 0$ |
+| `Pr(>|t|)` | p-valor | Si es menor a 0,05, el coeficiente es significativo al 5% |
+| `Residual standard error` | Desvío del error | En unidades de $y$ (acá, log-puntos) |
+| `Multiple R-squared` | $R^2$ | Proporción de la variabilidad de $y$ que explica el modelo |
+| `Adjusted R-squared` | $R^2$ ajustado | Penaliza agregar variables; sirve para comparar modelos |
+| `F-statistic` | Test global | $H_0$: todos los coeficientes (menos el intercepto) son cero |
+
+Con solo dummies, la regresión reproduce las medias de cada grupo: el intercepto es la media de la base y cada coeficiente es la diferencia con ella.
+
+```{r}
+eph |>
+  group_by(educacion) |>
+  summarise(media_log = mean(log(ingreso_hora))) |>
+  mutate(diferencia_con_base = media_log - first(media_log))
+```
+
+### Dummies con log(y): la diferencia exacta
+
+Con la variable dependiente en log, el coeficiente × 100 es solo una **aproximación** del cambio porcentual, que empeora cuando el coeficiente es grande (más de 0,1 en valor absoluto). La diferencia exacta es
+
+$$\%\Delta y = 100 \cdot \left(e^{\hat\beta} - 1\right)$$
+
+```{r}
+b0 <- coef(e0)[-1]
+tibble(nivel       = names(b0),
+       beta        = b0,
+       aproximado  = 100 * b0,
+       exacto      = 100 * (exp(b0) - 1))
+```
+
+<div class="lectura">
+Sin controlar por nada, quien tiene universitario completo gana por hora **106% más** que quien tiene hasta primario (la lectura rápida, 72%, se queda muy corta).
+</div>
+
+## 1.4 Agregar controles: "manteniendo lo demás constante"
+
+En una regresión múltiple, cada coeficiente es el efecto de su variable **manteniendo constantes las demás incluidas en el modelo**. Agregamos sexo, edad (con su cuadrado, ver 1.5) y región.
+
+```{r}
+e1 <- lm(log(ingreso_hora) ~ educacion + sexo + edad + I(edad^2) + region, data = eph)
+summary(e1)
+```
+
+¿Cambiaron los coeficientes de educación?
+
+```{r}
+cbind(solo_educacion = coef(e0)[2:5], con_controles = coef(e1)[2:5])
+```
+
+<div class="lectura">
+Los coeficientes de educación **suben** al controlar. Las personas más educadas son, en promedio, más jóvenes que las de la base (que tienen 48 años de media) y entre ellas hay más mujeres (58% entre universitarios completos, 33% en hasta primario); las mujeres ganan menos por hora. Sin esos controles, el modelo simple le restaba a la educación parte de su asociación con el ingreso. Es el **sesgo por variable omitida**: cuando un coeficiente cambia mucho al agregar un control, el control importaba.
+</div>
+
+## 1.5 Interpretar cada coeficiente
+
+```{r}
+b1 <- coef(e1)
+round(100 * (exp(b1[c(2:6, 9:13)]) - 1), 1)    # diferencias % exactas de cada dummy
+```
+
+<div class="lectura">
+
+- **Educación**: a igual sexo, edad y región, universitario completo gana por hora **118% más** que hasta primario; secundario completo, 31% más.
+- **Sexo** (base: Mujer): a igual educación, edad y región, los varones ganan por hora **20% más**. No alcanza para hablar de discriminación: faltan ocupación, sector, formalidad.
+- **Región** (base: GBA): a iguales características, en el NEA se gana 39% menos por hora y en la Patagonia, 20% más.
+</div>
+
+### La edad con un término cuadrático
+
+El efecto de un año más de edad no es el mismo a los 25 que a los 55. Con `I(edad^2)` (el `I()` es obligatorio dentro de una fórmula), el efecto marginal depende de la edad:
+
+$$\frac{\partial \log(y)}{\partial\, \text{edad}} = \hat\beta_{edad} + 2\,\hat\beta_{edad^2}\cdot \text{edad}$$
+
+**El coeficiente de `edad` solo no alcanza para interpretar.**
+
+```{r}
+efecto_edad <- function(x) 100 * (b1["edad"] + 2 * b1["I(edad^2)"] * x)
+c(a_los_25 = efecto_edad(25), a_los_40 = efecto_edad(40), a_los_55 = efecto_edad(55))
+
+punto_giro <- -b1["edad"] / (2 * b1["I(edad^2)"])
+punto_giro
+mean(eph$edad > punto_giro)     # qué parte de la muestra está después del máximo
+```
+
+<div class="lectura">
+A los 25 años, un año más se asocia con un ingreso horario 2,1% mayor; a los 40, 1%; cerca de los **54 años** el perfil llega a su máximo. Antes de decir que "después de los 54 el ingreso cae", mirar cuántas observaciones hay más allá de ese punto.
+</div>
+
+```{r fig.height=3.5}
+grilla <- tibble(edad = 18:70, educacion = "Sec. completo", sexo = "Mujer", region = "GBA")
+grilla$pred <- predict(e1, newdata = grilla)
+ggplot(grilla, aes(edad, exp(pred))) +
+  geom_line(linewidth = 1, color = "firebrick") +
+  geom_vline(xintercept = punto_giro, linetype = 2) +
+  labs(title = "Perfil de ingreso por edad",
+       subtitle = "Mujer, secundario completo, GBA",
+       x = "Edad", y = "Ingreso horario predicho ($)")
+```
+
+### Cambiar la categoría base
+
+`relevel()` cambia la base. **Cambian los coeficientes, no las predicciones.**
+
+```{r}
+eph_b <- eph |> mutate(region = relevel(region, ref = "Pampeana"))
+e1_b  <- update(e1, data = eph_b)
+coef(e1_b)[str_detect(names(coef(e1_b)), "region")]
+all.equal(fitted(e1), fitted(e1_b))
+```
+
+<div class="atencion">
+**Nunca meter una categórica codificada como número.** En la EPH, `REGION` viene como 1, 40, 41, 42, 43, 44. Si entra así, R la trata como continua y estima un único efecto por "subir un código", que no significa nada:
+</div>
+
+```{r}
+eph_mal <- eph |> mutate(region_codigo = c(1, 40, 41, 42, 43, 44)[as.integer(region)])
+coef(lm(log(ingreso_hora) ~ educacion + sexo + edad + I(edad^2) + region_codigo,
+        data = eph_mal))["region_codigo"]
+```
+
+## 1.6 Interacciones
+
+¿La brecha por sexo es la misma en todos los niveles educativos? Una **interacción** permite que el efecto de una variable cambie según otra. `educacion * sexo` incluye `educacion`, `sexo` y los productos `educacion:sexo`.
+
+```{r}
+e2 <- lm(log(ingreso_hora) ~ educacion * sexo + edad + I(edad^2) + region, data = eph)
+coeftest(e2)
+```
+
+- `sexoVaron`: brecha por sexo **en la base** (hasta primario).
+- `educacionX:sexoVaron`: cuánto **cambia** esa brecha en el nivel X.
+- Brecha en el nivel X = `sexoVaron` + `educacionX:sexoVaron`.
+
+```{r}
+b2 <- coef(e2)
+niveles <- levels(eph$educacion)
+brecha <- c(b2["sexoVaron"],
+            b2["sexoVaron"] + b2[paste0("educacion", niveles[-1], ":sexoVaron")])
+tibble(educacion = niveles, brecha_exacta_pct = 100 * (exp(brecha) - 1))
+
+anova(e1, e2)    # ¿la interacción importa en conjunto?
+```
+
+<div class="lectura">
+La brecha a favor de los varones es de 26% entre quienes tienen hasta primario y baja a 13% entre universitarios completos. El test F conjunto rechaza al 5% (p = 0,02): la interacción aporta.
+</div>
+
+## 1.7 Significatividad
+
+- **Cada coeficiente**: test $t$, $H_0: \beta_j = 0$. Equivalente: si el intervalo de confianza no contiene al cero, el coeficiente es significativo.
+- **Varios a la vez**: test $F$. Caso típico: todas las dummies de una categórica, o un término y su cuadrado.
+
+```{r}
+coeftest(e1)
+confint(e1)
+
+e1_sin_region <- lm(log(ingreso_hora) ~ educacion + sexo + edad + I(edad^2), data = eph)
+anova(e1_sin_region, e1)     # H0: las 5 dummies de región son cero a la vez
+```
+
+<div class="atencion">
+**Significativo no es lo mismo que importante.** Con casi 14 mil observaciones, efectos chicos salen significativos. Mirar siempre la magnitud y preguntarse si es económicamente relevante.
+</div>
+
+## 1.8 Diagnóstico: chequear los supuestos y corregir
+
+| Problema | Qué rompe | Test en R | Solución |
+|:--|:--|:--|:--|
+| Forma funcional incorrecta | Coeficientes (sesgo) | `resettest()` | Logs, cuadrados, interacciones |
+| Multicolinealidad | Nada, pero infla los EE | `vif()` | Quitar o combinar variables |
+| Heteroscedasticidad | EE, tests $t$ y $F$ | `bptest()` | Errores robustos: `vcovHC()` |
+| No normalidad | Tests con $n$ chico | `jarque.bera.test()` | Con $n$ grande, nada. Si no, logs |
+| Observaciones influyentes | Coeficientes | `cooks.distance()` | Revisar y reportar con y sin |
+
+<div class="lectura">
+**La lógica de todos los tests es la misma**: $H_0$ = "no hay problema". **p-valor < 0,05 → se rechaza → hay evidencia del problema.** Con muestras grandes casi todo test rechaza: mirar también los gráficos antes de decidir.
+</div>
+
+### Primera mirada: los gráficos de `plot()`
+
+```{r fig.height=7}
+par(mfrow = c(2, 2))
+plot(e1, pch = 16, col = rgb(0, 0, 1, 0.1))
+par(mfrow = c(1, 1))
+```
+
+| Gráfico | Qué mirar |
+|:--|:--|
+| Residuals vs Fitted | Nube sin forma alrededor de 0. Una curva sugiere mala forma funcional |
+| Normal Q-Q | Puntos sobre la diagonal: residuos aproximadamente normales |
+| Scale-Location | Línea plana: varianza constante |
+| Residuals vs Leverage | Puntos fuera de las líneas de Cook: muy influyentes |
+
+### Forma funcional: test RESET
+
+Agrega potencias de los valores predichos ($\hat y^2, \hat y^3$) y testea si aportan algo. Si aportan, falta alguna no linealidad. El test **no dice qué** falta.
+
+```{r}
+resettest(e1)
+resettest(e2)
+```
+
+<div class="lectura">
+Rechaza, aunque con un estadístico chico para 14 mil observaciones. Ya tenemos logaritmo, el cuadrado de la edad y la interacción; el resto de la no linealidad probablemente venga de variables que no están (ocupación, formalidad). **Qué hacer si rechaza**: probar logs, cuadrados o interacciones con sentido económico.
+</div>
+
+### Multicolinealidad: VIF
+
+No genera sesgo: con regresoras muy correlacionadas entre sí, los errores estándar se inflan. Regla práctica: VIF > 10 merece atención.
+
+```{r}
+vif(e1)
+```
+
+<div class="lectura">
+`edad` y `edad^2` tienen VIF altísimo **por construcción** (son la misma variable): no es un problema. El resto está cerca de 1. **Qué hacer** en general: si las variables colineales son controles, nada. Si importa separar sus efectos, quitar una redundante o combinarlas en un índice. **Nunca** sacar una variable relevante solo para bajar el VIF: se genera sesgo por omisión.
+</div>
+
+### Heteroscedasticidad: detectar
+
+La varianza del error cambia con las regresoras. Los coeficientes siguen bien, pero **los errores estándar están mal**, y con ellos los tests y los intervalos.
+
+```{r fig.height=3.5}
+plot(fitted(e1), residuals(e1), pch = 16, col = rgb(0, 0, 1, 0.1),
+     xlab = "Valores predichos", ylab = "Residuos")
+abline(h = 0, lty = 2)
+```
+
+**Test de Breusch-Pagan**: regresa los residuos al cuadrado contra las regresoras. $H_0$: varianza constante.
+
+```{r}
+bptest(e1)
+```
+
+### Heteroscedasticidad: corregir con errores robustos
+
+Errores estándar **robustos de White**: mismos coeficientes, errores estándar recalculados con una fórmula válida con o sin heteroscedasticidad. `HC1` es la misma corrección que usa Stata.
+
+```{r}
+coeftest(e1)                                        # errores clásicos
+coeftest(e1, vcov = vcovHC(e1, type = "HC1"))       # errores robustos
+```
+
+```{r}
+tibble(termino    = names(coef(e1)),
+       coef       = coef(e1),
+       ee_clasico = sqrt(diag(vcov(e1))),
+       ee_robusto = sqrt(diag(vcovHC(e1, type = "HC1")))) |>
+  mutate(cociente = ee_robusto / ee_clasico)
+```
+
+Con errores robustos también se hacen los intervalos y los tests conjuntos:
+
+```{r}
+coefci(e1, vcov. = vcovHC(e1, type = "HC1"))
+waldtest(e1_sin_region, e1, vcov = vcovHC(e1, type = "HC1"))
+```
+
+<div class="lectura">
+Hay heteroscedasticidad, pero acá la corrección cambia poco los errores estándar (a lo sumo un 7%). **En corte transversal se reportan casi siempre errores robustos**: si no hay heteroscedasticidad dan casi lo mismo que los clásicos; si la hay, son los correctos.
+</div>
+
+### Normalidad de los residuos
+
+No afecta los coeficientes. Solo hace falta para que los tests sean exactos con **muestras chicas**; con más de 100 o 200 observaciones funcionan bien igual (teorema central del límite).
+
+```{r fig.height=3.5}
+qqnorm(residuals(e1), pch = 16, col = rgb(0, 0, 1, 0.1))
+qqline(residuals(e1), col = "firebrick", lwd = 2)
+tseries::jarque.bera.test(residuals(e1))
+```
+
+¿Qué hizo el logaritmo? El mismo modelo con el ingreso en niveles:
+
+```{r}
+e1_niveles <- lm(ingreso_hora ~ educacion + sexo + edad + I(edad^2) + region, data = eph)
+tseries::jarque.bera.test(residuals(e1_niveles))
+bptest(e1_niveles)
+```
+
+<div class="lectura">
+En niveles, el Jarque-Bera es miles de veces más grande: el logaritmo **corrige casi toda la asimetría**. La heteroscedasticidad no mejora (incluso el BP es más alto en log), así que los errores robustos siguen haciendo falta. Con 14 mil observaciones, el rechazo de normalidad del modelo en log no es un problema.
+</div>
+
+### Observaciones influyentes
+
+Una observación es influyente si, al sacarla, los coeficientes se mueven mucho. La distancia de Cook lo mide; umbral habitual, $4/n$.
+
+```{r}
+cook <- cooks.distance(e1)
+influyentes <- which(cook > 4 / nobs(e1))
+length(influyentes)
+
+eph[influyentes, ] |>
+  mutate(cook = cook[influyentes]) |>
+  arrange(desc(cook)) |>
+  select(ingreso, horas, ingreso_hora, edad, sexo, educacion, region, cook) |>
+  head(10)
+
+e1_sin <- update(e1, data = eph[-influyentes, ])
+cbind(con = coef(e1), sin = coef(e1_sin))
+```
+
+<div class="lectura">
+Las más influyentes son ingresos horarios extremos. Muchas son muy bajas (por ejemplo, $25.000 al mes trabajando 50 horas por semana), que probablemente sean errores de carga o ingresos mal declarados; otras, muy altas. Sin ellas, los coeficientes de educación casi no cambian y la brecha por sexo baja de 20% a 16,5%. **No se sacan observaciones solo porque molestan**: se revisan y se reporta el modelo con y sin ellas.
+</div>
+
+## 1.9 ¿Y los ponderadores de la EPH?
+
+La EPH es una muestra: cada persona representa a `pondera` personas. Para estimar relaciones que valgan para la población se puede usar `weights`.
+
+```{r}
+e1_w <- update(e1, weights = pondera)
+cbind(sin_pesos = coef(e1), con_pesos = coef(e1_w))
+```
+
+<div class="lectura">
+Los resultados se mueven algo (la brecha por sexo sube). Lo importante es **decidir y decirlo** en el informe.
+</div>
+
+## 1.10 Comparar modelos y guardar la tabla
+
+Con distinta cantidad de variables, comparar con **R² ajustado** o **AIC** (menor es mejor), nunca con R² a secas. Solo son comparables modelos con **la misma variable dependiente y la misma muestra** (no se puede comparar `e1` con `e1_niveles`).
+
+```{r}
+AIC(e0, e1, e2)
+sapply(list(e0 = e0, e1 = e1, e2 = e2), \(m) summary(m)$adj.r.squared)
+```
+
+Para un informe, en lugar de pegar salidas de `summary()`, una tabla con los modelos lado a lado y **errores robustos**. Para verla usamos `mostrar_tabla()` (definida en el primer chunk), que recibe los mismos argumentos que `modelsummary()` y se ve bien tanto en RStudio como en Jupyter o Colab. Para guardarla, `modelsummary()` con `output = "archivo.docx"` (también `.html`, `.png`, `.tex`). Para Word hace falta el paquete `pandoc`. `coef_rename` cambia los nombres de los coeficientes (acepta un vector de nombres o una función) y `fmt` fija la cantidad de decimales.
+
+```{r}
+modelos <- list("Solo educación" = e0, "Con controles" = e1, "Interacción" = e2)
+
+mostrar_tabla(modelos,
+  vcov        = "HC1",
+  stars       = TRUE,
+  coef_omit   = "region",
+  fmt         = 4,
+  coef_rename = \(x) x |> str_remove_all("educacion") |>
+                  str_replace_all(c("sexoVaron" = "Varón", "I\\(edad\\^2\\)" = "Edad²", "edad" = "Edad")),
+  gof_map     = c("nobs", "r.squared", "adj.r.squared", "aic"),
+  notas       = c("Variable dependiente: log(ingreso horario). EPH 1T2026.",
+                  "Errores estándar robustos (HC1) entre paréntesis. Incluye efectos de región.",
+                  "+ p < 0,1; * p < 0,05; ** p < 0,01; *** p < 0,001"))
+```
+
+```{r}
+modelsummary(modelos,
+  vcov        = "HC1",
+  stars       = TRUE,
+  coef_omit   = "region",
+  fmt         = 4,
+  coef_rename = \(x) x |> str_remove_all("educacion") |>
+                  str_replace_all(c("sexoVaron" = "Varón", "I\\(edad\\^2\\)" = "Edad²", "edad" = "Edad")),
+  gof_map     = c("nobs", "r.squared", "adj.r.squared", "aic"),
+  notes       = c("Variable dependiente: log(ingreso horario). EPH 1T2026.",
+                  "Errores estándar robustos (HC1) entre paréntesis. Incluye efectos de región."),
+  output      = "tabla_eph.docx")
+```
+
+Un gráfico de coeficientes comunica mejor que la tabla frente a públicos no técnicos:
+
+```{r fig.height=4}
+modelplot(e1, vcov = "HC1", coef_omit = "Intercept|edad") +
+  geom_vline(xintercept = 0, linetype = 2) +
+  labs(x = "Coeficiente (log-puntos)", title = "log(ingreso horario), EPH 1T2026")
+```
+
+<div class="atencion">
+**Errores frecuentes de interpretación**
+
+- Leer causalidad donde hay asociación.
+- Extrapolar fuera del rango de los datos (el modelo no sabe nada de personas de 90 años).
+- Confundir significancia estadística con magnitud relevante.
+- Leer un coeficiente con interacción como si fuera el efecto general (en `e2`, `sexoVaron` es la brecha solo en "hasta primario").
+- Leer solo el término lineal cuando hay un cuadrado.
+</div>
+
+# Integrador rápido: precios de departamentos (Properati)
+
+Avisos de departamentos en venta en CABA (nov-2018 a may-2019), en barrios con al menos 300 avisos. El mismo recorrido, en formato checklist.
+
+**☐ 1. Mirar los datos.** *Por qué*: detectar asimetrías y valores raros antes de elegir la forma del modelo.
+
+```{r fig.height=3.5}
+summary(select(deptos, precio, m2, ambientes))
+par(mfrow = c(1, 2))
+hist(log(deptos$precio), breaks = 50, main = "log(precio)", xlab = "", col = "grey80")
+plot(log(deptos$m2), log(deptos$precio), pch = 16, col = rgb(0, 0, 1, 0.05),
+     xlab = "log(m2)", ylab = "log(precio)")
+par(mfrow = c(1, 1))
+```
+
+> Precio y superficie son asimétricos y la relación entre sus logaritmos es casi una recta: modelo **log-log**.
+
+**☐ 2. Estimar e interpretar.** *Por qué*: el coeficiente de `log(m2)` es una elasticidad; los de `barrio`, diferencias con Balvanera (la base).
+
+```{r}
+p1 <- lm(log(precio) ~ log(m2) + ambientes + barrio, data = deptos)
+summary(p1)
+```
+
+> - `log(m2)` ≈ 1,03: un departamento 10% más grande cuesta 10,3% más, a igual barrio y ambientes.
+> - `ambientes` ≈ −0,03: a igual superficie, un ambiente más es 3% más barato (ambientes más chicos).
+> - R² ≈ 0,87: superficie y barrio explican casi toda la variabilidad del precio.
+
+**☐ 3. Primas exactas de las dummies.** *Por qué*: con log(y), $100\hat\beta$ falla cuando $\hat\beta$ es grande.
+
+```{r}
+tibble(termino = names(coef(p1)), beta = coef(p1)) |>
+  filter(str_starts(termino, "barrio")) |>
+  mutate(aproximado = 100 * beta, exacto = 100 * (exp(beta) - 1)) |>
+  arrange(desc(beta))
+```
+
+> Puerto Madero: β ≈ 1. La lectura rápida dice "100% más caro que Balvanera"; la exacta, **173%**.
+
+**☐ 4. Significatividad conjunta del barrio.** *Por qué*: una categórica se decide con el test conjunto, no dummy por dummy.
+
+```{r}
+p0 <- lm(log(precio) ~ log(m2) + ambientes, data = deptos)
+waldtest(p0, p1, vcov = vcovHC(p1, type = "HC1"))
+```
+
+> F enorme: el barrio importa, aunque un par de dummies sueltas no sean significativas.
+
+**☐ 5. Forma funcional.** *Por qué*: si falta una no linealidad, los coeficientes están sesgados.
+
+```{r}
+resettest(p1)
+p2 <- lm(log(precio) ~ log(m2) + I(log(m2)^2) + ambientes + barrio, data = deptos)
+coeftest(p2)["I(log(m2)^2)", ]
+```
+
+> Rechaza. El cuadrado de `log(m2)` es significativo: la elasticidad crece con el tamaño (≈ 0,96 en 40 m² y ≈ 1,11 en 150 m²).
+
+**☐ 6. Multicolinealidad.** *Por qué*: errores estándar inflados.
+
+```{r}
+vif(p1)
+```
+
+> Superficie y ambientes están correlacionados (VIF ≈ 4), lejos de 10. No se hace nada.
+
+**☐ 7. Heteroscedasticidad.** *Por qué*: si está, los errores estándar clásicos están mal.
+
+```{r}
+bptest(p1)
+cbind(clasico = sqrt(diag(vcov(p1))), robusto = sqrt(diag(vcovHC(p1, type = "HC1"))))[1:3, ]
+```
+
+> Rechaza. Los errores robustos de `log(m2)` y `ambientes` son ~40% más grandes: **se reportan los robustos**.
+
+**☐ 8. Normalidad.** *Por qué*: solo importa con muestras chicas.
+
+```{r}
+tseries::jarque.bera.test(residuals(p1))
+```
+
+> Rechaza (colas pesadas), pero con 36 mil observaciones no importa.
+
+**☐ 9. Influyentes.** *Por qué*: que unos pocos avisos no definan el resultado.
+
+```{r}
+cook_p <- cooks.distance(p1)
+p1_sin <- update(p1, data = deptos[cook_p <= 4 / nobs(p1), ])
+cbind(con = coef(p1), sin = coef(p1_sin))[c("log(m2)", "ambientes", "barrioPuerto Madero"), ]
+```
+
+> Los coeficientes casi no cambian.
+
+**☐ 10. Reportar.** *Por qué*: el resultado tiene que poder leerse sin R.
+
+```{r}
+# Verla
+mostrar_tabla(list("Sin barrio" = p0, "Con barrio" = p1, "Con cuadrático" = p2),
+  vcov     = "HC1",
+  stars    = TRUE,
+  coef_map = c("log(m2)" = "Log superficie", "I(log(m2)^2)" = "Log superficie²",
+               "ambientes" = "Ambientes", "barrioPuerto Madero" = "Puerto Madero",
+               "barrioPalermo" = "Palermo"),
+  gof_map  = c("nobs", "adj.r.squared", "aic"),
+  notas    = "Errores robustos (HC1) entre paréntesis.")
+
+# Guardarla en Word
+modelsummary(list("Sin barrio" = p0, "Con barrio" = p1, "Con cuadrático" = p2),
+  vcov     = "HC1",
+  stars    = TRUE,
+  coef_map = c("log(m2)" = "Log superficie", "I(log(m2)^2)" = "Log superficie²",
+               "ambientes" = "Ambientes", "barrioPuerto Madero" = "Puerto Madero",
+               "barrioPalermo" = "Palermo"),
+  gof_map  = c("nobs", "adj.r.squared", "aic"),
+  output   = "tabla_deptos.docx")
+```
+
+> En palabras: a igual barrio y ambientes, un departamento 10% más grande cuesta cerca de 10% más; Puerto Madero es 173% más caro que Balvanera y Palermo, 65% más.
+
+# Parte 2. Shift-share
+
+## La pregunta
+
+Cuando cambia un agregado que es un **promedio ponderado**, ¿cuánto vino de cambios **dentro** de cada componente y cuánto de la **recomposición** entre componentes?
+
+- Productividad de un país: promedio de la productividad de cada sector, ponderada por empleo.
+- Margen de una empresa: promedio del margen de cada producto, ponderado por ventas.
+- Salario medio: promedio por ocupación, ponderado por cantidad de ocupados.
+
+El agregado puede caer aunque **todos** los componentes mejoren, si el peso se mueve hacia los de nivel más bajo (paradoja de Simpson). El shift-share mide exactamente cuánto de cada cosa.
+
+## La identidad y su descomposición
+
+La productividad agregada es el producto total sobre el empleo total. Escrita como promedio ponderado, con $s_i = L_i / L$ la participación del sector $i$ en el empleo y $p_i = Y_i / L_i$ su productividad:
+
+$$P = \frac{\sum_i Y_i}{\sum_i L_i} = \sum_i s_i \, p_i$$
+
+Entre el año 0 y el año 1, $s_{i1} = s_{i0} + \Delta s_i$ y $p_{i1} = p_{i0} + \Delta p_i$. Para cada sector:
+
+$$s_{i1}\,p_{i1} - s_{i0}\,p_{i0} = (s_{i0} + \Delta s_i)(p_{i0} + \Delta p_i) - s_{i0}\,p_{i0} = s_{i0}\,\Delta p_i + \Delta s_i\, p_{i0} + \Delta s_i\, \Delta p_i$$
+
+Sumando sobre los sectores:
+
+$$\Delta P = \underbrace{\sum_i s_{i0}\,\Delta p_i}_{\text{intrasectorial}} + \underbrace{\sum_i \Delta s_i \, p_{i0}}_{\text{estático}} + \underbrace{\sum_i \Delta s_i \, \Delta p_i}_{\text{dinámico}}$$
+
+- **Intrasectorial**: mejoras dentro de cada sector, con la estructura del año inicial.
+- **Estático**: reasignación del empleo hacia sectores que **ya eran** más productivos.
+- **Dinámico**: positivo si el empleo va hacia sectores cuya productividad **crece**.
+
+Es pura álgebra: los tres términos suman **exacto** el cambio total. No hay nada estimado, no hay errores estándar.
+
+```{r}
+shift_share <- function(d) {
+  d |> mutate(intra    = s0 * (p1 - p0),
+              estatico = (s1 - s0) * p0,
+              dinamico = (s1 - s0) * (p1 - p0))
+}
+```
+
+## Ejemplo de pizarrón
+
+```{r}
+ej <- tribble(
+  ~sector,     ~s0, ~s1, ~p0, ~p1,
+  "Industria", 0.5, 0.3, 100, 120,
+  "Servicios", 0.5, 0.7,  50,  55
+) |> shift_share()
+ej
+
+c(P0 = sum(ej$s0 * ej$p0), P1 = sum(ej$s1 * ej$p1))
+ej |> summarise(across(c(intra, estatico, dinamico), sum))
+```
+
+<div class="lectura">
+Los dos sectores mejoran (+20 y +5) y la productividad agregada **cae** de 75 a 74,5: el empleo se va al sector menos productivo (estático −10) y justo al que menos mejora (dinámico −3). Intrasectorial (+12,5) + estático (−10) + dinámico (−3) = −0,5 = $P_1 - P_0$.
+</div>
+
+## Productividad de Argentina
+
+VAB a precios de 2004 (Argendata) y ocupados (GGDC), en 9 sectores compatibles entre ambas fuentes. La productividad está en miles de pesos de 2004 por ocupado.
+
+```{r}
+prod_arg <- prod_arg |>
+  group_by(anio) |>
+  mutate(s = empleo / sum(empleo), p = vab / empleo) |>
+  ungroup()
+
+# Chequeo: el promedio ponderado es igual al cociente de totales
+prod_arg |>
+  group_by(anio) |>
+  summarise(P_ponderado = sum(s * p), P_cociente = sum(vab) / sum(empleo)) |>
+  filter(anio %in% c(1950, 1990, 2018))
+```
+
+Una función que arma la tabla ancha (una fila por sector, columnas `s0, s1, p0, p1`) y descompone:
+
+```{r}
+ss_periodo <- function(datos, a0, a1) {
+  datos |>
+    filter(anio %in% c(a0, a1)) |>
+    mutate(t = if_else(anio == a0, "0", "1")) |>
+    select(sector, t, s, p) |>
+    pivot_wider(names_from = t, values_from = c(s, p), names_sep = "") |>
+    shift_share()
+}
+
+arg <- ss_periodo(prod_arg, 1990, 2018)
+arg
+
+totales <- arg |> summarise(across(c(intra, estatico, dinamico), sum))
+totales
+c(suma_terminos = sum(totales),
+  P1_menos_P0   = sum(arg$s1 * arg$p1) - sum(arg$s0 * arg$p0))   # chequeo obligatorio
+```
+
+```{r fig.height=4}
+arg |>
+  select(sector, intra, estatico, dinamico) |>
+  pivot_longer(-sector, names_to = "termino", values_to = "aporte") |>
+  mutate(termino = factor(termino, c("intra", "estatico", "dinamico"))) |>
+  ggplot(aes(aporte, reorder(sector, aporte, sum), fill = aporte > 0)) +
+  geom_col() +
+  geom_vline(xintercept = 0) +
+  facet_wrap(~ termino) +
+  guides(fill = "none") +
+  labs(x = "Miles de pesos de 2004 por ocupado", y = NULL,
+       title = "Aporte de cada sector al cambio de la productividad, 1990-2018")
+```
+
+<div class="lectura">
+La productividad pasó de 23,6 a 29,2. El grueso es intrasectorial (+8,7). El dinámico es negativo (−3,9): industria y agro casi duplicaron su productividad mientras **perdían** participación en el empleo. Es el "cambio estructural que reduce el crecimiento" de McMillan y Rodrik (2011).
+</div>
+
+Por períodos:
+
+```{r}
+periodos <- list(c(1950, 1975), c(1975, 1990), c(1990, 2002), c(2002, 2018))
+map_dfr(periodos, \(pp) ss_periodo(prod_arg, pp[1], pp[2]) |>
+          summarise(across(c(intra, estatico, dinamico), sum)) |>
+          mutate(periodo = paste(pp, collapse = "-"), .before = 1))
+```
+
+## El problema del año base
+
+El término dinámico es un "sobrante" que no pertenece naturalmente a ninguno de los otros dos. Hay varias formas de repartirlo, **todas exactas**:
+
+| Variante | Dentro de sectores | Reasignación |
+|:--|:--|:--|
+| Tres términos | $\sum s_{i0}\Delta p_i$ | $\sum \Delta s_i\, p_{i0}$ y $\sum \Delta s_i \Delta p_i$ por separado |
+| Pesos finales en el intra | $\sum s_{i1}\Delta p_i$ | $\sum \Delta s_i\, p_{i0}$ |
+| Productividad final en la reasignación (McMillan y Rodrik) | $\sum s_{i0}\Delta p_i$ | $\sum \Delta s_i\, p_{i1}$ |
+| Promedios de los dos años | $\sum \bar s_i \Delta p_i$ | $\sum \Delta s_i\, \bar p_i$ |
+
+Es el mismo problema de los números índice (Laspeyres vs Paasche).
+
+```{r}
+tibble(
+  variante     = c("pesos finales en el intra", "McMillan-Rodrik", "promedios"),
+  dentro       = c(sum(arg$s1 * (arg$p1 - arg$p0)),
+                   sum(arg$s0 * (arg$p1 - arg$p0)),
+                   sum((arg$s0 + arg$s1) / 2 * (arg$p1 - arg$p0))),
+  reasignacion = c(sum((arg$s1 - arg$s0) * arg$p0),
+                   sum((arg$s1 - arg$s0) * arg$p1),
+                   sum((arg$s1 - arg$s0) * (arg$p0 + arg$p1) / 2)))
+```
+
+<div class="lectura">
+Según la variante, la reasignación **suma** (+0,9) o **resta** (−3,1). Hay que decir siempre qué variante se usó.
+</div>
+
+## En negocios: el margen de Superstore (precio-volumen-mix)
+
+El margen total es un promedio de los márgenes de cada producto, ponderado por su participación en las ventas:
+
+$$M = \frac{\sum_i G_i}{\sum_i V_i} = \sum_i w_i \, m_i \qquad w_i = \frac{V_i}{V}, \quad m_i = \frac{G_i}{V_i}$$
+
+¿Cambió el margen porque cada producto rinde distinto o porque cambió **qué** se vende? En finanzas corporativas es el **análisis precio-volumen-mix**: el término estático es el "efecto mix". Se usa la misma función, con $s$ = participación en ventas y $p$ = margen.
+
+```{r}
+margen <- superstore |>
+  group_by(anio, sector = subcategoria) |>
+  summarise(ventas = sum(ventas), ganancia = sum(ganancia), .groups = "drop") |>
+  group_by(anio) |>
+  mutate(s = ventas / sum(ventas), p = ganancia / ventas) |>
+  ungroup()
+
+mg <- ss_periodo(margen, 2015, 2018)
+mg |> summarise(across(c(intra, estatico, dinamico), sum)) * 100     # en puntos porcentuales
+
+mg |> arrange(desc(abs(estatico))) |> select(sector, s0, s1, p0, p1, estatico) |> head()
+```
+
+<div class="lectura">
+El margen sube de 10,2% a 12,7%. Dentro de cada subcategoría el margen **cae** (−1,8 p.p.); todo el aumento viene del mix: Copiers pasó de 2% a 9% de las ventas y además es la de margen más alto.
+</div>
+
+## Versión regional o por sucursal
+
+Para el cambio de las ventas (o del empleo) de una región $r$ en el sector $i$, con $g$ = tasa de crecimiento entre los dos años:
+
+$$\Delta e_{ri} = e_{ri0}\, g_{ri}$$
+
+Sumando y restando el crecimiento total ($g_N$) y el del sector en el total ($g_{Ni}$):
+
+$$\Delta e_{ri} = \underbrace{e_{ri0}\, g_N}_{\text{nacional}} + \underbrace{e_{ri0}\,(g_{Ni} - g_N)}_{\text{composición}} + \underbrace{e_{ri0}\,(g_{ri} - g_{Ni})}_{\text{competitivo}}$$
+
+- **Nacional o de cadena**: lo que habría crecido al ritmo del total.
+- **Composición**: lo que aporta estar especializado en sectores o categorías dinámicas.
+- **Competitivo**: desempeño propio respecto del mismo sector en el total.
+
+```{r}
+reg <- superstore |>
+  filter(anio %in% c(2015, 2018)) |>
+  group_by(region, categoria, anio) |>
+  summarise(v = sum(ventas), .groups = "drop") |>
+  pivot_wider(names_from = anio, values_from = v, names_prefix = "v")
+
+g_N <- sum(reg$v2018) / sum(reg$v2015) - 1
+g_N
+
+reg |>
+  group_by(categoria) |>
+  mutate(g_Ni = sum(v2018) / sum(v2015) - 1) |>
+  ungroup() |>
+  mutate(g_ri        = v2018 / v2015 - 1,
+         nacional    = v2015 * g_N,
+         composicion = v2015 * (g_Ni - g_N),
+         competitivo = v2015 * (g_ri - g_Ni)) |>
+  group_by(region) |>
+  summarise(cambio = sum(v2018 - v2015),
+            across(c(nacional, composicion, competitivo), sum))
+```
+
+<div class="lectura">
+La cadena creció 51%. Este y Oeste crecen por encima por desempeño propio; el Sur queda muy por debajo. La composición casi no aporta: todas las regiones venden una mezcla parecida.
+</div>
+
+## Cuidados
+
+- **El resultado depende del año base** y de cómo se reparte el término cruzado.
+- **El nivel de agregación cambia el reparto**: lo que con 9 sectores es "intrasectorial" puede ser reasignación entre ramas con 50 sectores.
+- **Unidades comparables**: productividad a precios constantes. Con precios corrientes, el cambio de precios relativos se mezcla con la productividad.
+- **Es una identidad**: describe dónde está el cambio y deja abierta la pregunta por su causa.
+
+# Parte 3. Entropía e índice de Theil
+
+## Antes: qué es la entropía
+
+Viene de la teoría de la información (Shannon, 1948). Si un evento tiene probabilidad $p$, la **información** (o sorpresa) que aporta enterarse de que ocurrió es
+
+$$h(p) = -\ln p$$
+
+Un evento seguro ($p = 1$) no sorprende: $h = 0$. Uno rarísimo sorprende mucho. La **entropía** es la sorpresa esperada de una distribución $(p_1, \dots, p_N)$:
+
+$$H = -\sum_i p_i \ln p_i$$
+
+- $H = 0$ si un resultado tiene toda la probabilidad: no hay incertidumbre.
+- $H = \ln N$, su máximo, si todos los resultados son igual de probables.
+- Mide cuán "repartida" está una distribución.
+
+```{r}
+entropia <- function(p) { p <- p / sum(p); -sum(p * log(p)) }
+
+entropia(c(0.5, 0.5))      # moneda justa: ln 2
+entropia(c(0.99, 0.01))    # moneda cargada: casi no hay nada que adivinar
+entropia(rep(1, 6))        # dado: ln 6
+log(6)
+```
+
+## De la entropía a la desigualdad
+
+Theil (1967) reemplazó probabilidades por **participaciones en el ingreso**, $q_i = y_i / \sum_j y_j$:
+
+- Si todos ganan lo mismo, $q_i = 1/N$ y la entropía es máxima: $\ln N$.
+- Si una persona se queda con todo, la entropía es 0.
+
+La desigualdad es lo que le **falta** a la entropía para llegar al máximo:
+
+$$T = \ln N - H(q) = \ln N + \sum_i q_i \ln q_i = \sum_i q_i \ln (N q_i)$$
+
+Como $q_i = \dfrac{y_i}{N \bar y}$, reemplazando se llega a la fórmula usual:
+
+$$T = \frac{1}{N} \sum_i \frac{y_i}{\bar{y}} \ln\left(\frac{y_i}{\bar{y}}\right)$$
+
+**Otra lectura**: $T = \sum_i q_i \ln\left(\dfrac{q_i}{1/N}\right)$ es la divergencia de Kullback-Leibler entre la distribución del ingreso ($q_i$) y la de la población ($1/N$). Mide qué tan distinto es "quién tiene el ingreso" de "quién es la gente".
+
+```{r}
+theil <- function(y, w = rep(1, length(y))) {
+  mu <- weighted.mean(y, w)
+  sum(w * (y / mu) * log(y / mu)) / sum(w)
+}
+
+y <- c(10, 20, 30, 40)
+c(theil = theil(y), lnN_menos_H = log(length(y)) - entropia(y))   # iguales
+
+theil(c(25, 25, 25, 25))           # igualdad perfecta: 0
+theil(c(0.001, 0.001, 0.001, 100)) # casi todo en una persona...
+log(4)                             # ...se acerca al máximo, ln N
+```
+
+## Propiedades
+
+Un buen índice de desigualdad cumple:
+
+- **Independencia de escala**: multiplicar todos los ingresos por una constante no cambia el índice.
+- **Principio de población**: replicar la población no cambia el índice.
+- **Transferencias (Pigou-Dalton)**: pasar ingreso de alguien más rico a alguien más pobre baja el índice.
+
+```{r}
+theil(y * 1000)              # escala
+theil(rep(y, 3))             # población
+theil(c(15, 20, 30, 35))     # transferencia de 5 del más rico al más pobre: baja
+```
+
+El Theil T es parte de la familia de **entropía generalizada**:
+
+$$GE(\alpha) = \frac{1}{\alpha(\alpha-1)} \frac{1}{N}\sum_i \left[\left(\frac{y_i}{\bar y}\right)^\alpha - 1\right]$$
+
+- $\alpha = 0$: desvío logarítmico medio (Theil L), más sensible a la parte baja de la distribución.
+- $\alpha = 1$: Theil T.
+- $\alpha = 2$: la mitad del cuadrado del coeficiente de variación, sensible a la parte alta.
+
+## Desigualdad del ingreso laboral (EPH 1T2026)
+
+Con microdatos de encuesta hay que usar el **ponderador** (`PONDIIO` para el ingreso de la ocupación principal). Sin pesos se calcula la desigualdad de la muestra, no la de la población.
+
+```{r}
+mld <- function(y, w = rep(1, length(y))) {
+  mu <- weighted.mean(y, w)
+  sum(w * log(mu / y)) / sum(w)
+}
+gini <- function(y, w = rep(1, length(y))) {
+  o <- order(y); y <- y[o]; w <- w[o]
+  pw <- w / sum(w); L <- cumsum(w * y) / sum(w * y)
+  1 - sum(pw * (L + c(0, head(L, -1))))
+}
+
+c(theil_T = theil(ocupados$ingreso, ocupados$pondera),
+  theil_L = mld(ocupados$ingreso, ocupados$pondera),
+  gini    = gini(ocupados$ingreso, ocupados$pondera),
+  theil_T_sin_pesos = theil(ocupados$ingreso))
+```
+
+## Descomposición entre y dentro de grupos
+
+Con $s_g$ la participación del grupo $g$ en el ingreso total, $T_g$ el Theil dentro del grupo y $\bar y_g$ su media:
+
+$$T = \underbrace{\sum_g s_g \, T_g}_{\text{dentro}} + \underbrace{\sum_g s_g \ln\left(\frac{\bar{y}_g}{\bar{y}}\right)}_{\text{entre}}$$
+
+- **Dentro**: desigualdad al interior de cada grupo, ponderada por el peso del grupo en el ingreso.
+- **Entre**: la desigualdad que quedaría si todos en un grupo ganaran la media del grupo.
+
+**Por qué es exacta**: escribiendo $\dfrac{y_i}{\bar y} = \dfrac{y_i}{\bar y_g} \cdot \dfrac{\bar y_g}{\bar y}$, el logaritmo del producto se separa en una suma: un término con la distancia de cada persona a la media de su grupo y otro con la distancia entre la media del grupo y la general.
+
+El Gini no tiene una descomposición exacta así (queda un residuo cuando los grupos se superponen): por eso para esta pregunta se usa Theil.
+
+```{r}
+theil_desc <- function(d, grupo) {
+  mu <- weighted.mean(d$ingreso, d$pondera)
+  d |>
+    group_by(grupo = {{ grupo }}) |>
+    summarise(pob   = sum(pondera),
+              media = weighted.mean(ingreso, pondera),
+              T_g   = theil(ingreso, pondera),
+              .groups = "drop") |>
+    mutate(s_g    = pob * media / sum(pob * media),
+           dentro = s_g * T_g,
+           entre  = s_g * log(media / mu))
+}
+
+por_educ <- theil_desc(ocupados, educacion)
+por_educ
+
+por_educ |>
+  summarise(dentro = sum(dentro), entre = sum(entre)) |>
+  mutate(total       = dentro + entre,
+         chequeo     = theil(ocupados$ingreso, ocupados$pondera),
+         share_entre = entre / total)
+```
+
+```{r fig.height=3}
+resumen <- bind_rows(
+  theil_desc(ocupados, region)    |> summarise(dentro = sum(dentro), entre = sum(entre)) |> mutate(particion = "Región (6)"),
+  theil_desc(ocupados, sexo)      |> summarise(dentro = sum(dentro), entre = sum(entre)) |> mutate(particion = "Sexo (2)"),
+  theil_desc(ocupados, educacion) |> summarise(dentro = sum(dentro), entre = sum(entre)) |> mutate(particion = "Nivel educativo (5)")
+) |>
+  mutate(share_entre = entre / (dentro + entre))
+resumen
+
+resumen |>
+  pivot_longer(c(dentro, entre)) |>
+  ggplot(aes(value, particion, fill = name)) +
+  geom_col() +
+  scale_fill_manual(values = c(dentro = "grey70", entre = "steelblue")) +
+  labs(x = "Theil T", y = NULL, fill = NULL)
+```
+
+<div class="lectura">
+La proporción **entre / total** dice cuánto de la desigualdad se explica por pertenecer a un grupo. La educación explica 14%; la región y el sexo, menos de 5%. La mayor parte de la desigualdad está **dentro** de los grupos.
+</div>
+
+<div class="atencion">
+**Cuidados**
+
+- Hay que filtrar ceros y negativos ($\ln 0$ no existe).
+- El Theil T es más sensible a lo que pasa en la parte alta de la distribución.
+- El "entre" crece mecánicamente con la cantidad de grupos. Educación × región tiene 30 grupos:
+</div>
+
+```{r}
+theil_desc(ocupados, interaction(educacion, region)) |>
+  summarise(entre = sum(entre)) |>
+  mutate(share_entre = entre / theil(ocupados$ingreso, ocupados$pondera))
+```
+
+# Cierre
+
+| Herramienta | Pregunta que responde | Lo que hay que reportar |
+|:--|:--|:--|
+| Regresión | ¿Cómo se relaciona $Y$ con $X$, manteniendo lo demás constante? | Coeficientes interpretados, errores robustos, diagnóstico |
+| Shift-share | ¿El cambio de un agregado vino de adentro de cada componente o de su recomposición? | Año base, variante, nivel de agregación |
+| Theil | ¿Cuánta desigualdad hay entre grupos y cuánta dentro de ellos? | Ponderadores, filtros, cantidad de grupos |
+
+Las descomposiciones parten de una identidad, suman exacto y describen **dónde** está el cambio o la desigualdad. La pregunta por la **causa** requiere otras herramientas.

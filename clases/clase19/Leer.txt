@@ -1,0 +1,5 @@
+1) Abrir https://colab.research.google.com/
+2) Apretar en subir notebook
+3) Elegir del escritorio el archivo clase19_series_temporales.ipynb
+4) Seleccionar como entorno de ejecución R
+5) Deberían poder ejecutar todo sin depender de archivos externos a Google Colab
