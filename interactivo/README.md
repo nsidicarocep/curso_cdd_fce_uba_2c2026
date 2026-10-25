@@ -2,7 +2,7 @@
 
 Esta sección del repositorio tiene por objetivo dejar materiales interactivos que ayuden a asentar los contenidos vistos en las clases teóricas y prácticas. No van a tener funcionalidad de programación, dado que el entorno de Github Pages no posee esas funcionalidades (o, mejor dicho, no es tan cómodo hacerlo como localmente o en Google Colab), pero sí permite poder hacer cosas interactivas con los contenidos vistos. 
 
-El foco principal es la práctica conceptual. Por ejemplo, en el primer material cargado van a poder practicar temas vinculados a pseudocódigo y pensamiento computacional, pero más adelante vamos a ver cuestiones estadísticas, de ordenamiento de tablas, modelos de bases de datos, gráficos, etc. 
+El foco principal es la práctica conceptual: pensamiento computacional, manipulación de datos con Tidyverse, estadística descriptiva e inferencial, limpieza de datos, índices compuestos, reducción de dimensiones y visualización de datos. 
 
 Este es un material nuevo y de prueba, por lo que si encuentran errores o problemas, no duden en avisarnos para que podamos corregirlos. 
 
@@ -23,9 +23,12 @@ Este es un material nuevo y de prueba, por lo que si encuentran errores o proble
 | Datos faltantes, outliers y transformaciones | Elegir la forma de una variable (normal, asimétrica, colas pesadas, bimodal, con ceros) y comparar: imputación con media, mediana, por grupo, regresión y PMM bajo MCAR, MAR y MNAR; detección de outliers con IQR, z-score y z robusto, efecto masking y winsorización; y cómo log, z-score y min-max cambian (o no) la forma. Cierra con casos para decidir qué harías | [Laboratorio de limpieza](./faltantes_outliers/) |
 | Índices compuestos | Armar un índice de desarrollo con los datos del PNUD eligiendo dimensiones y pesos, transformaciones (log), normalización (umbrales fijos, mín-máx observado, z-score, percentiles, terciles), agregación (aritmética, geométrica, mínimo) y tratamiento de faltantes, y compararlo con el IDH oficial o con otra configuración guardada; replicar el IDH paso a paso, ver la compensabilidad y por qué los umbrales observados engañan en el tiempo; pesos nominales vs. efectivos, pesos de PCA, beneficio de la duda y tasas de sustitución; Monte Carlo de pesos, sacar una dimensión por vez y validación externa. Cierra con casos para decidir | [Armá tu índice](./indices_compuestos/) |
 | Clustering, PCA y MCA | Ver cómo la escala y las variables cambian quién se parece a quién; agrupar con k-means (paso a paso), cluster jerárquico (linkage y dendrograma) y DBSCAN sobre formas simuladas y sobre los países, elegir k con elbow y silhouette y testear si los grupos existen; girar la recta del PCA, leer varianza explicada, loadings, círculo de correlaciones y el mapa de países; armar un MCA con los ocupados de la EPH eligiendo variables activas y suplementarias. Cierra con casos para decidir | [Grupos y dimensiones](./clustering_pca_mca/) |
+| Visualización de datos | Graficar los mismos datos del Banco Mundial (WDI, 172 países, 1990–2023) de 36 formas distintas: distribución, ranking, correlación, parte de un todo, evolución y cruces de dos cualitativas. Se eligen por dropdown el gráfico, las variables cuantitativas y cualitativas, la agregación, el año, los filtros, la paleta y las escalas, y se puede dividir cualquier gráfico en small multiples con escala común o propia. La página no interpreta los datos: solo avisa sobre problemas de construcción (ejes cortados, paletas mal elegidas, sumas de tasas, faltantes). Incluye una pestaña metodológica con qué sirve, qué se lee y qué puede fallar en cada gráfico | [Taller de visualización](./visualizacion/) |
 
 
 ## Cómo se usan
 
 Entrá al link del tema que estés cursando y resolvé los ejercicios en el orden en que aparecen: están pensados como una progresión, cada uno se apoya en el anterior. Si te trabás, cada ejercicio tiene una pista antes de la respuesta. Usala recién después de haber intentado en serio; leerla de entrada arruina el ejercicio.
+
+El taller de visualización es la excepción: no tiene ejercicios ni respuestas. Es un espacio para explorar, así que la conclusión sobre los datos la sacás vos.
 
